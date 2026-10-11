@@ -1,0 +1,14 @@
+{
+  "name": "orbital-services",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Carnet de bord, chronologie et carte du temps pour Star Citizen",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/smoke.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  },
+  "license": "MIT"
+}
