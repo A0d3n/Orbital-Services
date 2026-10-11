@@ -323,12 +323,19 @@ applyFx();
 /* onglets */
 var tabs=[].slice.call(document.querySelectorAll(".tab"));
 var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte"};
+var SUBS={home:"Une carte qui change avec le temps, la chronologie de l’univers et votre carnet de bord.",
+  log:"Journal personnel · aUEC · heures de vol",
+  time:"",
+  map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements."};
 function show(v){
   if(!VIEWS[v])v="home";
   var map=v==="map";
   ["home","log","time","map"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
   $("#bar").setAttribute("data-view",v);
-  tabs.forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.v===v))});
+  tabs.forEach(function(t){
+    var on=t.dataset.v===v;t.setAttribute("aria-selected",String(on));
+    if(on){$("#topTitle").textContent=t.querySelector("span").textContent;$("#topIc").innerHTML=t.querySelector("svg").outerHTML;$("#topSub").textContent=SUBS[v]||""}
+  });
   if(!map)stop();
   try{history.replaceState(null,"",map?"#carte/"+year+(sel?"/"+sel:""):VIEWS[v])}catch(e){}
   window.scrollTo(0,0);
@@ -345,6 +352,7 @@ function toMap(id,y){
   show("map");if(sel)centerOn(sel);
 }
 function toTimeline(y){
+  if(window.__orbSort)window.__orbSort("era");
   show("time");
   var el=document.querySelector('.ev[data-y^="'+y+'"]:not([hidden])');
   if(!el)return;
@@ -358,25 +366,30 @@ function sysIn(text){
   NAMERX.forEach(function(n){var m=n.rx.exec(text);if(m&&m.index<at){at=m.index;best=n.s}});
   return best;
 }
-[].forEach.call(document.querySelectorAll(".ev"),function(ev){
-  var m=/(\d{4})/.exec(ev.dataset.y.replace(/\s/g,""));
-  if(!m)return;
-  var y=+m[1];if(y<MIN||y>MAX)return;
-  var t=ev.querySelector("h3").textContent,d=ev.querySelector(".body p").textContent;
-  var s=sysIn(t)||sysIn(d);
-  var b=document.createElement("button");b.type="button";b.className="ev-map";b.dataset.y=y;
-  if(s){b.dataset.s=s.i;b.textContent="Voir "+s.n+" sur la carte"}else b.textContent="Voir la carte en "+y;
-  ev.querySelector(".body").appendChild(b);
-});
+function decorateEvents(root){
+  [].forEach.call((root||document).querySelectorAll(".ev:not([data-m])"),function(ev){
+    ev.dataset.m="1";
+    var m=/^(\d{4})(?!\d)/.exec(ev.dataset.y.replace(/[\s\u00a0\u202f]/g,""));
+    if(!m)return;
+    var y=+m[1];if(y<MIN||y>MAX)return;
+    var t=ev.querySelector("h3").textContent,d=ev.querySelector(".ev-desc").textContent;
+    var s=sysIn(t)||sysIn(d);
+    var b=document.createElement("button");b.type="button";b.className="ev-map";b.dataset.y=y;
+    if(s){b.dataset.s=s.i;b.textContent="Voir "+s.n+" sur la carte"}else b.textContent="Voir la carte en "+y;
+    ev.querySelector(".ev-foot").appendChild(b);
+  });
+}
+window.__orbDecorate=decorateEvents;
+decorateEvents(document);
 document.addEventListener("click",function(e){
   var b=e.target.closest(".ev-map");if(b)toMap(b.dataset.s,+b.dataset.y);
 });
 (function(){
   var o=window.__orb||{},ns=SYS.length;
   function put(id,t){var e=$(id);if(e)e.textContent=t}
-  put("#hsSys",ns);put("#hsYears",MAX-MIN);put("#hmSysN",ns+" système"+(ns>1?"s":""));
+  put("#hsSys",ns);put("#hsYear",MAX);put("#hmYear",MAX);put("#tbYear",MAX);put("#hmSysN",ns+" système"+(ns>1?"s":""));
   if(o.eras)put("#hsEras",o.eras);
-  if(o.events)put("#hmEvN",o.events+" événement"+(o.events>1?"s":""));
+  if(o.events){put("#hmEvN",o.events+" événement"+(o.events>1?"s":""));put("#hsEv",o.events)}
   var last=null;CH.forEach(function(c){if(c.y<=MAX)last=c});
   var n=$("#hmNews");if(!last||!n)return;
   n.innerHTML='<span class="fl">À la une de la carte · '+last.y+'</span><button type="button">'+last.t+'</button>';

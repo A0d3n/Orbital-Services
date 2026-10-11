@@ -1,5 +1,5 @@
 /* Service worker : l'app s'ouvre même sans réseau (page et scripts gardés en cache). */
-var VERSION = "orbital-v1";
+var VERSION = "orbital-v2";
 var CORE = ["./", "style.css", "data.js", "timeline.js", "map.js", "carnet.js", "home.js", "terra.webp", "favicon.svg", "site.webmanifest"];
 
 self.addEventListener("install", function (e) {

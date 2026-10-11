@@ -5,6 +5,7 @@ var NAMES={session:"Session de jeu",mining:"Minage",cargo:"Commerce / cargo",com
 function paint(){
   var g=window.__lg;if(!g)return;
   N.textContent=g.count?g.count+" entrée"+(g.count>1?"s":""):"Carnet vide";
+  var SN=document.getElementById("sideLogN");if(SN)SN.textContent=g.count?g.count+" entrée"+(g.count>1?"s":""):"Carnet vide";
   if(g.last){
     var e=g.last;B.hidden=false;T.textContent="";
     var d=new Date(e.ts).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"});
