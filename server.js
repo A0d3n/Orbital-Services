@@ -127,7 +127,7 @@ const server = http.createServer(async (req, res) => {
   const file = path.join(PUB, name);
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, "introuvable", "text/plain; charset=utf-8");
-    const noCache = name === "index.html" || name === "sw.js";
+    const noCache = /\.(html|css|js|webmanifest)$/.test(name);
     send(res, 200, req.method === "HEAD" ? "" : buf, MIME[path.extname(file)] || "application/octet-stream",
       { "Cache-Control": noCache ? "no-cache" : "public, max-age=86400" });
   });
