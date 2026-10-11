@@ -198,6 +198,17 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .m-log{position:absolute;left:.8rem;bottom:clamp(2.8rem,7.4vw,4.8rem);margin:0;padding:0;list-style:none;pointer-events:none;font-size:.74rem;line-height:1.35;width:min(25rem,58%);color:var(--mk);text-shadow:0 1px 2px #000,0 0 6px #000}
 .m-log li{margin:.12rem 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .m-log b{font-family:var(--f-mono);font-weight:400;color:var(--c-banu);margin-right:.35em}
+.tb-find{padding-top:.2rem}
+.tb-find input{font:400 .95rem var(--f-body);color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--line-2);border-radius:12px;padding:.55rem .8rem;width:min(100%,15rem);color-scheme:dark}
+.tb-find input:focus{outline:2px solid var(--sage,#b8d9a6);outline-offset:1px}
+.tb-find .chips{flex:1 1 20rem}
+.tb-find .chip{padding:.4rem .7rem;font-size:.78rem}
+.tb-find .btn{height:2.4rem;font-size:.78rem}
+.nd.on.dim{opacity:.16;pointer-events:none}
+.m-tip{position:absolute;z-index:3;pointer-events:none;padding:.5rem .7rem;border-radius:12px;background:rgba(8,11,16,.92);border:1px solid #2b3440;font-size:.78rem;line-height:1.35;color:var(--mk);max-width:15rem;transform:translate(-50%,calc(-100% - 14px))}
+.m-tip b{display:block;font-size:.9rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+.m-tip span{color:var(--mk-2)}
+.mapbox.lite .nd .halo{display:none}
 .m-key{position:absolute;right:.6rem;top:.6rem;pointer-events:none;background:rgba(8,11,16,.78);border:1px solid #2b3440;padding:.55rem .7rem .6rem;font-size:.66rem;line-height:1.25;color:var(--mk);max-width:48%}
 .m-key h5{margin:0 0 .3rem;font:700 .72rem var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .m-key .jp{display:flex;align-items:center;gap:.45rem;margin:0 0 .5rem;font-family:var(--f-mono);color:var(--mk-2)}
@@ -613,6 +624,13 @@ footer,footer p{color:var(--ink-2)}
         </div>
         <input type="range" id="mRange" min="2100" max="2956" step="1" value="2956" aria-label="Année">
         <div class="keys" id="mKeys" role="group" aria-label="Dates clés"></div>
+        <div class="tb-row tb-find">
+          <label class="fl" for="mFind">Chercher un système</label>
+          <input id="mFind" type="search" list="mSys" placeholder="ex. Stanton" autocomplete="off" spellcheck="false">
+          <datalist id="mSys"></datalist>
+          <div class="chips" id="mFac" role="group" aria-label="Filtrer par camp"></div>
+          <button type="button" class="btn" id="mLink">Copier le lien</button>
+        </div>
       </div>
 
       <div class="mp-grid">
@@ -622,7 +640,9 @@ footer,footer p{color:var(--ink-2)}
           <div class="m-key" id="mLegend"></div>
           <ul class="m-log" id="mLog" aria-hidden="true"></ul>
           <div class="m-year" id="mBig" aria-hidden="true"></div>
+          <div class="m-tip" id="mTip" role="tooltip" hidden></div>
           <div class="zoom">
+            <button type="button" class="btn" id="zFx" aria-label="Effets visuels" aria-pressed="true" title="Effets visuels"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6zM13 11l.7 1.8 1.8.7-1.8.7L13 16l-.7-1.8-1.8-.7 1.8-.7z"/></svg></button>
             <button type="button" class="btn" id="zIn" aria-label="Zoom avant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/></svg></button>
             <button type="button" class="btn" id="zOut" aria-label="Zoom arrière"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7h12v2H2z"/></svg></button>
             <button type="button" class="btn" id="zFit" aria-label="Voir toute la carte"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/></svg></button>
@@ -962,7 +982,7 @@ var MIN=2100,MAX=2956,MW=1434,MH=1012;
 
 var OW={hum:["Humanité","--c-hum"],xian:["Empire xi’an","--c-xian"],banu:["Protectorat banu","--c-banu"],tev:["Tevarin","--c-tev"],van:["Vanduul","--c-van"],out:["Hors-la-loi","--c-myst"],con:["Contesté","--c-tech"],none:["Inhabité ou perdu","--c-corp"]};
 
-var POS={"sol":[564,445],"croshaw":[563,509],"nul":[462,506],"caliban":[383,490],"centauri":[419,602],"rhetor":[587,682],"fora":[507,893],"banshee":[380,856],"nemo":[649,770],"corel":[857,832],"geddon":[811,877],"gliese":[1019,948],"yulin":[404,933],"leir":[247,826],"ferron":[596,588],"oretani":[513,586],"idris":[497,663],"elysium":[403,688],"davien":[668,562],"cathcart":[719,629],"nexus":[803,653],"hades":[748,693],"min":[828,692],"cano":[710,498],"pyro":[742,407],"kilian":[767,533],"ellis":[862,621],"taranis":[863,775],"helios":[1011,789],"charon":[1052,863],"magnus":[820,501],"stanton":[823,416],"terra":[969,632],"tayac":[945,757],"hadrian":[937,517],"kiel":[1027,573],"baker":[1051,661],"horus":[1067,440],"castra":[863,311],"gurzil":[939,412],"hadur":[1183,680],"pallas":[1167,538],"indra":[1241,762],"rila":[1007,183],"kaipua":[1059,306],"oya":[883,277],"ealuth":[814,106],"trise":[667,63],"tohil":[782,266],"laou":[742,176],"nyx":[683,314],"bremen":[630,344],"tanga":[505,308],"odin":[535,282],"vega":[524,370],"oberon":[433,426],"virgil":[412,351],"tiber":[356,378],"orion":[281,442],"vulture":[193,469],"vector":[321,266]};
+var POS={"sol":[564,445],"croshaw":[563,509],"nul":[462,506],"caliban":[383,490],"centauri":[419,602],"rhetor":[587,682],"fora":[507,893],"banshee":[380,856],"nemo":[649,770],"corel":[857,832],"geddon":[811,877],"gliese":[1019,948],"yulin":[404,933],"leir":[247,826],"ferron":[596,588],"oretani":[513,586],"idris":[497,663],"elysium":[403,688],"davien":[668,562],"cathcart":[719,629],"nexus":[803,653],"hades":[748,693],"min":[828,692],"cano":[710,498],"pyro":[742,407],"kilian":[767,538],"ellis":[862,621],"taranis":[863,775],"helios":[1011,789],"charon":[1052,863],"magnus":[820,496],"stanton":[823,416],"terra":[969,632],"tayac":[945,757],"hadrian":[937,517],"kiel":[1027,573],"baker":[1051,661],"horus":[1067,440],"castra":[863,315],"gurzil":[939,412],"hadur":[1183,680],"pallas":[1167,538],"indra":[1241,762],"rila":[1007,183],"kaipua":[1059,306],"oya":[883,273],"ealuth":[814,106],"trise":[667,63],"tohil":[782,266],"laou":[742,176],"nyx":[683,314],"bremen":[630,344],"tanga":[505,316],"odin":[535,274],"vega":[524,370],"oberon":[433,426],"virgil":[412,351],"tiber":[356,378],"orion":[281,442],"vulture":[193,469],"vector":[321,266]};
 
 function S(i,n,d,by,mj,o,p){return{i:i,n:n,d:d,by:by,mj:mj,o:o,p:p||[]}}
 var SYS=[
@@ -1110,7 +1130,7 @@ SYS.forEach(function(s){
 CH.sort(function(a,b){return a.y-b.y});
 var CY=[];CH.forEach(function(c){if(c.y>=MIN&&c.y<=MAX&&CY.indexOf(c.y)<0)CY.push(c.y)});
 
-var year=MAX,sel="stanton",playing=false,spd=30;
+var year=MAX,sel="stanton",playing=false,spd=30,facF="";
 var svg=$("#mapsvg"),box=$("#mapbox"),detail=$("#mDetail"),feed=$("#mFeed");
 var yEl=$("#mYear"),range=$("#mRange"),cEl=$("#mCount");
 
@@ -1167,6 +1187,7 @@ function render(){
     s.g.setAttribute("tabindex",on?"0":"-1");
     s.g.classList.toggle("fresh",on&&s.d>0&&year-s.d<12);
     s.g.classList.toggle("sel",s.i===sel);
+    s.g.classList.toggle("dim",!!facF&&stateAt(s,year)[1]!==facF);
     var ok=stateAt(s,year)[1],v="var("+OW[ok][1]+")";
     s.g.style.setProperty("--oc",v);
     s.f.style.setProperty("--oc",v);
@@ -1179,6 +1200,7 @@ function render(){
     e.el.classList.toggle("on",on);
     e.el.classList.toggle("hl",on&&(e.a===sel||e.b===sel));
   });
+  syncHash();
   $("#mEra").textContent=eraAt(year);$("#mBig").textContent=year;renderLog();
   cEl.textContent=known+" système"+(known>1?"s":"")+" connu"+(known>1?"s":"")+" sur "+SYS.length;
   $("#mKeys").querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(+c.dataset.y===year))});
@@ -1327,6 +1349,89 @@ $("#zOut").addEventListener("click",function(){zoomAt(1/.7,.5,.5)});
 $("#zFit").addEventListener("click",fit);
 addEventListener("resize",function(){if(box.offsetParent){var ar=ratio();vb.h=vb.w/ar;setVB()}});
 
+/* lien partageable : #carte/année/système, mis à jour en différé */
+var hashTimer=0;
+function syncHash(){
+  if(!box.offsetParent)return;
+  clearTimeout(hashTimer);
+  hashTimer=setTimeout(function(){try{history.replaceState(null,"","#carte/"+year+(sel?"/"+sel:""))}catch(e){}},250);
+}
+function readHash(h){
+  var a=h.split("/");
+  if(a[0]!=="#carte")return;
+  var y=parseInt(a[1],10);
+  if(y>=MIN&&y<=MAX)year=y;
+  if(a[2]&&BY[a[2]])sel=a[2];
+}
+function say(msg){var el=$("#mLink");var old=el.textContent;el.textContent=msg;setTimeout(function(){el.textContent=old},1800)}
+$("#mLink").addEventListener("click",function(){
+  var url=location.href.split("#")[0]+"#carte/"+year+(sel?"/"+sel:"");
+  function fallback(){var t=document.createElement("textarea");t.value=url;t.setAttribute("readonly","");t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}t.remove();say(ok?"Lien copié":"Copie impossible")}
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(function(){say("Lien copié")},fallback);else fallback();
+});
+
+/* recherche d’un système */
+function norm(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g,"").toLowerCase().trim()}
+$("#mSys").innerHTML=SYS.slice().sort(function(a,b){return a.n.localeCompare(b.n,"fr")}).map(function(s){return '<option value="'+s.n+'"></option>'}).join("");
+function findSys(q){
+  q=norm(q);if(!q)return null;
+  var hit=null;
+  SYS.forEach(function(s){var n=norm(s.n);if(n===q)hit=s;else if(!hit&&n.indexOf(q)===0)hit=s});
+  return hit;
+}
+function goFind(){
+  var s=findSys($("#mFind").value);if(!s)return;
+  pick(s.i,year<s.d?s.d:year);
+}
+$("#mFind").addEventListener("change",goFind);
+$("#mFind").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();goFind()}});
+
+/* filtre par camp */
+var FACS=[["","Tous"],["hum","Humanité"],["xian","Xi’an"],["banu","Banu"],["tev","Tevarin"],["van","Vanduul"]];
+$("#mFac").innerHTML=FACS.map(function(f){return '<button type="button" class="chip" data-f="'+f[0]+'" aria-pressed="'+(f[0]===""?"true":"false")+'" style="--tc:'+(f[0]?"var("+OW[f[0]][1]+")":"var(--ink-2)")+'"><i></i>'+f[1]+'</button>'}).join("");
+$("#mFac").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  facF=b.dataset.f;
+  this.querySelectorAll("button").forEach(function(x){x.setAttribute("aria-pressed",String(x===b))});
+  render();
+});
+
+/* flèches gauche et droite : changement précédent ou suivant */
+document.addEventListener("keydown",function(e){
+  if(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
+  if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;
+  if($("#v-map").hidden)return;
+  var t=e.target;if(t&&t!==document.body&&t.closest&&t.closest("input,textarea,select,button,a,.nd"))return;
+  e.preventDefault();$(e.key==="ArrowLeft"?"#mPrev":"#mNext").click();
+});
+
+/* infobulle au survol */
+var tip=$("#mTip");
+function hideTip(){tip.hidden=true}
+svg.addEventListener("pointermove",function(e){
+  if(drag&&drag.moved||e.pointerType==="touch"){hideTip();return}
+  var n=e.target.closest&&e.target.closest(".nd");
+  if(!n||n.classList.contains("dim")){hideTip();return}
+  var s=BY[n.getAttribute("data-i")],st=stateAt(s,year),r=box.getBoundingClientRect();
+  tip.innerHTML='<b>'+s.n+'</b><span>'+OW[st[1]][0]+(s.d?' · découvert en '+s.d:'')+'</span>';
+  tip.hidden=false;
+  tip.style.left=Math.max(60,Math.min(r.width-60,e.clientX-r.left))+"px";
+  tip.style.top=(e.clientY-r.top)+"px";
+});
+svg.addEventListener("pointerleave",hideTip);
+
+/* effets visuels : zones d’influence floutées, désactivables sur un appareil lent */
+var fxOn=!matchMedia("(prefers-reduced-motion: reduce)").matches;
+try{var sv=localStorage.getItem("orbital-fx");if(sv==="0")fxOn=false;else if(sv==="1")fxOn=true}catch(e){}
+function applyFx(){
+  gI.setAttribute("filter",fxOn?"url(#mblur)":"none");
+  gI.setAttribute("opacity",fxOn?".5":".16");
+  box.classList.toggle("lite",!fxOn);
+  $("#zFx").setAttribute("aria-pressed",String(fxOn));
+}
+$("#zFx").addEventListener("click",function(){fxOn=!fxOn;try{localStorage.setItem("orbital-fx",fxOn?"1":"0")}catch(e){}applyFx()});
+applyFx();
+
 /* onglets */
 var tabs=[].slice.call(document.querySelectorAll(".tab"));
 var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte"};
@@ -1337,7 +1442,7 @@ function show(v){
   $("#bar").setAttribute("data-view",v);
   tabs.forEach(function(t){t.setAttribute("aria-selected",String(t.dataset.v===v))});
   if(!map)stop();
-  try{history.replaceState(null,"",VIEWS[v])}catch(e){}
+  try{history.replaceState(null,"",map?"#carte/"+year+(sel?"/"+sel:""):VIEWS[v])}catch(e){}
   window.scrollTo(0,0);
   if(v==="time")window.dispatchEvent(new Event("scroll"));
   if(map){fit();render()}
@@ -1345,7 +1450,7 @@ function show(v){
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
 document.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)show(g.dataset.go)});
 render();
-var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};show(R[HASH]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
 })();
 </script>
 
