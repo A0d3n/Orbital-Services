@@ -3,27 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f3a5f">
+<meta name="theme-color" content="#070b0d">
 <title>Orbital Services</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<style>html{color-scheme:light}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=Special+Elite&display=swap">
+<style>html{color-scheme:dark}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap">
 <style>
 /* Concept : une carte stellaire holographique. Chaque époque est un « saut » le long d’une route
    qui mène de l’aube xi’an jusqu’à 2956. Fond de ciel fixe, rail lumineux, panneaux à angles marqués
    pour les événements majeurs. Un seul univers visuel, volontairement sombre. */
 :root{
-  color-scheme:light;
-  --bg:#efe6d2; --bg-2:#e6dbc2; --line:#cdbf9f; --line-2:#9c8a63;
-  --ink:#1d2330; --ink-2:#4f4b3c; --holo:#1f3a5f; --amber:#b3261e;
-  --c-hum:#1f3a5f; --c-xian:#6b3fa0; --c-banu:#1f7a4d; --c-tev:#b85a00;
-  --c-van:#b3261e; --c-tech:#3d4a5c; --c-corp:#7a705a; --c-myst:#a0306f;
-  --f-display:"Playfair Display",Georgia,"Times New Roman",serif;
-  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
-  --f-mono:"Special Elite","Courier New",Courier,monospace;
+  color-scheme:dark;
+  --bg:#070b0d; --bg-2:#0e1517; --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.28);
+  --ink:#eef3ee; --ink-2:rgba(238,243,238,.7); --holo:#b8d9a6; --amber:#9be6a4;
+  --c-hum:#6fa6d6; --c-xian:#a98bdb; --c-banu:#6fcf93; --c-tev:#f0944a;
+  --c-van:#f07468; --c-tech:#8fb0d4; --c-corp:#a9a28a; --c-myst:#e07ab8;
+  --f-display:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Outfit",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:auto}
@@ -208,7 +208,7 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .m-key li{display:flex;align-items:center;gap:.4rem;margin:.18rem 0;white-space:nowrap}
 .m-key svg{width:.85rem;height:.85rem;flex:none;overflow:visible}
 .m-key .sw{width:1.5rem;height:.55rem;background:var(--oc);opacity:.75;flex:none}
-@container (max-width:760px){.m-log{display:none}.m-key{font-size:.6rem;padding:.4rem .5rem}.m-key .jp{margin-bottom:.3rem}.m-era{font-size:.85rem;padding:.4rem .7rem;max-width:44%}.m-year{font-size:2.2rem}}
+@container (max-width:960px){.m-log{display:none}.m-key{font-size:.6rem;padding:.4rem .5rem}.m-key .jp{margin-bottom:.3rem}.m-era{font-size:.85rem;padding:.4rem .7rem;max-width:44%}.m-year{font-size:2.2rem}}
 
 .inf{fill:var(--oc);opacity:0;transition:opacity .6s,fill .6s}
 .inf.on{opacity:1}
@@ -344,99 +344,138 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .hm-last{margin-top:1.4rem;border:1px dashed var(--line-2);border-radius:4px;padding:.9rem 1.1rem;display:grid;gap:.4rem}
 @media (prefers-reduced-motion:reduce){.hm-card{transition:none}.hm-card:hover{transform:none}}
 
-/* ═════ Dossier d’archives UEE : papier crème, encre, tampon rouge, onglets de classeur ═════ */
-:root{--paper:#f7f0de;--shadow:rgba(70,50,20,.16)}
-html{background:#efe6d2}
-body{background:#efe6d2;color:var(--ink);font-size:17px;line-height:1.62;letter-spacing:0}
-body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:radial-gradient(ellipse 90% 60% at 50% 0%,#f8f2e2 0%,transparent 70%),radial-gradient(ellipse 80% 50% at 50% 110%,rgba(150,112,56,.2),transparent 70%)}
-body::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.5;mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .38  0 0 0 0 .29  0 0 0 0 .16  0 0 0 .5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
-.gridbg{background-image:linear-gradient(rgba(31,58,95,.09) 1px,transparent 1px);background-size:100% 34px;opacity:.55;-webkit-mask-image:none;mask-image:none}
-::selection{background:rgba(31,58,95,.22)}
+/* ═════ Thème Terra : verre sombre, vert sauge et grande planète ═════ */
+:root{--glass:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));--glass-b:rgba(255,255,255,.12);--sage:#b8d9a6;--ok:#7fe08c}
+html{background:#06090b}
+body{background:radial-gradient(ellipse at 60% -10%,#1b2a2c 0%,#0a1013 50%,#06090b 100%) fixed;color:var(--ink);font-size:17px;line-height:1.6;font-weight:400;letter-spacing:0}
+.gridbg{display:none}
+::selection{background:rgba(184,217,166,.3)}
 a{color:var(--holo)}
-:focus-visible{outline:2px solid var(--holo);outline-offset:3px}
+:focus-visible{outline:2px solid var(--sage);outline-offset:3px}
 
 /* titres */
-h1,.hm h2,.lg h2,.mp h2,.wrap>h2{font-family:var(--f-display);font-weight:900;color:var(--holo);text-shadow:none;letter-spacing:.01em}
-h1{letter-spacing:.01em}
-.eyebrow,.fl{font-family:var(--f-mono);color:var(--amber);letter-spacing:.14em;font-weight:400}
+h1,.mp h2,.lg h2,.wrap>h2{font-family:var(--f-display);font-weight:300;color:var(--ink);text-shadow:none;letter-spacing:.02em}
+.eyebrow,.fl,.kicker,.hm-k{font-family:var(--f-body);font-weight:500;letter-spacing:.14em;color:var(--amber)}
 .lead,.hero .lead{color:var(--ink-2)}
 .now,.yearbig,.lg-clock{text-shadow:none}
-.now{color:var(--amber)}.lg-clock{color:var(--holo)}
+.now{color:var(--amber)}
+.lg-clock{color:var(--ink);text-shadow:0 0 30px rgba(184,217,166,.3)}
+.lg-timer.on{border-color:var(--sage);box-shadow:0 0 24px rgba(184,217,166,.16)}
+.yr,.range,.today .y{font-family:var(--f-display)}
+.yr{font-weight:400}
 
-/* barre : onglets de classeur */
-.bar{background:linear-gradient(#e7dcc3,#ddd0b2);border-bottom:2px solid var(--ink-2);-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 3px 8px var(--shadow)}
-.bar .wrap{padding-block:.5rem 0;align-items:flex-end}
-.now,.ecs{padding-bottom:.5rem}
-.tabs{align-items:flex-end;gap:.25rem}
-.tab{font-family:var(--f-mono);font-weight:400;text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;color:var(--ink-2);background:#d8caa8;
-  border:1px solid var(--line-2);border-bottom:0;border-radius:9px 9px 0 0;padding:.55rem 1rem;margin-bottom:-2px;box-shadow:inset 0 -6px 8px -6px rgba(70,50,20,.25)}
-.tab:hover{color:var(--ink);background:#e2d5b6}
-.tab[aria-selected="true"]{color:var(--holo);background:#f4ecd9;border-color:var(--ink-2);border-bottom:2px solid #f4ecd9;padding-top:.7rem;box-shadow:none;font-weight:400}
-.prog{background:var(--line)}.prog i{background:linear-gradient(90deg,var(--holo),var(--amber))}
-.ec{font-family:var(--f-mono);font-weight:400;border-radius:2px;background:rgba(255,255,255,.35)}
-.ec.on{color:var(--ink);background:color-mix(in srgb,var(--era) 14%,#f7f0de);box-shadow:none}
+/* barre : marque, onglets en capsule */
+.bar{background:rgba(7,11,13,.72);border-bottom:1px solid var(--glass-b);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.bar .wrap{max-width:1360px;padding-block:.7rem;gap:.5rem 1.2rem;align-items:center}
+.bar-brand{display:flex;align-items:center;gap:.8rem;text-decoration:none;color:var(--ink);font-weight:300;letter-spacing:.42em;text-transform:uppercase;font-size:1.05rem;margin-right:auto}
+.bar-brand svg{width:34px;height:34px;flex:none}
+.tabs{padding:.35rem;border-radius:2.5rem;background:rgba(255,255,255,.06);border:1px solid var(--glass-b);gap:.15rem}
+.tab{font-family:var(--f-body);font-weight:400;text-transform:none;letter-spacing:0;font-size:.95rem;border:0;border-radius:2rem;padding:.65rem 1.15rem;color:var(--ink-2);background:transparent}
+.tab:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+.tab[aria-selected="true"]{color:#fff;background:rgba(255,255,255,.13);font-weight:500}
+.prog{background:var(--line)}.prog i{background:linear-gradient(90deg,var(--sage),var(--ok))}
+.ec{font-family:var(--f-body);font-weight:400;border-radius:20px;font-size:.78rem;padding:.3rem .75rem;background:rgba(255,255,255,.04)}
+.ec.on{color:var(--ink);background:color-mix(in srgb,var(--era) 18%,transparent);box-shadow:none}
+@media (max-width:760px){.bar-brand{letter-spacing:.3em;font-size:.95rem}.tabs{max-width:100%;overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}.tabs::-webkit-scrollbar{display:none}.tab{flex:none;padding:.55rem .85rem;font-size:.85rem}}
 
 /* boutons et pastilles */
-.btn,.chip,.x,.lk button,.lg-act button{font-family:var(--f-mono);font-weight:400;border-radius:2px;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.4);color:var(--ink);border-color:var(--ink-2)}
-.btn:hover,.chip:hover,.x:hover,.lk button:hover,.lg-act button:hover{border-color:var(--holo);color:var(--holo);background:#fffaf0}
-.btn.play,.gomap .btn{background:var(--holo);color:#f6efdc;border-color:var(--holo);box-shadow:0 2px 0 rgba(0,0,0,.25);font-weight:400}
-.btn.play:hover,.gomap .btn:hover{background:#2a4d7c;color:#fff;filter:none}
+.btn,.chip,.x,.lk button,.lg-act button{font-family:var(--f-body);font-weight:400;border-radius:12px;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.04);color:var(--ink);border-color:var(--glass-b)}
+.btn:hover,.chip:hover,.x:hover,.lk button:hover,.lg-act button:hover{border-color:rgba(255,255,255,.4);color:#fff;background:rgba(255,255,255,.09)}
+.btn.play,.gomap .btn{background:#fff;color:#0a1012;border-color:#fff;font-weight:500;box-shadow:0 10px 26px rgba(255,255,255,.1)}
+.btn.play:hover,.gomap .btn:hover{background:var(--sage);border-color:var(--sage);color:#0a1012;filter:none}
 .gomap .btn{padding:0 1.6rem;height:3rem}
-.chip[aria-pressed="true"]{color:var(--ink);border-color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,#f7f0de);box-shadow:none}
+.chip[aria-pressed="true"]{color:var(--ink);border-color:var(--tc);background:color-mix(in srgb,var(--tc) 16%,transparent)}
 .keys .chip b{color:var(--amber)}
-.keys .chip[aria-pressed="true"]{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 12%,#f7f0de)}
+.keys .chip[aria-pressed="true"]{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 14%,transparent)}
 .chip.reset{border-style:dashed}
+.spd .btn[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
 
-/* feuillets : panneaux et cartes */
-.lg-panel,.hm-card,.tb,.side .pn,.pn{background:var(--paper);border:1px solid #b8a883;border-radius:2px;box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 3px 10px var(--shadow)}
-.tb{background:var(--paper)}
-.side{background:none}
-.lg-panel,.hm-card{position:relative}
-.lg-panel::after,.hm-card::after{content:"";position:absolute;top:0;right:0;width:20px;height:20px;background:linear-gradient(225deg,#efe6d2 50%,#d9caa4 50%);box-shadow:-2px 2px 3px rgba(70,50,20,.18);pointer-events:none}
-.hm-card:hover{border-color:var(--holo);box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 6px 16px rgba(70,50,20,.25);transform:translateY(-2px)}
-.hm-card b,.hm-k{color:var(--holo)}.hm-k{color:var(--amber)}
-.hm-go{color:var(--holo)}
-.hm-last{border:1px dashed var(--ink-2);background:rgba(255,255,255,.3)}
-.lg-ent{background:#fbf6e8;border-color:var(--line);border-left:4px solid var(--tc)}
+/* panneaux en verre */
+.lg-panel,.hm-card,.tb,.pn{background:var(--glass);border:1px solid var(--glass-b);border-radius:24px;box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 18px 36px rgba(0,0,0,.28);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.mapbox{border-radius:28px;border-color:var(--glass-b)}
+.lg-ent{background:rgba(255,255,255,.04);border-color:var(--glass-b);border-left:3px solid var(--tc);border-radius:14px}
 .lg-ent:hover{border-color:var(--line-2);border-left-color:var(--tc)}
-.lg-prev{border-color:var(--ink-2)}
-.lg-timer.on{border-color:var(--holo);box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 3px 10px var(--shadow),0 0 0 2px rgba(31,58,95,.15)}
-.lg input,.lg select,.lg textarea{background:#fdf9ee;color:var(--ink);border:1px solid var(--ink-2);border-radius:2px;color-scheme:light;font-family:var(--f-body)}
-.lg input::placeholder,.lg textarea::placeholder{color:#8b8068}
-.lg input:focus,.lg select:focus,.lg textarea:focus{outline:2px solid var(--holo);outline-offset:1px}
-.lg-fields label,.lg-handle{font-family:var(--f-mono);font-weight:400;color:var(--ink-2)}
-.lg-day{font-family:var(--f-mono);font-weight:400;color:var(--amber);border-bottom:1px solid var(--line-2)}
-.lg-tag,.lg-stat span{font-family:var(--f-mono);font-weight:400}
+.lg-prev{border-color:var(--line-2);border-radius:14px}
+.lg input,.lg select,.lg textarea{background:rgba(0,0,0,.35);color:var(--ink);border:1px solid var(--line-2);border-radius:12px;color-scheme:dark;font-family:var(--f-body)}
+.lg input::placeholder,.lg textarea::placeholder{color:rgba(238,243,238,.45)}
+.lg input:focus,.lg select:focus,.lg textarea:focus{outline:2px solid var(--sage);outline-offset:1px}
+.lg-fields label,.lg-handle,.lg-tag,.lg-stat span,.lg-day{font-family:var(--f-body);font-weight:500}
+.lg-day{color:var(--amber);border-bottom:1px solid var(--line)}
 .lg-stat{border-left-color:var(--amber)}
-.lg-bar i{box-shadow:none}
 .lg code{color:var(--amber)}
-.pos{color:#1f7a4d!important}.neg{color:#b3261e!important}
-.lg-msg{color:var(--holo)}.lg-msg.err{color:#b3261e}
-.lg-act button.arm{color:#b3261e;border-color:#b3261e}
-.lg-days i{background:var(--holo)}.lg-days i.z{background:var(--line-2)}
 .lg-store b{color:var(--amber)}
+.lg-msg{color:var(--amber)}.lg-msg.err{color:#ff8a8f}
+.lg-days i{background:var(--sage)}.lg-days i.z{background:var(--line-2)}
+.pn h3{font-weight:500;color:var(--ink)}
+.pl li{border-left-color:var(--line-2)}
+.feed button:hover{color:var(--sage)}
+input[type=range],#mRange{accent-color:var(--sage)}
 
-/* timeline */
-.ev h3,.ev .ttl{font-family:var(--f-display)}
-.reticle{opacity:.35}
+/* chronologie */
+.reticle{opacity:.4}
 .reticle .pt{fill:var(--amber)}
-
-/* carte */
-.pn h3{font-weight:900;color:var(--holo)}
-.feed button:hover{color:var(--holo)}
-.mp-note,.mnote{color:var(--ink-2)}
-input[type=range]{accent-color:var(--holo)}
-#mRange{accent-color:var(--holo)}
-
-/* tampon et logo */
-.stamp{position:absolute;right:0;top:-.2rem;transform:rotate(9deg);font:400 1.15rem/1 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:#b3261e;border:3px double #b3261e;padding:.45rem .8rem .35rem;opacity:.78;mix-blend-mode:multiply;pointer-events:none;border-radius:3px}
-.hm-head{position:relative}
-.hm-logo svg,.brand svg{filter:drop-shadow(0 3px 5px rgba(40,25,5,.35))}
-@media (max-width:620px){.stamp{display:none}.tab{padding:.5rem .65rem;font-size:.72rem}}
+.today{border-radius:24px}
+.ev.major .body{border-radius:6px}
 footer,footer p{color:var(--ink-2)}
-.ec{font-size:.74rem;padding:.25rem .55rem}
+.brand svg{filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}
+
+/* accueil */
+.wrap.hm{max-width:1360px;padding-block:clamp(1.2rem,3vw,2.4rem) 3rem}
+.hm-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:1.6rem 2rem;align-items:center;overflow-x:clip}
+.hm-copy{position:relative;z-index:2;min-width:0}
+.hm-chip{display:inline-flex;align-items:center;gap:.6rem;padding:.5rem 1rem;border-radius:2rem;border:1px solid var(--glass-b);background:rgba(255,255,255,.04);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.hm-chip i{width:.4rem;height:.4rem;border-radius:50%;background:var(--ok)}
+.hm-chip b{font-weight:500;color:var(--amber)}
+.hm .hm-copy h2{font-family:var(--f-display);font-weight:200;font-size:clamp(2.2rem,5.2vw,5rem);line-height:.98;letter-spacing:.01em;text-transform:uppercase;color:#f4f7f2;text-shadow:none;margin:1.6rem 0 0;max-width:none}
+.hm .hm-copy h2 em{font-style:normal;color:var(--sage)}
+.hm .hm-copy .lead{margin:1.6rem 0 0;max-width:30rem;font-weight:300;font-size:1.15rem;line-height:1.6;color:var(--ink-2)}
+.hm-cta{display:flex;flex-wrap:wrap;gap:.9rem;margin-top:2rem}
+.hm-cta button{display:inline-flex;align-items:center;gap:1rem;min-height:3.2rem;padding:0 1.6rem;border-radius:14px;font:500 .85rem/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.hm-cta .w{background:#fff;color:#0a1012;border:0;box-shadow:0 12px 30px rgba(255,255,255,.12)}
+.hm-cta .w:hover{background:var(--sage)}
+.hm-cta .o{background:rgba(255,255,255,.03);color:var(--ink);border:1px solid var(--line-2)}
+.hm-cta .o:hover{border-color:#fff;background:rgba(255,255,255,.09)}
+.hm-cta svg{width:.9rem;height:.9rem;flex:none}
+
+.hm-world{position:relative;aspect-ratio:1;width:min(100%,640px);justify-self:center}
+.hm-glow{position:absolute;inset:6%;border-radius:50%;background:#8fd0ff;opacity:.2;filter:blur(40px)}
+.hm-globe{position:absolute;inset:11%;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.16),inset 10px 10px 30px rgba(207,233,255,.35)}
+.hm-globe img{display:block;width:100%;height:100%;object-fit:cover;object-position:46% 50%;max-width:none}
+.hm-globe::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 26% 20%,transparent 36%,rgba(0,0,0,.82) 100%);pointer-events:none}
+.hm-orbit{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.hm-moon{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,#9aa3a6,#3b4346 60%,#0c1012)}
+.hm-moon.a{left:8%;top:22%;width:5.5%;aspect-ratio:1}
+.hm-moon.b{left:62%;top:76%;width:11%;aspect-ratio:1;box-shadow:inset -14px -14px 24px rgba(0,0,0,.55)}
+.hm-target{position:absolute;right:0;top:22%;padding:.8rem 1.1rem;border-radius:20px;background:rgba(10,18,22,.66);border:1px solid var(--glass-b);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);max-width:13rem}
+.hm-target small{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.hm-target b{display:block;font-size:1.4rem;font-weight:500;letter-spacing:.04em;line-height:1.2}
+.hm-target span{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+
+.hm-stats{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:1.2rem 2rem;text-align:center}
+.hm-stats li{min-width:6.5rem}
+.hm-stats svg{width:1.4rem;height:1.4rem;stroke:var(--ink-2);fill:none;stroke-width:1.3}
+.hm-stats b{display:block;font-size:1.7rem;font-weight:300;line-height:1.2;margin-top:.4rem;font-variant-numeric:tabular-nums}
+.hm-stats span{display:block;font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);line-height:1.35}
+@media (min-width:900px){
+  .hm-hero{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+  .hm-stats{grid-column:1/-1}
+}
+@media (min-width:1180px){
+  .hm-hero{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 8rem}
+  .hm-stats{grid-column:auto;flex-direction:column;flex-wrap:nowrap;justify-content:center;border-left:1px solid var(--glass-b);padding-left:1rem;gap:1.6rem}
+  .hm-stats li{min-width:0}
+}
+@media (max-width:520px){.hm-target{display:none}.hm-stats li{min-width:5.5rem}}
+
+.hm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));gap:1rem;margin-top:1.6rem}
+.hm-card{position:relative;font:inherit;color:inherit;text-align:left;cursor:pointer;display:grid;gap:.6rem;align-content:start;padding:1.5rem 1.5rem 1.4rem;border-radius:28px;transition:border-color .2s,transform .2s}
+.hm-card:hover{border-color:var(--sage);transform:translateY(-2px)}
+.hm-k{font-size:.74rem;text-transform:uppercase}
+.hm-card b{font:300 1.9rem/1.15 var(--f-display);color:var(--ink)}
+.hm-d{color:var(--ink-2);font-size:.95rem;line-height:1.5}
+.hm-go{font:500 .78rem var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--sage)}
+.hm-last{margin-top:1.4rem;border:1px dashed var(--line-2);border-radius:20px;padding:.9rem 1.2rem;display:grid;gap:.4rem;background:rgba(255,255,255,.03)}
+@media (prefers-reduced-motion:reduce){.hm-card{transition:none}.hm-card:hover{transform:none}}
 </style>
 </head>
 <body>
@@ -446,6 +485,7 @@ footer,footer p{color:var(--ink-2)}
 <div class="page">
   <div class="bar" id="bar">
     <div class="wrap">
+      <a class="bar-brand" href="#accueil" data-go="home" aria-label="Orbital Services, accueil"><svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#eef3ee" stroke-width="1.6" transform="rotate(-30 20 20)"/><circle cx="20" cy="20" r="6" fill="none" stroke="#eef3ee" stroke-width="1.6"/><circle cx="32" cy="13" r="2.4" fill="#b8d9a6"/></svg><span>Orbital</span></a>
       <div class="tabs" role="tablist" aria-label="Vues">
         <button type="button" class="tab" role="tab" data-v="home" aria-selected="true">Accueil</button>
         <button type="button" class="tab" role="tab" data-v="log" aria-selected="false">Carnet de bord</button>
@@ -460,23 +500,28 @@ footer,footer p{color:var(--ink-2)}
 
   <div id="v-home">
     <section class="wrap hm" aria-label="Accueil">
-      <div class="hm-head">
-        <div class="hm-logo"><span class="stamp" aria-hidden="true">Confidentiel</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-hidden="true" focusable="false"><rect x="2" y="2" width="124" height="124" rx="26" fill="#1f3a5f"/><rect x="7" y="7" width="114" height="114" rx="21" fill="none" stroke="#efe6d2" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 3"/><g transform="translate(64 64) rotate(-24)">
-<path d="M-46 0A46 18 0 0 1 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-<circle r="20" fill="#2d5185" stroke="#efe6d2" stroke-width="3.2"/>
-<path d="M-18 -7Q0 -1 18 -7M-20 6Q0 12 20 6" fill="none" stroke="#efe6d2" stroke-width="1.8" opacity=".6"/>
-<path d="M-46 0A46 18 0 0 0 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round"/>
-<g transform="translate(24.4 15.3) rotate(24) scale(1.05)">
-<rect x="-5" y="-4.5" width="10" height="9" rx="1.5" fill="#e8574b" stroke="#1f3a5f" stroke-width="1.6"/>
-<rect x="-17" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
-<rect x="7" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
-</g></g>
-<circle cx="26" cy="30" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="102" cy="36" r="1.4" fill="#efe6d2" opacity=".7"/><circle cx="98" cy="100" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="34" cy="98" r="1.2" fill="#efe6d2" opacity=".6"/></svg></div>
-        <div>
-          <p class="eyebrow">Archives du Verse · Dossier ouvert</p>
-          <h2>Orbital Services</h2>
-          <p class="lead">Un carnet de bord pour vos sessions, la chronologie complète du lore et une carte des systèmes que l’on remonte dans le temps.</p>
+      <div class="hm-hero">
+        <div class="hm-copy">
+          <span class="hm-chip">Année 2956 <i></i><b>En cours</b></span>
+          <h2>Remonter.<br>Cartographier.<br><em>Consigner.</em></h2>
+          <p class="lead">Une carte des systèmes qui change année après année, la chronologie de l’univers et votre carnet de bord Star Citizen.</p>
+          <div class="hm-cta">
+            <button type="button" class="w" data-go="map">Ouvrir la carte <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11L11 3M4 3h7v7"/></svg></button>
+            <button type="button" class="o" data-go="log">Démarrer une session <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></button>
+          </div>
         </div>
+        <div class="hm-world">
+          <div class="hm-glow" aria-hidden="true"></div>
+          <div class="hm-globe"><img src="terra.webp" width="2000" height="1090" alt="Vue aérienne d’une métropole de Terra, avec ses tours et ses vaisseaux au-dessus de la baie" decoding="async"></div>
+          <svg class="hm-orbit" viewBox="0 0 800 800" aria-hidden="true"><ellipse cx="400" cy="400" rx="400" ry="215" transform="rotate(-28 400 400)" fill="none" stroke="rgba(255,255,255,.34)" stroke-width="1.2"/><circle cx="616" cy="514" r="5" fill="#fff"/><circle cx="616" cy="514" r="12" fill="none" stroke="rgba(255,255,255,.3)"/></svg>
+          <span class="hm-moon a" aria-hidden="true"></span><span class="hm-moon b" aria-hidden="true"></span>
+          <div class="hm-target"><small>Cible</small><b>TERRA</b><span>Colonie établie en 2516</span></div>
+        </div>
+        <ul class="hm-stats" aria-label="Chiffres clés">
+          <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5"/><path d="M7 11h8M12 8l3 3-3 3"/></svg><b>61</b><span>Systèmes<br>cartographiés</span></li>
+          <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5"/><ellipse cx="11" cy="11" rx="8.5" ry="3.4"/></svg><b>8</b><span>Époques<br>racontées</span></li>
+          <li><svg viewBox="0 0 22 22" aria-hidden="true"><rect x="4" y="3" width="14" height="16" rx="2"/><path d="M8 8h6M8 12h6"/></svg><b>856</b><span>Années<br>d’histoire</span></li>
+        </ul>
       </div>
       <div class="hm-cards">
         <button type="button" class="hm-card" data-go="log">
@@ -693,7 +738,7 @@ footer,footer p{color:var(--ink-2)}
 var TAGS={hum:"Humanité",xian:"Xi’an",banu:"Banu",tev:"Tevarin",van:"Vanduul",tech:"Technologie",corp:"Industrie",myst:"Mystères"};
 
 var ERAS=[
-{id:"anciens",n:"Les Anciens",r:"−300 000 → 1969",c:"#6b3fa0",
+{id:"anciens",n:"Les Anciens",r:"−300 000 → 1969",c:"#a98bdb",
  b:"Avant que l’humanité ne quitte la Terre, d’autres espèces ont déjà bâti, détruit et reconstruit des civilisations entières. Les Xi’an comptent leur histoire en dizaines de milliers d’années.",
  e:[
  {y:"−300 000",t:"Les Hadésiens disparaissent",g:"myst",d:"Une guerre civile ravage les trois planètes intérieures du système Hades. L’espèce s’éteint très probablement, Hades IV est fendue en deux et Hades I perd son atmosphère. Personne n’y reviendra avant très longtemps."},
@@ -706,7 +751,7 @@ var ERAS=[
  {y:"1924",t:"Les Xi’an rencontrent les Banu",g:"banu",d:"Pendant que la Terre ignore tout du cosmos, les Xi’an nouent le contact avec les marchands banu."},
  {y:"1961 → 1969",t:"Gagarine, puis Armstrong",g:"hum",d:"L’histoire réelle sert de point de départ au lore : Youri Gagarine devient le premier humain dans l’espace en 1961, Neil Armstrong le premier à marcher sur la Lune en 1969."}
  ]},
-{id:"aube",n:"L’aube spatiale",r:"2038 → 2271",c:"#9a7410",
+{id:"aube",n:"L’aube spatiale",r:"2038 → 2271",c:"#d9b24a",
  b:"L’humanité invente le moteur quantique, terraforme Mars et reste enfermée dans le système solaire, jusqu’à ce qu’un pilote trouve la première porte vers les étoiles.",
  e:[
  {y:"2038",t:"Naissance de Roberts Space Industries",g:"corp",d:"Chris Roberts fonde RSI, l’entreprise à l’origine des premiers moteurs et des premiers vaisseaux commerciaux."},
@@ -719,7 +764,7 @@ var ERAS=[
  {y:"2262",t:"Le Triangle de Neso",g:"myst",d:"Plusieurs vaisseaux disparaissent dans la même région de l’espace. Le gouvernement en interdit le survol, et les légendes se multiplient plus vite que les faits."},
  {y:"2271",t:"Nick Croshaw ouvre la voie",g:"hum",m:1,d:"Après presque dix ans d’étude, Nick Croshaw découvre le premier point de saut, dans le Triangle de Neso. Il devient le premier humain à rejoindre un autre système stellaire, Croshaw, et le père des NavJumpers modernes."}
  ]},
-{id:"expansion",n:"L’expansion",r:"2281 → 2384",c:"#1f3a5f",
+{id:"expansion",n:"L’expansion",r:"2281 → 2384",c:"#6fa6d6",
  b:"Chaque point de saut découvert ouvre un système de plus. La Terre unifie ses dirigeants, mais pas tous ses habitants.",
  e:[
  {y:"2281",t:"Le comité d’expansion de Croshaw",g:"hum",d:"Un comité nommé par le Sommet mondial, la réunion des dirigeants de la Terre, prend le contrôle de l’expansion vers le système Croshaw."},
@@ -729,7 +774,7 @@ var ERAS=[
  {y:"2380 → 2381",t:"Première guerre d’Unification",g:"hum",d:"Le 20 octobre 2380, l’équipage du Stanley se mutine. La guerre s’achève le 22 mars 2381 avec la destruction du Panjwani, mais un nouveau soulèvement éclate dès le milieu de l’année."},
  {y:"2383 → 2384",t:"Les dernières guerres d’Unification",g:"hum",d:"La deuxième guerre se termine le 4 janvier 2383 par la conquête de Syrtis, base des anti-unionistes sur Mars. La répression violente nourrit une nouvelle rébellion. Le 29 juillet 2384, l’Alliance anti-unification attaque New York, ce qui retourne l’opinion contre les rebelles et met fin à la troisième guerre."}
  ]},
-{id:"contacts",n:"Premiers contacts",r:"2438 → 2530",c:"#1f7a4d",
+{id:"contacts",n:"Premiers contacts",r:"2438 → 2530",c:"#6fcf93",
  b:"L’humanité n’est pas seule. Marchands banu, frontières lointaines et nouveau gouvernement : l’Empire se dessine.",
  e:[
  {y:"2438",t:"Rencontre avec les Banu",g:"banu",m:1,d:"Le 12 juin, l’humanité fait son premier contact avec une espèce extraterrestre, les Banu, dans le système Davien. En octobre, le général Neal Socolovich négocie le premier traité interstellaire de paix et de commerce."},
@@ -738,7 +783,7 @@ var ERAS=[
  {y:"2523",t:"Les Planètes unies de la Terre",g:"hum",d:"Environ 70 % des humains vivent hors de la Terre et réclament une représentation égale. Le gouvernement devient l’UPE, dirigée par un tribunal de trois hauts responsables : un secrétaire, un général et un avocat. L’Advocacy, police inter-systèmes, voit le jour."},
  {y:"2530",t:"L’Empire xi’an est découvert",g:"xian",m:1,d:"Le NavJumper Kathryn Segovia découvre Th.us’ūng. Gaia Planet Services y entre sur le territoire xi’an et s’apprête à terraformer. Une guerre froide commence : menaces des deux côtés et quelques morts, sans conflit ouvert. L’ère de l’expansion coloniale humaine prend fin."}
  ]},
-{id:"tevarin",n:"Tevarin et Empire",r:"2541 → 2659",c:"#b85a00",
+{id:"tevarin",n:"Tevarin et Empire",r:"2541 → 2659",c:"#f0944a",
  b:"Une guerre contre les Tevarin porte un colonel au sommet du pouvoir. Il en profite pour fonder l’Empire.",
  e:[
  {y:"2541",t:"Les Tevarin apparaissent",g:"tev",d:"Le Dr Kellar Lench découvre le système Elysium le 15 novembre et y observe pour la première fois une civilisation tevarin, sur Kaleeth."},
@@ -750,7 +795,7 @@ var ERAS=[
  {y:"2603 → 2610",t:"La seconde guerre tévarine",g:"tev",d:"Cinquante ans plus tard, les Tevarin reconstitués attaquent pour reprendre leur monde natal, Kaleeth, rebaptisé Elysium IV. Le 24 juin 2610, certains de la défaite, ils sabordent leurs vaisseaux sur la planète. Peu après, la plupart détruisent leurs codex lors de la Purge et abandonnent leur religion. Le peintre Aaron Fring immortalisera la scène dans Tears of Fire."},
  {y:"2659",t:"L’Aurora arrive",g:"corp",d:"RSI met l’Aurora sur le marché, un vaisseau que de nombreux joueurs ont piloté en premier."}
  ]},
-{id:"vanduul",n:"L’ombre vanduul",r:"2681 → 2793",c:"#b3261e",
+{id:"vanduul",n:"L’ombre vanduul",r:"2681 → 2793",c:"#f07468",
  b:"Un ennemi qui ne négocie pas frappe la frontière, pendant que la dynastie Messer se maintient par la peur.",
  e:[
  {y:"2681",t:"Premier contact avec les Vanduul",g:"van",m:1,d:"Les Vanduul attaquent la bourgade de Dell, sur Armitage, dans le système Orion. Quelques semaines plus tard, un second raid frappe. Les Xi’an apprennent à leur tour l’existence de ce peuple."},
@@ -764,7 +809,7 @@ var ERAS=[
  {y:"2792",t:"Le Massacre de Garron II et la chute des Messer",g:"hum",m:1,d:"Le 12 avril, des images de la conduite rationnelle des êtres de Garron II fuitent. Le 27, des milliers de manifestants sont abattus sur Vale. Le 3 mai, le peuple renverse le gouvernement : l’ère Messer s’achève et Erin Toi devient Imperator. Selon des analystes, l’influence xi’an a été décisive."},
  {y:"2793",t:"Toi rencontre Kray",g:"xian",d:"Dans le système Kayfa, Erin Toi visite Tovaroh avec l’empereur Kray. Il y expose un principe du Li’Tova : une petite action peut modifier l’univers entier. Kayfa reste ouvert aux visiteurs humains."}
  ]},
-{id:"modernes",n:"Les temps modernes",r:"2845 → 2900",c:"#4a5f7a",
+{id:"modernes",n:"Les temps modernes",r:"2845 → 2900",c:"#8fb0d4",
  b:"Un siècle moins sanglant : de nouveaux constructeurs, des mondes lointains, une œuvre d’art partagée entre espèces.",
  e:[
  {y:"2845",t:"Drake Interplanetary",g:"corp",d:"Jan Dredge fonde Drake, aujourd’hui connu pour ses vaisseaux utilitaires et armés accessibles."},
@@ -772,7 +817,7 @@ var ERAS=[
  {y:"2884",t:"L’échec de CHARIOT",g:"tech",d:"Le 14 janvier, le Dr Russel Valem meurt pendant la démonstration ratée de son moteur CHARIOT, à Angeli."},
  {y:"2900",t:"Silent Song",g:"hum",d:"Une œuvre d’art à laquelle ont participé plusieurs espèces est achevée dans la ceinture Tayac Alpha."}
  ]},
-{id:"present",n:"Le présent",r:"2903 → 2956",c:"#8a3a10",
+{id:"present",n:"Le présent",r:"2903 → 2956",c:"#e8895a",
  b:"Stanton s’ouvre, la frontière vanduul cède et l’Empire se demande ce qu’il est prêt à défendre. Squadron 42 (2945-2946) et le jeu persistant se situent ici.",
  e:[
  {y:"2903",t:"Ouverture de Stanton",g:"hum",m:1,d:"Le premier point de saut vers le système Stanton est découvert. Hurston Dynamics acquiert Stanton I et ses lunes en 2904, et la ville de Lorville est fondée en 2912."},
@@ -883,7 +928,7 @@ function draw(t){
     var s=stars[i],sp=reduce?0:t*(.0016+s.z*.005);
     var y=((s.y-sp-sy*(.03+s.z*.12))%H+H)%H,x=((s.x+Math.sin(t/9000+s.p)*6*s.z)%W+W)%W;
     var a=.22+.55*s.z*(reduce?1:(.7+.3*Math.sin(t/1100+s.p)));
-    cx.fillStyle='rgba(95,72,38,'+(a*.38).toFixed(3)+')';
+    cx.fillStyle='rgba(225,238,232,'+(a*.75).toFixed(3)+')';
     var q=1+s.z*1.2;cx.fillRect(x,y,q,q);
   }
   /* braises : petites étincelles ambrées qui montent depuis le bas */
