@@ -205,6 +205,15 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .tb-find .chip{padding:.4rem .7rem;font-size:.78rem}
 .tb-find .btn{height:2.4rem;font-size:.78rem}
 .nd.on.dim{opacity:.16;pointer-events:none}
+.ev-map{margin-top:.7rem;font:500 .74rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--sage,#b8d9a6);background:transparent;border:1px solid var(--glass-b,rgba(255,255,255,.12));border-radius:20px;padding:.45rem .9rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem}
+.ev-map:hover{border-color:var(--sage,#b8d9a6);color:#fff}
+.ev.flash .body{animation:flash 2.2s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 3px var(--sage,#b8d9a6)}100%{box-shadow:0 0 0 3px transparent}}
+@media (prefers-reduced-motion:reduce){.ev.flash .body{animation:none;outline:2px solid var(--sage,#b8d9a6)}}
+.pn .lk-t{margin-top:1rem}
+.hm-news{margin-top:1.2rem;display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1rem;padding:.9rem 1.2rem;border-radius:20px;border:1px solid var(--glass-b);background:rgba(255,255,255,.03)}
+.hm-news button{font:400 1rem/1.4 var(--f-body);color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:.2em}
+.hm-news button:hover{color:var(--sage);text-decoration-color:var(--sage)}
 .m-tip{position:absolute;z-index:3;pointer-events:none;padding:.5rem .7rem;border-radius:12px;background:rgba(8,11,16,.92);border:1px solid #2b3440;font-size:.78rem;line-height:1.35;color:var(--mk);max-width:15rem;transform:translate(-50%,calc(-100% - 14px))}
 .m-tip b{display:block;font-size:.9rem;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
 .m-tip span{color:var(--mk-2)}
@@ -554,6 +563,7 @@ footer,footer p{color:var(--ink-2)}
           <span class="hm-go">Ouvrir la carte →</span>
         </button>
       </div>
+      <div class="hm-news" id="hmNews" hidden></div>
       <div class="hm-last" id="hmLast" hidden>
         <div class="fl">Dernière activité</div>
         <div id="hmLastT"></div>
@@ -1231,6 +1241,7 @@ function renderDetail(){
     if(o&&BY[o].d<=year)nb.push(o);
   });
   if(nb.length)h+='<h4>Points de saut</h4><div class="lk">'+nb.map(function(o){return '<button type="button" data-s="'+o+'">'+BY[o].n+'</button>'}).join("")+'</div>';
+  if(document.querySelector('.ev[data-y^="'+year+'"]'))h+='<button type="button" class="btn lk-t" data-ty="'+year+'">Voir la chronologie de '+year+'</button>';
   detail.innerHTML=h;
 }
 
@@ -1283,7 +1294,7 @@ function pick(id,y){
 feed.addEventListener("click",function(ev){var b=ev.target.closest("button");if(b)pick(b.dataset.s,+b.dataset.y)});
 detail.addEventListener("click",function(ev){
   var b=ev.target.closest("button");if(!b)return;
-  if(b.dataset.clr){sel=null;render()}else if(b.dataset.s){sel=b.dataset.s;render();centerOn(sel)}
+  if(b.dataset.clr){sel=null;render()}else if(b.dataset.s){sel=b.dataset.s;render();centerOn(sel)}else if(b.dataset.ty)toTimeline(+b.dataset.ty)
 });
 
 /* vue : zoom et déplacement */
@@ -1450,6 +1461,46 @@ function show(v){
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
 document.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)show(g.dataset.go)});
 render();
+/* liens entre l’accueil, la chronologie et la carte */
+function toMap(id,y){
+  if(typeof y==="number")year=Math.max(MIN,Math.min(MAX,y));
+  if(id&&BY[id])sel=id;
+  show("map");if(sel)centerOn(sel);
+}
+function toTimeline(y){
+  show("time");
+  var el=document.querySelector('.ev[data-y^="'+y+'"]:not([hidden])');
+  if(!el)return;
+  el.scrollIntoView({block:"center"});
+  el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+}
+function esc(t){return t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+var NAMERX=SYS.map(function(s){return{s:s,rx:new RegExp("(^|[^A-Za-zÀ-ÿ’'])"+esc(s.n)+"(?![A-Za-zÀ-ÿ])")}});
+function sysIn(text){
+  var best=null,at=1e9;
+  NAMERX.forEach(function(n){var m=n.rx.exec(text);if(m&&m.index<at){at=m.index;best=n.s}});
+  return best;
+}
+[].forEach.call(document.querySelectorAll(".ev"),function(ev){
+  var m=/(\d{4})/.exec(ev.dataset.y.replace(/\s/g,""));
+  if(!m)return;
+  var y=+m[1];if(y<MIN||y>MAX)return;
+  var t=ev.querySelector("h3").textContent,d=ev.querySelector(".body p").textContent;
+  var s=sysIn(t)||sysIn(d);
+  var b=document.createElement("button");b.type="button";b.className="ev-map";b.dataset.y=y;
+  if(s){b.dataset.s=s.i;b.textContent="Voir "+s.n+" sur la carte"}else b.textContent="Voir la carte en "+y;
+  ev.querySelector(".body").appendChild(b);
+});
+document.addEventListener("click",function(e){
+  var b=e.target.closest(".ev-map");if(b)toMap(b.dataset.s,+b.dataset.y);
+});
+(function(){
+  var last=null;CH.forEach(function(c){if(c.y<=MAX)last=c});
+  var n=$("#hmNews");if(!last||!n)return;
+  n.innerHTML='<span class="fl">À la une de la carte · '+last.y+'</span><button type="button">'+last.t+'</button>';
+  n.hidden=false;
+  n.querySelector("button").addEventListener("click",function(){toMap(last.s,last.y)});
+})();
 var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
 })();
 </script>
