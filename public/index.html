@@ -3,76 +3,89 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#070b0d">
+<meta name="theme-color" content="#0b0d0c">
 <title>Orbital Services</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <style>html{color-scheme:dark}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="sky" aria-hidden="true"></canvas>
-<div class="gridbg" aria-hidden="true"></div>
-
-<div class="page">
-  <div class="bar" id="bar">
-    <div class="wrap">
-      <a class="bar-brand" href="#accueil" data-go="home" aria-label="Orbital Services, accueil"><svg viewBox="0 0 40 40" aria-hidden="true" focusable="false"><ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#eef3ee" stroke-width="1.6" transform="rotate(-30 20 20)"/><circle cx="20" cy="20" r="6" fill="none" stroke="#eef3ee" stroke-width="1.6"/><circle cx="32" cy="13" r="2.4" fill="#b8d9a6"/></svg><span>Orbital</span></a>
-      <div class="tabs" role="tablist" aria-label="Vues">
-        <button type="button" class="tab" role="tab" data-v="home" aria-selected="true">Accueil</button>
-        <button type="button" class="tab" role="tab" data-v="log" aria-selected="false">Carnet de bord</button>
-        <button type="button" class="tab" role="tab" data-v="time" aria-selected="false">Chronologie</button>
-        <button type="button" class="tab" role="tab" data-v="map" aria-selected="false">Carte du temps</button>
-      </div>
-      <div class="now" id="now" aria-live="off"><small>ANNÉE</small><span id="nowy">−300 000</span></div>
-      <nav class="ecs" id="ecs" aria-label="Époques"></nav>
+<div class="app">
+  <aside class="sidebar" aria-label="Navigation">
+    <a class="brand-row" href="#accueil" data-go="home" aria-label="Orbital Services, accueil">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true" focusable="false"><path d="M3 21L10 5h4L7 21zM12 21l7-16h4l-7 16z" fill="#b8d9a6"/></svg>
+      <b><i>#</i>Orbital<i>Services</i></b>
+    </a>
+    <div class="nav-h">Navigation</div>
+    <div class="tabs" role="tablist" aria-label="Vues" aria-orientation="vertical">
+      <button type="button" class="tab" role="tab" data-v="home" aria-selected="true"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 8l7-5 7 5v7H2z"/></svg><span>Accueil</span></button>
+      <button type="button" class="tab" role="tab" data-v="log" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="12" height="14" rx="2"/><path d="M6 6h6M6 9h6M6 12h3"/></svg><span>Carnet de bord</span></button>
+      <button type="button" class="tab" role="tab" data-v="time" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M5 5h8M5 9h8M5 13h8"/></svg><span>Chronologie</span></button>
+      <button type="button" class="tab" role="tab" data-v="map" aria-selected="false"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="2.5"/><path d="M9 1v3M9 14v3M1 9h3M14 9h3"/></svg><span>Carte du temps</span></button>
     </div>
+    <div class="nav-h side-about">Projet</div>
+    <a class="side-link side-about" href="#about"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7"/><path d="M9 8v5M9 5.5v.5"/></svg><span>À propos</span></a>
+    <div class="side-bottom">
+      <button type="button" class="side-card" data-go="log">
+        <span class="side-ic" aria-hidden="true"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="2"/><path d="M5 7h6M5 10h3"/></svg></span>
+        <span class="side-t"><b id="sideLogT">Carnet local</b><small id="sideLogN">Carnet vide</small></span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-col">
+  <header class="bar" id="bar" data-view="home">
+    <span class="tb-ic" id="topIc" aria-hidden="true"></span>
+    <h1 id="topTitle">Accueil</h1>
+    <span class="tb-sub" id="topSub"></span>
+    <div class="now" id="now" aria-live="off"><small>ANNÉE</small><span id="nowy">−300 000</span></div>
+    <nav class="ecs" id="ecs" aria-label="Époques"></nav>
+    <div class="tb-right"><span class="tb-data">DONNÉES <b>STAR CITIZEN WIKI</b></span><span class="tb-pill" id="tbYear">2956</span></div>
     <div class="prog"><i id="prog"></i></div>
-  </div>
+  </header>
 
   <div id="v-home">
-    <section class="wrap hm" aria-label="Accueil">
-      <div class="hm-hero">
+    <section class="page-pad hm" aria-label="Accueil">
+      <div class="hm-banner">
+        <div class="hm-img">
+          <img src="terra.webp" width="2000" height="1090" alt="Vue aérienne d’une métropole de Terra, avec ses tours et ses vaisseaux au-dessus de la baie" decoding="async">
+          <span class="hm-cap">Terra · colonie établie en 2516</span>
+        </div>
         <div class="hm-copy">
-          <span class="hm-chip">Année 2956 <i></i><b>En cours</b></span>
-          <h2>Remonter.<br>Cartographier.<br><em>Consigner.</em></h2>
+          <div class="hm-chips"><span class="pill">Année <span id="hmYear">2956</span></span><span class="pill s">En cours</span></div>
+          <h2>Remonter. Cartographier. <em>Consigner.</em></h2>
           <p class="lead">Une carte des systèmes qui change année après année, la chronologie de l’univers et votre carnet de bord Star Citizen.</p>
           <div class="hm-cta">
-            <button type="button" class="w" data-go="map">Ouvrir la carte <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11L11 3M4 3h7v7"/></svg></button>
-            <button type="button" class="o" data-go="log">Démarrer une session <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></button>
+            <button type="button" class="cta w" data-go="map">Ouvrir la carte <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 11L11 3M4 3h7v7"/></svg></button>
+            <button type="button" class="cta o" data-go="log">Démarrer une session <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M7 1v12M1 7h12"/></svg></button>
           </div>
         </div>
-        <div class="hm-world">
-          <div class="hm-glow" aria-hidden="true"></div>
-          <div class="hm-globe"><img src="terra.webp" width="2000" height="1090" alt="Vue aérienne d’une métropole de Terra, avec ses tours et ses vaisseaux au-dessus de la baie" decoding="async"></div>
-          <svg class="hm-orbit" viewBox="0 0 800 800" aria-hidden="true"><ellipse cx="400" cy="400" rx="400" ry="215" transform="rotate(-28 400 400)" fill="none" stroke="rgba(255,255,255,.34)" stroke-width="1.2"/><circle cx="616" cy="514" r="5" fill="#fff"/><circle cx="616" cy="514" r="12" fill="none" stroke="rgba(255,255,255,.3)"/></svg>
-          <span class="hm-moon a" aria-hidden="true"></span><span class="hm-moon b" aria-hidden="true"></span>
-          <div class="hm-target"><small>Cible</small><b>TERRA</b><span>Colonie établie en 2516</span></div>
-        </div>
-        <ul class="hm-stats" aria-label="Chiffres clés">
-          <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5"/><path d="M7 11h8M12 8l3 3-3 3"/></svg><b id="hsSys">61</b><span>Systèmes<br>cartographiés</span></li>
-          <li><svg viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="11" r="8.5"/><ellipse cx="11" cy="11" rx="8.5" ry="3.4"/></svg><b id="hsEras">8</b><span>Époques<br>racontées</span></li>
-          <li><svg viewBox="0 0 22 22" aria-hidden="true"><rect x="4" y="3" width="14" height="16" rx="2"/><path d="M8 8h6M8 12h6"/></svg><b id="hsYears">856</b><span>Années<br>d’histoire</span></li>
-        </ul>
       </div>
+      <ul class="hm-tiles" aria-label="Chiffres clés">
+        <li class="tile hl"><b id="hsYear">2956</b><span>Année</span></li>
+        <li class="tile"><b id="hsSys">61</b><span>Systèmes connus</span></li>
+        <li class="tile"><b id="hsEras">8</b><span>Époques</span></li>
+        <li class="tile"><b id="hsEv">64</b><span>Événements</span></li>
+      </ul>
       <div class="hm-cards">
         <button type="button" class="hm-card" data-go="log">
-          <span class="hm-k">01 · Carnet de bord</span>
+          <span class="hm-k">Carnet de bord</span>
           <b id="hmLogN">—</b>
           <span class="hm-d" id="hmLogD">Notez vos activités, chronométrez vos sessions, importez votre Game.log.</span>
           <span class="hm-go">Ouvrir le carnet →</span>
         </button>
         <button type="button" class="hm-card" data-go="time">
-          <span class="hm-k">02 · Chronologie</span>
+          <span class="hm-k">Chronologie</span>
           <b id="hmEvN">64 événements</b>
           <span class="hm-d">Huit époques, de la chute des Xi’an à la guerre contre les Vanduul, chaque événement expliqué.</span>
           <span class="hm-go">Parcourir la chronologie →</span>
         </button>
         <button type="button" class="hm-card" data-go="map">
-          <span class="hm-k">03 · Carte du temps</span>
+          <span class="hm-k">Carte du temps</span>
           <b id="hmSysN">61 systèmes</b>
           <span class="hm-d">Avancez et reculez de 2100 à 2956 pour voir les systèmes, leurs planètes et leurs propriétaires changer.</span>
           <span class="hm-go">Ouvrir la carte →</span>
@@ -87,37 +100,17 @@
   </div>
 
   <div id="v-time" hidden>
-  <header class="hero">
-    <div class="reticle" aria-hidden="true">
-      <svg viewBox="0 0 200 200"><circle class="r1" cx="100" cy="100" r="96"/><circle class="r2" cx="100" cy="100" r="88"/><circle class="r3" cx="100" cy="100" r="68"/><circle class="r1" cx="100" cy="100" r="44"/><line class="ax" x1="4" y1="100" x2="196" y2="100"/><line class="ax" x1="100" y1="4" x2="100" y2="196"/><circle class="pt" cx="168" cy="52" r="2.4"/><circle class="pt" cx="58" cy="132" r="1.6"/></svg>
-    </div>
-    <div class="wrap">
-      <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-hidden="true" focusable="false"><rect x="2" y="2" width="124" height="124" rx="26" fill="#1f3a5f"/><rect x="7" y="7" width="114" height="114" rx="21" fill="none" stroke="#efe6d2" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 3"/><g transform="translate(64 64) rotate(-24)">
-<path d="M-46 0A46 18 0 0 1 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round" opacity=".55"/>
-<circle r="20" fill="#2d5185" stroke="#efe6d2" stroke-width="3.2"/>
-<path d="M-18 -7Q0 -1 18 -7M-20 6Q0 12 20 6" fill="none" stroke="#efe6d2" stroke-width="1.8" opacity=".6"/>
-<path d="M-46 0A46 18 0 0 0 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round"/>
-<g transform="translate(24.4 15.3) rotate(24) scale(1.05)">
-<rect x="-5" y="-4.5" width="10" height="9" rx="1.5" fill="#e8574b" stroke="#1f3a5f" stroke-width="1.6"/>
-<rect x="-17" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
-<rect x="7" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
-</g></g>
-<circle cx="26" cy="30" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="102" cy="36" r="1.4" fill="#efe6d2" opacity=".7"/><circle cx="98" cy="100" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="34" cy="98" r="1.2" fill="#efe6d2" opacity=".6"/></svg></div>
-      <p class="eyebrow">Carte des sauts · années standard terrestres</p>
-      <h1>Chronologie de Star Citizen</h1>
-      <p class="lead">Du naufrage du monde d’origine des Xi’an jusqu’à la guerre contre les Vanduul. Suivez la route saut après saut : chaque événement est daté dans le calendrier de l’univers et expliqué.</p>
-      <p class="gomap"><button type="button" class="btn" data-go="map">Ouvrir la carte du temps</button></p>
-      <ol class="route" id="route"></ol>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="filters" aria-label="Filtres">
-      <span class="fl">Filtrer par peuple ou thème</span>
+  <main class="page-pad">
+    <section class="tl-tools" aria-label="Filtres">
+      <div class="tl-row">
+        <div class="tl-search"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><label for="tlQ" class="sr">Rechercher un événement</label><input id="tlQ" type="search" placeholder="Rechercher un événement…" autocomplete="off" spellcheck="false"></div>
+        <div class="tl-sortw"><span>Trier par</span><div class="tl-sort" id="tlSort" role="group" aria-label="Ordre d’affichage"><button type="button" data-sort="era" aria-pressed="true">Époque</button><button type="button" data-sort="recent" aria-pressed="false">Récent</button></div></div>
+      </div>
       <div class="chips" id="chips"></div>
-      <span class="count" id="count"></span>
+      <span class="count" id="count" role="status"></span>
     </section>
     <div id="app"></div>
+    <div id="appFlat" class="evs" hidden></div>
     <section class="today" id="today">
       <h2>Position actuelle</h2>
       <p class="y">2956</p>
@@ -127,8 +120,7 @@
   </div>
 
   <div id="v-map" hidden>
-    <section class="wrap mp" aria-label="Carte du temps">
-      <h2>Carte du temps</h2>
+    <section class="page-pad mp" aria-label="Carte du temps">
       <p class="sub">Les systèmes apparaissent quand l’humanité les découvre, et leur propriétaire change au fil des événements. Faites glisser la date, ou avancez de changement en changement. Cliquez sur un système pour voir ses planètes et ses lieux à la date choisie.</p>
 
       <div class="tb">
@@ -183,9 +175,7 @@
   </div>
 
   <div id="v-log" hidden>
-    <section class="wrap lg" aria-label="Carnet de bord">
-      <p class="eyebrow">Journal personnel · aUEC · heures de vol</p>
-      <h2>Carnet de bord</h2>
+    <section class="page-pad lg" aria-label="Carnet de bord">
       <p class="lead">Notez vos activités dans le verse : minage, cargo, combat, exploration, missions… Lancez le chronomètre pendant que vous jouez, ou importez le fichier <code>Game.log</code> du jeu pour reprendre vos sessions et vos éliminations.</p>
       <p class="lg-store" id="lgStore" role="status"></p>
 
@@ -271,8 +261,8 @@
     </section>
   </div>
 
-  <footer>
-    <div class="wrap">
+  <footer id="about">
+    <div class="page-pad">
       <p>Textes reformulés en français à partir du Star Citizen Wiki, sous licence CC BY-SA 4.0. Le wiki ne répertorie pas d’événement en univers après 2950.</p>
       <ul>
         <li><a href="https://starcitizen.tools/Lore_timeline" target="_blank" rel="noopener">Lore timeline</a></li>
@@ -282,6 +272,7 @@
       <p>Projet de fan non officiel. Star Citizen®, Squadron 42® et Roberts Space Industries® sont des marques de Cloud Imperium Rights LLC.</p>
     </div>
   </footer>
+  </div>
 </div>
 
 <script src="data.js"></script>

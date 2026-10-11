@@ -50,10 +50,10 @@ async function waitUp(port) {
     page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
 
     await page.goto(base + "/");
-    await page.waitForSelector(".hm-hero");
+    await page.waitForSelector(".hm-banner");
     const nSys = await page.evaluate(() => SYS.length);
     check("accueil : le nombre de systèmes vient des données", (await page.textContent("#hsSys")) === String(nSys) && nSys > 0);
-    check("accueil : l'image de Terra est chargée", await page.evaluate(() => { const i = document.querySelector(".hm-globe img"); return i.complete && i.naturalWidth > 0; }));
+    check("accueil : l'image de Terra est chargée", await page.evaluate(() => { const i = document.querySelector(".hm-img img"); return i.complete && i.naturalWidth > 0; }));
 
     for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["home", "#v-home"]]) {
       await page.click('.tab[data-v="' + v + '"]');
@@ -73,6 +73,21 @@ async function waitUp(port) {
     await page.evaluate(() => document.activeElement && document.activeElement.blur());
     const y0 = await page.textContent("#mYear"); await page.keyboard.press("ArrowRight");
     check("carte : les flèches changent d'année", (await page.textContent("#mYear")) !== y0);
+
+    /* chronologie : recherche, tri, cartes */
+    await page.click('.tab[data-v="time"]');
+    const cards = await page.evaluate(() => document.querySelectorAll("#app .ev").length);
+    check("chronologie : les événements sont des cartes", cards === (await page.evaluate(() => window.__orb.events)) && cards > 30);
+    await page.fill("#tlQ", "Stanton");
+    const found = await page.evaluate(() => [...document.querySelectorAll("#app .ev")].filter(e => !e.hidden).length);
+    check("chronologie : la recherche filtre les cartes", found > 0 && found < cards, String(found));
+    await page.fill("#tlQ", "");
+    await page.click('#tlSort button[data-sort="recent"]');
+    const first = await page.evaluate(() => { const e = [...document.querySelectorAll("#appFlat .ev")].find(x => !x.hidden); return e && e.dataset.y; });
+    check("chronologie : tri du plus récent au plus ancien", first === "2950", String(first));
+    await page.click('#tlSort button[data-sort="era"]');
+    const bad = await page.evaluate(() => [...document.querySelectorAll(".ev-map")].filter(b => b.dataset.y && (+b.dataset.y < 2100 || +b.dataset.y > 2956)).length);
+    check("chronologie : aucun bouton « carte » pour une année hors carte", bad === 0, String(bad));
 
     /* liens entre onglets */
     await page.click('.tab[data-v="time"]');
