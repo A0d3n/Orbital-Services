@@ -156,6 +156,7 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .gomap{margin:0 0 1.8rem;position:relative}
 
 /* carte du temps */
+.wrap.mp{max-width:1480px}
 .mp{padding-block:2.2rem 1rem}
 .mp h2{font-family:var(--f-display);font-weight:700;font-size:clamp(1.8rem,5vw,3rem);line-height:1.05;margin:0 0 .6rem;text-transform:uppercase}
 .mp .sub{max-width:64ch;color:var(--ink-2);margin:0 0 1.4rem}
@@ -181,35 +182,54 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .keys .chip[aria-pressed="true"]{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 14%,transparent)}
 
 .mp-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:1rem}
-@media (min-width:1000px){.mp-grid{grid-template-columns:minmax(0,1fr) 23rem}}
-.mapbox{position:relative;border:1px solid var(--line-2);background:radial-gradient(ellipse at 50% 40%,color-mix(in srgb,var(--holo) 7%,var(--bg)) 0%,var(--bg) 72%);height:clamp(400px,72vh,780px);overflow:hidden;touch-action:none;cursor:grab}
+@media (min-width:1000px){.mp-grid{grid-template-columns:minmax(0,1fr) 21rem}}
+/* Carte sombre façon atlas galactique : zones d’influence, liaisons fines, repères par camp */
+.mapbox{--c-hum:#38a8d4;--c-xian:#62b53c;--c-banu:#e3c63a;--c-tev:#9a5fd8;--c-van:#e03c3c;--c-myst:#f08a2a;--c-tech:#dca545;--c-corp:#8b919b;
+  --mk:#e9eef2;--mk-2:#aab4bd;--mline:#c99a5c;--mbg:#05070b;
+  position:relative;container-type:inline-size;border:1px solid #2b3440;background:radial-gradient(ellipse at 50% 45%,#0d131b 0%,var(--mbg) 75%);height:clamp(420px,76vh,820px);overflow:hidden;touch-action:none;cursor:grab;color:var(--mk)}
 .mapbox.drag{cursor:grabbing}
 #mapsvg{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
-.zoom{position:absolute;right:.6rem;top:.6rem;display:flex;flex-direction:column;gap:.3rem}
-.zoom .btn{min-width:2.5rem;height:2.5rem;padding:0;background:color-mix(in srgb,var(--bg) 82%,transparent)}
-.legend{position:absolute;left:.6rem;bottom:.6rem;right:3.7rem;display:flex;flex-wrap:wrap;gap:.2rem .9rem;font-family:var(--f-mono);font-size:.7rem;color:var(--ink-2);background:color-mix(in srgb,var(--bg) 80%,transparent);padding:.4rem .55rem;pointer-events:none}
-.legend span{display:inline-flex;align-items:center;gap:.35rem}
-.legend i{width:.6rem;height:.6rem;border-radius:50%;background:var(--oc)}
-.legend i.ln{width:1.2rem;height:0;border-radius:0;background:none;border-top:1.5px dashed var(--ink-2)}
+.zoom{position:absolute;right:.6rem;bottom:.6rem;display:flex;flex-direction:column;gap:.3rem}
+.zoom .btn{min-width:2.5rem;height:2.5rem;padding:0;background:rgba(10,14,20,.78);border-color:#3a4553;color:var(--mk)}
+.zoom .btn:hover{border-color:var(--mline);color:#fff}
 
-.edge{stroke:var(--line-2);stroke-width:1.6px;fill:none;opacity:0;vector-effect:non-scaling-stroke;transition:opacity .4s}
-.edge.on{opacity:.95}
+.m-era{position:absolute;left:.7rem;top:.7rem;pointer-events:none;font-family:var(--f-display);font-weight:900;font-size:clamp(.95rem,2.4vw,1.45rem);letter-spacing:.06em;text-transform:uppercase;color:#f3f6f8;padding:.55rem 1.1rem;background:linear-gradient(100deg,rgba(56,168,212,.55),rgba(56,168,212,.12));border-left:3px solid var(--c-hum);text-shadow:0 1px 3px #000;max-width:55%}
+.m-year{position:absolute;left:.8rem;bottom:.2rem;pointer-events:none;font-family:var(--f-mono);font-size:clamp(2.2rem,6vw,4rem);line-height:1;color:rgba(243,246,248,.9);font-variant-numeric:tabular-nums;text-shadow:0 2px 6px #000}
+.m-log{position:absolute;left:.8rem;bottom:clamp(2.8rem,7.4vw,4.8rem);margin:0;padding:0;list-style:none;pointer-events:none;font-size:.74rem;line-height:1.35;width:min(25rem,58%);color:var(--mk);text-shadow:0 1px 2px #000,0 0 6px #000}
+.m-log li{margin:.12rem 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m-log b{font-family:var(--f-mono);font-weight:400;color:var(--c-banu);margin-right:.35em}
+.m-key{position:absolute;right:.6rem;top:.6rem;pointer-events:none;background:rgba(8,11,16,.78);border:1px solid #2b3440;padding:.55rem .7rem .6rem;font-size:.66rem;line-height:1.25;color:var(--mk);max-width:48%}
+.m-key h5{margin:0 0 .3rem;font:700 .72rem var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.m-key .jp{display:flex;align-items:center;gap:.45rem;margin:0 0 .5rem;font-family:var(--f-mono);color:var(--mk-2)}
+.m-key .jp i{width:1.4rem;height:0;border-top:2px solid var(--mline)}
+.m-key .jp i.d{border-top:2px dashed var(--mline)}
+.m-key .cols{display:flex;gap:1rem}
+.m-key ul{list-style:none;margin:0;padding:0}
+.m-key li{display:flex;align-items:center;gap:.4rem;margin:.18rem 0;white-space:nowrap}
+.m-key svg{width:.85rem;height:.85rem;flex:none;overflow:visible}
+.m-key .sw{width:1.5rem;height:.55rem;background:var(--oc);opacity:.75;flex:none}
+@container (max-width:760px){.m-log{display:none}.m-key{font-size:.6rem;padding:.4rem .5rem}.m-key .jp{margin-bottom:.3rem}.m-era{font-size:.85rem;padding:.4rem .7rem;max-width:44%}.m-year{font-size:2.2rem}}
+
+.inf{fill:var(--oc);opacity:0;transition:opacity .6s,fill .6s}
+.inf.on{opacity:1}
+.edge{stroke:var(--mline);stroke-width:1.3px;fill:none;opacity:0;vector-effect:non-scaling-stroke;transition:opacity .4s}
+.edge.on{opacity:.8}
 .edge.dsh{stroke-dasharray:4 5}
-.edge.hl{stroke:var(--holo);stroke-width:2.4px;opacity:1}
+.edge.hl{stroke:#ffd9a0;stroke-width:2.2px;opacity:1}
 .nd{opacity:0;pointer-events:none;transition:opacity .4s;cursor:pointer}
 .nd.on{opacity:1;pointer-events:auto}
-.nd circle{vector-effect:non-scaling-stroke}
-.nd .c{fill:color-mix(in srgb,var(--oc) 32%,var(--bg));stroke:var(--oc);stroke-width:2px;transition:fill .35s,stroke .35s}
-.nd .halo{fill:none;stroke:var(--oc);stroke-width:1.5px;opacity:0;transform-box:fill-box;transform-origin:center}
+.nd .c{vector-effect:non-scaling-stroke;fill:var(--oc);stroke:rgba(255,255,255,.85);stroke-width:1.5px;transition:fill .35s}
+.nd .c.ring{fill:#0a0e14;stroke:var(--oc);stroke-width:3px}
+.nd .halo{vector-effect:non-scaling-stroke;fill:none;stroke:var(--oc);stroke-width:1.5px;opacity:0;transform-box:fill-box;transform-origin:center}
 .nd.fresh .halo{animation:ping 1.8s ease-out infinite}
 @keyframes ping{from{transform:scale(1);opacity:.9}to{transform:scale(3);opacity:0}}
-.nd text{font-family:var(--f-display);font-weight:500;font-size:var(--fs,12px);fill:var(--ink);paint-order:stroke;stroke:var(--bg);stroke-width:calc(var(--fs,12px)*.28);stroke-linejoin:round;text-anchor:middle;pointer-events:none}
+.nd text{font-family:var(--f-display);font-weight:500;font-size:var(--fs,12px);letter-spacing:.05em;text-transform:uppercase;fill:var(--mk);paint-order:stroke;stroke:#05070b;stroke-width:calc(var(--fs,12px)*.3);stroke-linejoin:round;text-anchor:middle;pointer-events:none}
 .nd text.mn{display:none}
 #mapsvg.all .nd text.mn{display:block}
 .nd.sel .c{stroke:#fff;stroke-width:3px}
 .nd:focus-visible{outline:none}
 .nd:focus-visible .c{stroke:#fff;stroke-width:3px}
-@media (prefers-reduced-motion:reduce){.nd.fresh .halo{animation:none;opacity:.7}.edge,.nd{transition:none}}
+@media (prefers-reduced-motion:reduce){.nd.fresh .halo{animation:none;opacity:.7}.edge,.nd,.inf{transition:none}}
 
 .side{display:flex;flex-direction:column;gap:1rem;min-width:0}
 .pn{border:1px solid var(--line);padding:1rem 1.1rem 1.1rem;background:color-mix(in srgb,var(--bg-2) 72%,transparent);min-width:0}
@@ -371,7 +391,6 @@ h1{letter-spacing:.01em}
 
 /* feuillets : panneaux et cartes */
 .lg-panel,.hm-card,.tb,.side .pn,.pn{background:var(--paper);border:1px solid #b8a883;border-radius:2px;box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 3px 10px var(--shadow)}
-.mapbox{border:1px solid #b8a883;border-radius:2px;background:radial-gradient(ellipse at 50% 40%,#faf4e3 0%,#e8dcbf 100%);box-shadow:0 3px 10px var(--shadow)}
 .tb{background:var(--paper)}
 .side{background:none}
 .lg-panel,.hm-card{position:relative}
@@ -405,10 +424,6 @@ h1{letter-spacing:.01em}
 .reticle .pt{fill:var(--amber)}
 
 /* carte */
-.edge.hl{stroke:var(--amber)}
-.nd.sel .c,.nd:focus-visible .c{stroke:var(--ink);stroke-width:3px}
-.nd text{stroke:#f4ecd9}
-.zoom .btn,.legend{background:rgba(247,240,222,.9)}
 .pn h3{font-weight:900;color:var(--holo)}
 .feed button:hover{color:var(--holo)}
 .mp-note,.mnote{color:var(--ink-2)}
@@ -558,19 +573,22 @@ footer,footer p{color:var(--ink-2)}
       <div class="mp-grid">
         <div class="mapbox" id="mapbox">
           <svg id="mapsvg" role="img" aria-label="Carte des systèmes stellaires connus à l’année choisie" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="m-era" id="mEra" aria-hidden="true"></div>
+          <div class="m-key" id="mLegend"></div>
+          <ul class="m-log" id="mLog" aria-hidden="true"></ul>
+          <div class="m-year" id="mBig" aria-hidden="true"></div>
           <div class="zoom">
             <button type="button" class="btn" id="zIn" aria-label="Zoom avant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/></svg></button>
             <button type="button" class="btn" id="zOut" aria-label="Zoom arrière"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7h12v2H2z"/></svg></button>
             <button type="button" class="btn" id="zFit" aria-label="Voir toute la carte"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/></svg></button>
           </div>
-          <div class="legend" id="mLegend"></div>
         </div>
         <aside class="side">
           <div class="pn" id="mDetail"></div>
           <div class="pn"><h4 style="margin-top:0">Derniers changements</h4><ul class="feed" id="mFeed"></ul></div>
         </aside>
       </div>
-      <p class="mnote">Les positions sont schématiques et ne reflètent pas les distances réelles. Seule une partie des systèmes de l’univers est représentée : ceux dont la liaison figure dans la chronologie du wiki. Les liaisons en pointillés sont déduites ou issues du jeu. Les systèmes sont datés selon leur découverte par l’humanité, même quand les Xi’an ou les Banu les connaissaient depuis longtemps.</p>
+      <p class="mnote">Les positions suivent la disposition d’une carte de référence de l’univers, sans refléter les distances réelles ; les zones colorées figurent l’influence de chaque camp. Seule une partie des systèmes de l’univers est représentée : ceux dont la liaison figure dans la chronologie du wiki. Les liaisons en pointillés sont déduites ou issues du jeu. Les systèmes sont datés selon leur découverte par l’humanité, même quand les Xi’an ou les Banu les connaissaient depuis longtemps.</p>
     </section>
   </div>
 
@@ -895,11 +913,11 @@ apply();
 "use strict";
 var $=function(s,r){return (r||document).querySelector(s)};
 var NS="http://www.w3.org/2000/svg";
-var MIN=2100,MAX=2956,W=1434,H=1012;
+var MIN=2100,MAX=2956,MW=1434,MH=1012;
 
 var OW={hum:["Humanité","--c-hum"],xian:["Empire xi’an","--c-xian"],banu:["Protectorat banu","--c-banu"],tev:["Tevarin","--c-tev"],van:["Vanduul","--c-van"],out:["Hors-la-loi","--c-myst"],con:["Contesté","--c-tech"],none:["Inhabité ou perdu","--c-corp"]};
 
-var POS={"sol":[767,454],"croshaw":[875,386],"nul":[832,282],"caliban":[756,205],"centauri":[889,191],"rhetor":[991,336],"fora":[1097,274],"banshee":[1180,194],"nemo":[1203,309],"corel":[1291,376],"geddon":[1350,468],"gliese":[1364,574],"yulin":[1278,139],"leir":[1143,94],"ferron":[961,455],"oretani":[1046,522],"idris":[1085,394],"elysium":[1176,454],"davien":[668,532],"cathcart":[570,484],"nexus":[483,423],"hades":[381,439],"min":[458,320],"cano":[585,623],"pyro":[480,702],"kilian":[739,611],"ellis":[761,712],"taranis":[882,726],"helios":[995,750],"charon":[1102,779],"magnus":[637,683],"stanton":[507,608],"terra":[393,518],"tayac":[390,640],"hadrian":[362,744],"kiel":[261,788],"baker":[171,729],"horus":[191,869],"castra":[270,672],"gurzil":[319,849],"hadur":[75,683],"pallas":[136,631],"indra":[70,787],"rila":[265,942],"kaipua":[109,934],"oya":[197,581],"ealuth":[143,464],"trise":[98,369],"tohil":[218,490],"laou":[123,553],"nyx":[302,434],"bremen":[382,345],"tanga":[422,232],"odin":[431,122],"vega":[347,255],"oberon":[267,230],"virgil":[304,355],"tiber":[206,281],"orion":[157,174],"vulture":[123,70],"vector":[105,263]};
+var POS={"sol":[564,445],"croshaw":[563,509],"nul":[462,506],"caliban":[383,490],"centauri":[419,602],"rhetor":[587,682],"fora":[507,893],"banshee":[380,856],"nemo":[649,770],"corel":[857,832],"geddon":[811,877],"gliese":[1019,948],"yulin":[404,933],"leir":[247,826],"ferron":[596,588],"oretani":[513,586],"idris":[497,663],"elysium":[403,688],"davien":[668,562],"cathcart":[719,629],"nexus":[803,653],"hades":[748,693],"min":[828,692],"cano":[710,498],"pyro":[742,407],"kilian":[767,533],"ellis":[862,621],"taranis":[863,775],"helios":[1011,789],"charon":[1052,863],"magnus":[820,501],"stanton":[823,416],"terra":[969,632],"tayac":[945,757],"hadrian":[937,517],"kiel":[1027,573],"baker":[1051,661],"horus":[1067,440],"castra":[863,311],"gurzil":[939,412],"hadur":[1183,680],"pallas":[1167,538],"indra":[1241,762],"rila":[1007,183],"kaipua":[1059,306],"oya":[883,277],"ealuth":[814,106],"trise":[667,63],"tohil":[782,266],"laou":[742,176],"nyx":[683,314],"bremen":[630,344],"tanga":[505,308],"odin":[535,282],"vega":[524,370],"oberon":[433,426],"virgil":[412,351],"tiber":[356,378],"orion":[281,442],"vulture":[193,469],"vector":[321,266]};
 
 function S(i,n,d,by,mj,o,p){return{i:i,n:n,d:d,by:by,mj:mj,o:o,p:p||[]}}
 var SYS=[
@@ -1052,8 +1070,19 @@ var svg=$("#mapsvg"),box=$("#mapbox"),detail=$("#mDetail"),feed=$("#mFeed");
 var yEl=$("#mYear"),range=$("#mRange"),cEl=$("#mCount");
 
 /* construction du SVG */
-var gE=document.createElementNS(NS,"g"),gN=document.createElementNS(NS,"g");
-svg.appendChild(gE);svg.appendChild(gN);
+var SH={hum:"o",xian:"u",banu:"d",tev:"q",van:"v",out:"o",con:"r",none:"o"},INF={hum:1,xian:1,banu:1,tev:1,van:1};
+function shapeD(k,x,y,r){
+  if(k==="u")return"M"+x+","+(y-r*1.2)+"L"+(x+r*1.1)+","+(y+r*.8)+"L"+(x-r*1.1)+","+(y+r*.8)+"Z";
+  if(k==="d")return"M"+x+","+(y+r*1.2)+"L"+(x+r*1.1)+","+(y-r*.8)+"L"+(x-r*1.1)+","+(y-r*.8)+"Z";
+  if(k==="v")return"M"+x+","+(y-r*1.25)+"L"+(x+r*1.25)+","+y+"L"+x+","+(y+r*1.25)+"L"+(x-r*1.25)+","+y+"Z";
+  if(k==="q")return"M"+(x-r*.9)+","+(y-r*.9)+"h"+(r*1.8)+"v"+(r*1.8)+"h"+(-r*1.8)+"Z";
+  return"M"+(x-r)+","+y+"a"+r+","+r+" 0 1,0 "+(2*r)+",0a"+r+","+r+" 0 1,0 "+(-2*r)+",0Z";
+}
+var defs=document.createElementNS(NS,"defs");
+defs.innerHTML='<filter id="mblur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="24"/><feComponentTransfer><feFuncA type="linear" slope="2.4" intercept="-.2"/></feComponentTransfer></filter>';
+var gI=document.createElementNS(NS,"g"),gE=document.createElementNS(NS,"g"),gN=document.createElementNS(NS,"g");
+gI.setAttribute("filter","url(#mblur)");gI.setAttribute("opacity",".5");gI.setAttribute("pointer-events","none");
+svg.appendChild(defs);svg.appendChild(gI);svg.appendChild(gE);svg.appendChild(gN);
 EDG.forEach(function(e){
   var l=document.createElementNS(NS,"line");
   l.setAttribute("x1",POS[e.a][0]);l.setAttribute("y1",POS[e.a][1]);l.setAttribute("x2",POS[e.b][0]);l.setAttribute("y2",POS[e.b][1]);
@@ -1062,17 +1091,23 @@ EDG.forEach(function(e){
 SYS.forEach(function(s){
   var g=document.createElementNS(NS,"g");
   g.setAttribute("class","nd");g.setAttribute("data-i",s.i);g.setAttribute("role","button");g.setAttribute("tabindex","-1");g.setAttribute("aria-label",s.n);
-  var h=document.createElementNS(NS,"circle"),c=document.createElementNS(NS,"circle"),t=document.createElementNS(NS,"text");
+  var h=document.createElementNS(NS,"circle"),c=document.createElementNS(NS,"path"),t=document.createElementNS(NS,"text"),f=document.createElementNS(NS,"circle");
   h.setAttribute("class","halo");c.setAttribute("class","c");
-  [h,c].forEach(function(x){x.setAttribute("cx",POS[s.i][0]);x.setAttribute("cy",POS[s.i][1])});
+  h.setAttribute("cx",POS[s.i][0]);h.setAttribute("cy",POS[s.i][1]);
+  f.setAttribute("class","inf");f.setAttribute("cx",POS[s.i][0]);f.setAttribute("cy",POS[s.i][1]);f.setAttribute("r",s.mj?105:88);gI.appendChild(f);s.f=f;
   t.setAttribute("x",POS[s.i][0]);t.setAttribute("class",s.mj?"mj":"mn");t.textContent=s.n;
   g.appendChild(h);g.appendChild(c);g.appendChild(t);gN.appendChild(g);
   s.g=g;s.h=h;s.c=c;s.t=t;
 });
 
 /* légende et dates clés */
-var lg="";["hum","xian","banu","tev","van","out","con","none"].forEach(function(k){lg+='<span style="--oc:var('+OW[k][1]+')"><i></i>'+OW[k][0]+'</span>'});
-lg+='<span><i class="ln"></i>Liaison déduite</span>';$("#mLegend").innerHTML=lg;
+var OK=["hum","xian","banu","tev","van","out","con","none"];
+function icon(k){return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><path d="'+shapeD(SH[k],0,0,5.5)+'" style="fill:var('+OW[k][1]+');stroke:rgba(255,255,255,.85);stroke-width:1.2"/></svg>'}
+$("#mLegend").innerHTML='<h5>Légende</h5><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><div class="cols"><div><h5>Gouvernance</h5><ul>'+
+  OK.map(function(k){return '<li>'+icon(k)+OW[k][0]+'</li>'}).join("")+'</ul></div></div><p class="jp" style="margin:.5rem 0 0"><span class="sw" style="--oc:var(--c-hum)"></span>Zone d’influence</p>';
+/* époques affichées en bandeau (années de début tirées des périodes de la chronologie) */
+var MERA=[[2100,"L’aube spatiale"],[2271,"L’expansion"],[2438,"Premiers contacts"],[2541,"Tevarin et Empire"],[2681,"L’ombre vanduul"],[2794,"Les temps modernes"],[2903,"Le présent"]];
+function eraAt(y){var n=MERA[0][1];MERA.forEach(function(e){if(y>=e[0])n=e[1]});return n}
 $("#mKeys").innerHTML=KEYS.map(function(k){return '<button type="button" class="chip" data-y="'+k[0]+'" aria-pressed="false" style="--tc:var(--amber)"><b>'+k[0]+'</b>'+k[1]+'</button>'}).join("");
 
 /* état d’un système à une année */
@@ -1087,13 +1122,19 @@ function render(){
     s.g.setAttribute("tabindex",on?"0":"-1");
     s.g.classList.toggle("fresh",on&&s.d>0&&year-s.d<12);
     s.g.classList.toggle("sel",s.i===sel);
-    s.g.style.setProperty("--oc","var("+OW[stateAt(s,year)[1]][1]+")");
+    var ok=stateAt(s,year)[1],v="var("+OW[ok][1]+")";
+    s.g.style.setProperty("--oc",v);
+    s.f.style.setProperty("--oc",v);
+    s.f.classList.toggle("on",on&&!!INF[ok]);
+    if(s.k!==SH[ok]){s.k=SH[ok];drawShape(s)}
+    s.c.classList.toggle("ring",ok==="con");
   });
   EDG.forEach(function(e){
     var on=year>=e.y&&(!e.u||year<e.u);
     e.el.classList.toggle("on",on);
     e.el.classList.toggle("hl",on&&(e.a===sel||e.b===sel));
   });
+  $("#mEra").textContent=eraAt(year);$("#mBig").textContent=year;renderLog();
   cEl.textContent=known+" système"+(known>1?"s":"")+" connu"+(known>1?"s":"")+" sur "+SYS.length;
   $("#mKeys").querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(+c.dataset.y===year))});
   renderDetail();renderFeed();
@@ -1125,6 +1166,12 @@ function renderDetail(){
   if(nb.length)h+='<h4>Points de saut</h4><div class="lk">'+nb.map(function(o){return '<button type="button" data-s="'+o+'">'+BY[o].n+'</button>'}).join("")+'</div>';
   detail.innerHTML=h;
 }
+
+function renderLog(){
+  var past=CH.filter(function(c){return c.y<=year}).slice(-5);
+  $("#mLog").innerHTML=past.map(function(c,i){return '<li style="opacity:'+(.35+.65*(i+1)/past.length).toFixed(2)+'"><b>'+c.y+'</b>'+c.t+'</li>'}).join("");
+}
+function drawShape(s){var r=s.r||6;s.c.setAttribute("d",shapeD(s.k||"o",POS[s.i][0],POS[s.i][1],r))}
 
 function renderFeed(){
   var past=[],next=[];
@@ -1173,12 +1220,12 @@ detail.addEventListener("click",function(ev){
 });
 
 /* vue : zoom et déplacement */
-var vb={x:0,y:0,w:W,h:H},justDragged=false,drag=null,raf=0;
+var vb={x:0,y:0,w:MW,h:MH},justDragged=false,drag=null,raf=0;
 function ratio(){var r=svg.getBoundingClientRect();return r.height?r.width/r.height:1.4}
 function fit(){
-  var ar=ratio(),w=W,h=H;
+  var ar=ratio(),w=MW*1.12,h=MH*1.12;
   if(w/h>ar)h=w/ar;else w=h*ar;
-  vb={x:(W-w)/2,y:(H-h)/2,w:w,h:h};setVB();
+  vb={x:(MW-w)/2,y:(MH-h)/2,w:w,h:h};setVB();
 }
 function setVB(){svg.setAttribute("viewBox",vb.x.toFixed(1)+" "+vb.y.toFixed(1)+" "+vb.w.toFixed(1)+" "+vb.h.toFixed(1));if(!raf)raf=requestAnimationFrame(applyScale)}
 function applyScale(){
@@ -1189,12 +1236,12 @@ function applyScale(){
   svg.classList.toggle("all",sc>=.5);
   SYS.forEach(function(s){
     var rr=(s.mj?rs*1.3:rs)/sc;
-    s.c.setAttribute("r",rr.toFixed(2));s.h.setAttribute("r",rr.toFixed(2));
+    s.r=+rr.toFixed(2);drawShape(s);s.h.setAttribute("r",s.r);
     s.t.setAttribute("y",(POS[s.i][1]+rr+fs/sc*.95).toFixed(2));
   });
 }
 function zoomAt(f,mx,my){
-  var nw=Math.max(W/9,Math.min(W*1.5,vb.w*f));f=nw/vb.w;
+  var nw=Math.max(MW/9,Math.min(MW*1.5,vb.w*f));f=nw/vb.w;
   var px=vb.x+mx*vb.w,py=vb.y+my*vb.h;
   vb.w=nw;vb.h*=f;vb.x=px-mx*vb.w;vb.y=py-my*vb.h;setVB();
 }
@@ -1253,7 +1300,7 @@ function show(v){
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
 document.addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)show(g.dataset.go)});
 render();
-var H=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};show(R[H]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};show(R[HASH]||"home");
 })();
 </script>
 
