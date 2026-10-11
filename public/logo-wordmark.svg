@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 140" role="img" aria-label="Orbital Services">
+<rect width="600" height="140" rx="10" fill="#efe6d2"/><rect x="3" y="3" width="594" height="134" rx="8" fill="none" stroke="#9c8a63" stroke-width="1.5"/>
+<g transform="translate(8 6)"><rect x="2" y="2" width="124" height="124" rx="26" fill="#1f3a5f"/><rect x="7" y="7" width="114" height="114" rx="21" fill="none" stroke="#efe6d2" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="3 3"/><g transform="translate(64 64) rotate(-24)">
+<path d="M-46 0A46 18 0 0 1 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+<circle r="20" fill="#2d5185" stroke="#efe6d2" stroke-width="3.2"/>
+<path d="M-18 -7Q0 -1 18 -7M-20 6Q0 12 20 6" fill="none" stroke="#efe6d2" stroke-width="1.8" opacity=".6"/>
+<path d="M-46 0A46 18 0 0 0 46 0" fill="none" stroke="#efe6d2" stroke-width="3" stroke-linecap="round"/>
+<g transform="translate(24.4 15.3) rotate(24) scale(1.05)">
+<rect x="-5" y="-4.5" width="10" height="9" rx="1.5" fill="#e8574b" stroke="#1f3a5f" stroke-width="1.6"/>
+<rect x="-17" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
+<rect x="7" y="-3" width="10" height="6" fill="#efe6d2" stroke="#1f3a5f" stroke-width="1.2"/>
+</g></g>
+<circle cx="26" cy="30" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="102" cy="36" r="1.4" fill="#efe6d2" opacity=".7"/><circle cx="98" cy="100" r="1.8" fill="#efe6d2" opacity=".8"/><circle cx="34" cy="98" r="1.2" fill="#efe6d2" opacity=".6"/></g>
+<text x="158" y="72" font-family="'Playfair Display',Georgia,'Times New Roman',serif" font-size="46" font-weight="900" letter-spacing="1" fill="#1f3a5f">ORBITAL</text>
+<text x="158" y="110" font-family="'Special Elite','Courier New',monospace" font-size="24" letter-spacing="8" fill="#b3261e">SERVICES</text>
+</svg>

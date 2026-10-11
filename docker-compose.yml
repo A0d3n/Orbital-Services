@@ -1,0 +1,24 @@
+# TrueNAS SCALE 24.10+ : Apps → Discover Apps → Custom App → « Install via YAML »
+# Remplacez /mnt/POOL/apps/orbital-services par le chemin réel de votre dataset.
+services:
+  orbital-services:
+    image: node:22-alpine
+    container_name: orbital-services
+    restart: unless-stopped
+    user: "568:568"                       # utilisateur « apps » de TrueNAS
+    working_dir: /app
+    command: ["node", "server.js"]
+    environment:
+      PORT: "8080"
+      DATA_DIR: /data
+      PUBLIC_DIR: /app/public
+    ports:
+      - "9080:8080"                       # accès : http://IP-DU-NAS:9080
+    volumes:
+      - /mnt/POOL/apps/orbital-services/app:/app:ro
+      - /mnt/POOL/apps/orbital-services/data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
