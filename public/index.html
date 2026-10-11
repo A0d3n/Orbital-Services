@@ -325,7 +325,17 @@ footer ul{margin:.3rem 0 1rem;padding-left:1.1rem}
 .lg-bar i{display:block;height:.55rem;border-radius:2px;background:var(--tc);box-shadow:0 0 10px color-mix(in srgb,var(--tc) 40%,transparent);min-width:2px}
 .lg-bar em{font:400 .8rem var(--f-mono);font-style:normal;text-align:right;color:var(--ink)}
 .lg-sub{margin-top:.2rem}
-.lg-days{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;align-items:end;height:4.2rem}
+.lg-days{display:grid;grid-template-columns:repeat(30,minmax(0,1fr));gap:3px;align-items:end;height:5.2rem;border-bottom:1px solid var(--line)}
+.lg-axis{display:flex;justify-content:space-between;font:400 .72rem var(--f-body);color:var(--ink-2);margin-top:.3rem}
+.lg-goal{display:grid;gap:.5rem}
+.lg-goalhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.3rem 1rem;align-items:baseline}
+.lg-goaltxt{font-size:.88rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.lg-goalbar{height:.55rem;border-radius:.3rem;background:rgba(255,255,255,.08);overflow:hidden}
+.lg-goalbar i{display:block;height:100%;width:0;background:var(--sage,#b8d9a6);border-radius:.3rem;transition:width .4s}
+.lg-goalbar.done i{background:var(--ok,#7fe08c)}
+.lg-goalin{font:500 .74rem var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.lg-goal input{max-width:11rem}
+.lg-sess{margin:0;padding-left:1.1rem;color:var(--ink-2);font-size:.85rem}
 .lg-days i{display:block;background:var(--holo);border-radius:2px 2px 0 0;min-height:3px;opacity:.85}
 .lg-days i.z{background:var(--line-2);opacity:.6}
 .lg-list{display:grid;gap:.5rem}
@@ -733,8 +743,14 @@ footer,footer p{color:var(--ink-2)}
             </div>
             <div class="lg-stats" id="lgStats"></div>
             <div class="lg-bars" id="lgBars"></div>
-            <div class="fl lg-sub">14 derniers jours</div>
-            <div class="lg-days" id="lgDays" aria-hidden="true"></div>
+            <div class="lg-goal">
+              <div class="lg-goalhead"><span class="fl">Objectif des 7 derniers jours</span><span id="lgGoalTxt" class="lg-goaltxt"></span></div>
+              <div class="lg-goalbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progression de l’objectif" id="lgGoalBar"><i></i></div>
+              <div class="lg-row"><label class="lg-goalin" for="lgGoal">Objectif en aUEC</label><input type="number" id="lgGoal" inputmode="numeric" min="0" step="1000" placeholder="ex. 500000"></div>
+            </div>
+            <div class="fl lg-sub">30 derniers jours</div>
+            <div class="lg-days" id="lgDays" role="img" aria-label="Entrées par jour sur les 30 derniers jours"></div>
+            <div class="lg-axis" id="lgAxis" aria-hidden="true"></div>
           </div>
 
           <div class="lg-panel">
@@ -1628,6 +1644,7 @@ chipsF.addEventListener("click",function(e){var b=e.target.closest("button");if(
 $("#lgRange").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;rangeD=+b.dataset.d;
   [].forEach.call(this.children,function(c){c.setAttribute("aria-pressed",String(c===b))});render()});
 $("#lgSearch").addEventListener("input",function(){q=this.value.trim().toLowerCase();render()});
+$("#lgGoal").addEventListener("change",function(){var v=Math.max(0,Math.round(+this.value||0));ls("sclog_goal",v?String(v):null);render()});
 var refreshQ=false;
 function refresh(){if(refreshQ)return;refreshQ=true;requestAnimationFrame(function(){refreshQ=false;render()})}
 function all(){return Object.keys(entries).map(function(k){return entries[k]}).sort(function(a,b){return b.ts-a.ts})}
@@ -1636,18 +1653,30 @@ function render(){
   window.__lg={count:list.length,last:list[0]||null};try{window.dispatchEvent(new CustomEvent("lg:update"))}catch(e){}
   var inRange=list.filter(function(e){return !rangeD||e.ts>=now-rangeD*864e5});
   /* stats */
-  var dur=0,auec=0,byT={};
-  inRange.forEach(function(e){dur+=e.dur||0;auec+=e.auec||0;byT[e.type]=(byT[e.type]||0)+1});
+  var dur=0,auec=0,byT={},rd=0,ra=0,rT={};
+  inRange.forEach(function(e){dur+=e.dur||0;auec+=e.auec||0;byT[e.type]=(byT[e.type]||0)+1;
+    if(e.dur>0&&e.auec){rd+=e.dur;ra+=e.auec;var q=rT[e.type]||(rT[e.type]={d:0,a:0});q.d+=e.dur;q.a+=e.auec}});
+  var rate=rd>0?ra/(rd/60):null;
   var st=$("#lgStats");st.textContent="";
-  [[String(inRange.length),"Entrées",""],[fmtDur(dur),"Temps noté",""],[(auec>0?"+":"")+fmtN(auec),"aUEC net",auec>0?"pos":auec<0?"neg":""]].forEach(function(s){
+  [[String(inRange.length),"Entrées",""],[fmtDur(dur),"Temps noté",""],[(auec>0?"+":"")+fmtN(auec),"aUEC net",auec>0?"pos":auec<0?"neg":""],[rate===null?"—":(rate>0?"+":"")+fmtN(rate),"aUEC / heure",rate>0?"pos":rate<0?"neg":""]].forEach(function(s){
     var d=el("div","lg-stat"),b=el("b",s[2],s[0]);d.appendChild(b);d.appendChild(el("span",null,s[1]));st.appendChild(d)});
   var bars=$("#lgBars");bars.textContent="";
   var ks=Object.keys(byT).sort(function(a,b){return byT[b]-byT[a]}),mx=ks.length?byT[ks[0]]:1;
   ks.forEach(function(k){var r=el("div","lg-bar");r.style.setProperty("--tc",tcol(k));r.appendChild(el("span",null,tname(k)));
+    var q=rT[k];r.title=tname(k)+" : "+byT[k]+" entrée(s)"+(q&&q.d>0?" · "+fmtN(q.a/(q.d/60))+" aUEC/h":"");
     var w=el("div"),i=document.createElement("i");i.style.width=Math.max(2,byT[k]/mx*100)+"%";w.appendChild(i);r.appendChild(w);r.appendChild(el("em",null,String(byT[k])));bars.appendChild(r)});
   var dd=$("#lgDays");dd.textContent="";var cnt={};list.forEach(function(e){var k=dayKey(e.ts);cnt[k]=(cnt[k]||0)+1});
-  var cols=[],m=1;for(var i=13;i>=0;i--){var k=dayKey(now-i*864e5);cols.push([k,cnt[k]||0]);m=Math.max(m,cnt[k]||0)}
+  var cols=[],m=1,tot30=0;for(var i=29;i>=0;i--){var k=dayKey(now-i*864e5);cols.push([k,cnt[k]||0]);tot30+=cnt[k]||0;m=Math.max(m,cnt[k]||0)}
   cols.forEach(function(c){var b=document.createElement("i");b.style.height=(c[1]?Math.max(12,c[1]/m*100):4)+"%";if(!c[1])b.className="z";b.title=c[0]+" : "+c[1]+" entrée(s)";dd.appendChild(b)});
+  dd.setAttribute("aria-label",tot30+" entrée(s) sur les 30 derniers jours, jusqu’à "+m+" par jour");
+  var ax=$("#lgAxis");ax.textContent="";ax.appendChild(el("span",null,cols[0][0]));ax.appendChild(el("span",null,"max "+m+" / jour"));ax.appendChild(el("span",null,cols[29][0]));
+  /* objectif des 7 derniers jours */
+  var goal=+(ls("sclog_goal")||0),wk=0,since=now-7*864e5;
+  list.forEach(function(e){if(e.ts>=since)wk+=e.auec||0});
+  var gb=$("#lgGoalBar"),pc=goal>0?Math.max(0,Math.min(100,wk/goal*100)):0;
+  gb.firstChild.style.width=pc+"%";gb.setAttribute("aria-valuenow",String(Math.round(pc)));gb.classList.toggle("done",goal>0&&wk>=goal);
+  $("#lgGoalTxt").textContent=goal>0?fmtN(wk)+" / "+fmtN(goal)+" aUEC":"Aucun objectif défini";
+  if(document.activeElement!==$("#lgGoal"))$("#lgGoal").value=goal>0?String(goal):"";
   /* liste */
   var shown=list.filter(function(e){
     if(fil&&e.type!==fil)return false;
@@ -1686,7 +1715,7 @@ gHandle.addEventListener("change",function(){ls("sclog_handle",gHandle.value.tri
 var prev=$("#gPrev"),pending=[];
 function hid(s){return String(s).replace(/[^A-Za-z0-9_-]/g,"_").slice(0,90)}
 function parseLog(text,handle){
-  var h=handle.toLowerCase(),first=0,last=0,kills=[],deaths=[],auto="";
+  var h=handle.toLowerCase(),first=0,last=0,kills=[],deaths=[],auto="",segs=[],prevT=0,GAP=30*60000;
   var tsRe=/^<(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z)>/;
   var deRe=/<Actor Death> CActor::Kill: '([^']+)' \[\d+\] in zone '([^']*)' killed by '([^']+)'(?: \[\d+\])?(?: using '([^']*)')?/;
   var lines=text.split(/\r?\n/);
@@ -1694,6 +1723,10 @@ function parseLog(text,handle){
     var ln=lines[i],m=tsRe.exec(ln);if(!m)continue;
     var t=Date.parse(m[1]);if(!isFinite(t))continue;
     if(!first||t<first)first=t;if(t>last)last=t;
+    var sg=segs[segs.length-1];
+    if(!sg||(prevT&&t-prevT>GAP&&t>sg.last))segs.push(sg={first:t,last:t});
+    else{if(t<sg.first)sg.first=t;if(t>sg.last)sg.last=t}
+    prevT=t;
     if(!auto&&ln.indexOf("STATE_CURRENT")>0){var a=/- name (\S+) - state STATE_CURRENT/.exec(ln);if(a)auto=a[1]}
     if(ln.indexOf("<Actor Death>")<0)continue;
     var d=deRe.exec(ln);if(!d||!h)continue;
@@ -1701,7 +1734,7 @@ function parseLog(text,handle){
     if(vic.toLowerCase()===h&&kil.toLowerCase()!==h)deaths.push({t:t,o:kil,zone:zone,wp:wp});
     else if(kil.toLowerCase()===h&&vic.toLowerCase()!==h)kills.push({t:t,o:vic,zone:zone,wp:wp});
   }
-  return {first:first,last:last,kills:kills,deaths:deaths,auto:auto};
+  return {first:first,last:last,kills:kills,deaths:deaths,auto:auto,segs:segs};
 }
 function zoneName(z){return String(z).replace(/_\d{6,}$/,"").replace(/_/g," ").slice(0,80)}
 $("#gFile").addEventListener("change",function(){
@@ -1712,15 +1745,20 @@ $("#gFile").addEventListener("change",function(){
     var r=parseLog(text,handle||"");
     if(!handle&&r.auto){handle=r.auto;gHandle.value=handle;ls("sclog_handle",handle);r=parseLog(text,handle)}
     if(!r.first){prev.textContent="Aucune ligne datée trouvée : ce fichier ne ressemble pas à un Game.log.";return}
-    var ev=[],base=r.first;
-    ev.push({id:"gl-s-"+base,d:{type:"session",ts:r.first,dur:Math.max(1,Math.round((r.last-r.first)/60000)),title:"Session de jeu (Game.log)",
-      notes:handle?(r.kills.length+" élimination(s), "+r.deaths.length+" mort(s) relevée(s)."):"",src:"gamelog"}});
+    var ev=[];
+    r.segs.forEach(function(sg){
+      var kn=r.kills.filter(function(k){return k.t>=sg.first&&k.t<=sg.last}).length,dn=r.deaths.filter(function(k){return k.t>=sg.first&&k.t<=sg.last}).length;
+      ev.push({id:"gl-s-"+sg.first,d:{type:"session",ts:sg.first,dur:Math.max(1,Math.round((sg.last-sg.first)/60000)),title:"Session de jeu (Game.log)",
+        notes:handle?(kn+" élimination(s), "+dn+" mort(s) relevée(s)."):"",src:"gamelog"}});
+    });
     r.kills.forEach(function(k){ev.push({id:"gl-k-"+k.t+"-"+hid(k.o),d:{type:"combat",ts:k.t,title:"Élimination : "+k.o,place:zoneName(k.zone),notes:k.wp?"Arme : "+k.wp:"",src:"gamelog"}})});
     r.deaths.forEach(function(k){ev.push({id:"gl-d-"+k.t+"-"+hid(k.o),d:{type:"combat",ts:k.t,title:"Mort : tué par "+k.o,place:zoneName(k.zone),notes:k.wp?"Arme : "+k.wp:"",src:"gamelog"}})});
-    var cut=0;if(ev.length>201){cut=ev.length-201;ev=ev.slice(0,1).concat(ev.slice(1).sort(function(a,b){return b.d.ts-a.d.ts}).slice(0,200))}
+    var ns=r.segs.length,cut=0;
+    if(ev.length>ns+200){cut=ev.length-ns-200;ev=ev.slice(0,ns).concat(ev.slice(ns).sort(function(a,b){return b.d.ts-a.d.ts}).slice(0,200))}
     var fresh=ev.filter(function(e){return !entries[e.id]});pending=fresh;
     prev.textContent="";
-    prev.appendChild(el("div",null,"Session du "+new Date(r.first).toLocaleString("fr-FR")+" au "+new Date(r.last).toLocaleString("fr-FR")+" · "+fmtDur((r.last-r.first)/60000)));
+    prev.appendChild(el("div",null,(ns>1?ns+" sessions détectées (coupure de plus de 30 min) :":"Session du "+new Date(r.first).toLocaleString("fr-FR")+" au "+new Date(r.last).toLocaleString("fr-FR")+" · "+fmtDur((r.last-r.first)/60000))));
+    if(ns>1){var sl=document.createElement("ul");sl.className="lg-sess";r.segs.slice(0,8).forEach(function(sg){sl.appendChild(el("li",null,new Date(sg.first).toLocaleString("fr-FR")+" · "+fmtDur((sg.last-sg.first)/60000)))});if(ns>8)sl.appendChild(el("li",null,"… et "+(ns-8)+" autre(s)"));prev.appendChild(sl)}
     var ul=document.createElement("ul");
     ul.appendChild(el("li",null,handle?(r.kills.length+" élimination(s) et "+r.deaths.length+" mort(s) pour « "+handle+" »"):"Pseudo non renseigné : seule la session sera créée."));
     ul.appendChild(el("li",null,fresh.length+" nouvelle(s) entrée(s) à ajouter"+(ev.length-fresh.length?" ("+(ev.length-fresh.length)+" déjà présente(s))":"")));
