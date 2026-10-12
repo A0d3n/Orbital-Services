@@ -8,7 +8,7 @@
 | `style.css` | Tous les styles |
 | `data.js` | Données : époques et événements, systèmes de la carte, liaisons, positions |
 | `timeline.js` | Chronologie et fond étoilé |
-| `map.js` | Carte du temps, liens entre onglets, navigation |
+| `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
 | `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
 | `versions.js` | Historique des versions (une entrée par commit) |

@@ -43,13 +43,14 @@ EDG.forEach(function(e){
 SYS.forEach(function(s){
   var g=document.createElementNS(NS,"g");
   g.setAttribute("class","nd");g.setAttribute("data-i",s.i);g.setAttribute("role","button");g.setAttribute("tabindex","-1");g.setAttribute("aria-label",s.n);
-  var h=document.createElementNS(NS,"circle"),c=document.createElementNS(NS,"path"),t=document.createElementNS(NS,"text"),f=document.createElementNS(NS,"circle");
+  var h=document.createElementNS(NS,"circle"),c=document.createElementNS(NS,"path"),t=document.createElementNS(NS,"text"),f=document.createElementNS(NS,"circle"),dt=document.createElementNS(NS,"circle");
+  dt.setAttribute("class","dot");dt.setAttribute("cx",POS[s.i][0]);dt.setAttribute("cy",POS[s.i][1]);
   h.setAttribute("class","halo");c.setAttribute("class","c");
   h.setAttribute("cx",POS[s.i][0]);h.setAttribute("cy",POS[s.i][1]);
   f.setAttribute("class","inf");f.setAttribute("cx",POS[s.i][0]);f.setAttribute("cy",POS[s.i][1]);f.setAttribute("r",s.mj?105:88);gI.appendChild(f);s.f=f;
   t.setAttribute("x",POS[s.i][0]);t.setAttribute("class",s.mj?"mj":"mn");t.textContent=s.n;
-  g.appendChild(h);g.appendChild(c);g.appendChild(t);gN.appendChild(g);
-  s.g=g;s.h=h;s.c=c;s.t=t;
+  g.appendChild(h);g.appendChild(c);g.appendChild(dt);g.appendChild(t);gN.appendChild(g);
+  s.g=g;s.h=h;s.c=c;s.t=t;s.dt=dt;
 });
 
 /* légende et dates clés */
@@ -177,10 +178,12 @@ detail.addEventListener("click",function(ev){
 /* vue : zoom et déplacement */
 var vb={x:0,y:0,w:MW,h:MH},justDragged=false,drag=null,raf=0;
 function ratio(){var r=svg.getBoundingClientRect();return r.height?r.width/r.height:1.4}
+function pads(){var cs=getComputedStyle(box),g=function(n){return parseFloat(cs.getPropertyValue(n))||0};return{l:g("--vpl"),r:g("--vpr"),t:g("--vpt"),b:g("--vpb")}}
 function fit(){
-  var ar=ratio(),w=MW*1.12,h=MH*1.12;
-  if(w/h>ar)h=w/ar;else w=h*ar;
-  vb={x:(MW-w)/2,y:(MH-h)/2,w:w,h:h};setVB();
+  var r=svg.getBoundingClientRect();if(!r.width||!r.height)return;
+  var p=pads(),aw=Math.max(240,r.width-p.l-p.r),ah=Math.max(240,r.height-p.t-p.b);
+  var k=Math.min(aw/(MW*1.06),ah/(MH*1.06)),w=r.width/k,h=r.height/k;
+  vb={x:MW/2-(p.l+aw/2)/k,y:MH/2-(p.t+ah/2)/k,w:w,h:h};setVB();
 }
 function setVB(){svg.setAttribute("viewBox",vb.x.toFixed(1)+" "+vb.y.toFixed(1)+" "+vb.w.toFixed(1)+" "+vb.h.toFixed(1));if(!raf)raf=requestAnimationFrame(applyScale)}
 function applyScale(){
@@ -191,18 +194,19 @@ function applyScale(){
   svg.classList.toggle("all",sc>=.5);
   SYS.forEach(function(s){
     var rr=(s.mj?rs*1.3:rs)/sc;
-    s.r=+rr.toFixed(2);drawShape(s);s.h.setAttribute("r",s.r);
+    s.r=+rr.toFixed(2);drawShape(s);s.h.setAttribute("r",s.r);s.dt.setAttribute("r",(rr*.34).toFixed(2));
     s.t.setAttribute("y",(POS[s.i][1]+rr+fs/sc*.95).toFixed(2));
   });
 }
 function zoomAt(f,mx,my){
-  var nw=Math.max(MW/9,Math.min(MW*1.5,vb.w*f));f=nw/vb.w;
+  var nw=Math.max(MW/9,Math.min(MW*3,vb.w*f));f=nw/vb.w;
   var px=vb.x+mx*vb.w,py=vb.y+my*vb.h;
   vb.w=nw;vb.h*=f;vb.x=px-mx*vb.w;vb.y=py-my*vb.h;setVB();
 }
 function centerOn(id){
   if(!POS[id]||!box.offsetParent)return;
-  vb.x=POS[id][0]-vb.w/2;vb.y=POS[id][1]-vb.h/2;setVB();
+  var r=svg.getBoundingClientRect(),p=pads(),fx=(p.l+Math.max(240,r.width-p.l-p.r)/2)/r.width,fy=(p.t+Math.max(240,r.height-p.t-p.b)/2)/r.height;
+  vb.x=POS[id][0]-fx*vb.w;vb.y=POS[id][1]-fy*vb.h;setVB();
 }
 svg.addEventListener("wheel",function(e){
   e.preventDefault();
@@ -329,7 +333,7 @@ var SUBS={home:"Une carte qui change avec le temps, la chronologie de l’univer
   map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements.",
   cl:"Les communications officielles de Roberts Space Industries.",
   ver:"Chaque modification de l’application, avec son numéro de version."};
-/* menu Lore : Chronologie et Carte du temps */
+/* menu Lore : Chronologie, Star Viewer et Comm-Links */
 function setLore(open){
   var b=$("#loreBtn"),m=$("#loreMenu");
   b.setAttribute("aria-expanded",String(open));m.hidden=!open;

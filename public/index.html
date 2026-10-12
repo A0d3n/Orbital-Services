@@ -28,7 +28,7 @@
         <button type="button" class="tab lore-toggle" id="loreBtn" aria-expanded="false" aria-controls="loreMenu"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3h8a3 3 0 013 3v9H6a3 3 0 01-3-3zM3 12a3 3 0 013-3h8"/></svg><span>Lore</span><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4"/></svg></button>
         <div class="lore-menu" id="loreMenu" role="group" aria-label="Lore" hidden>
           <button type="button" class="tab sub" data-v="time"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M5 5h8M5 9h8M5 13h8"/></svg><span>Chronologie</span></button>
-          <button type="button" class="tab sub" data-v="map"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="2.5"/><path d="M9 1v3M9 14v3M1 9h3M14 9h3"/></svg><span>Carte du temps</span></button>
+          <button type="button" class="tab sub" data-v="map"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="2.5"/><path d="M9 1v3M9 14v3M1 9h3M14 9h3"/></svg><span>Star Viewer</span></button>
           <button type="button" class="tab sub" data-v="cl"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4h12M3 9h12M3 14h8"/></svg><span>Comm-Links</span></button>
         </div>
       </div>
@@ -93,7 +93,7 @@
           <span class="hm-go">Parcourir la chronologie →</span>
         </button>
         <button type="button" class="hm-card" data-go="map">
-          <span class="hm-k">Carte du temps</span>
+          <span class="hm-k">Star Viewer</span>
           <b id="hmSysN">61 systèmes</b>
           <span class="hm-d">Avancez et reculez de 2100 à 2956 pour voir les systèmes, leurs planètes et leurs propriétaires changer.</span>
           <span class="hm-go">Ouvrir la carte →</span>
@@ -128,11 +128,40 @@
   </div>
 
   <div id="v-map" hidden>
-    <section class="page-pad mp" aria-label="Carte du temps">
-      <p class="sub">Les systèmes apparaissent quand l’humanité les découvre, et leur propriétaire change au fil des événements. Faites glisser la date, ou avancez de changement en changement. Cliquez sur un système pour voir ses planètes et ses lieux à la date choisie.</p>
+    <section class="page-pad mp vw" aria-label="Star Viewer">
+      <div class="vw-stage">
+        <div class="mapbox" id="mapbox">
+          <svg id="mapsvg" role="img" aria-label="Carte des systèmes stellaires connus à l’année choisie" preserveAspectRatio="xMidYMid meet"></svg>
+          <div class="m-era" id="mEra" aria-hidden="true"></div>
+          <ul class="m-log" id="mLog" aria-hidden="true"></ul>
+          <div class="m-year" id="mBig" aria-hidden="true"></div>
+          <div class="m-tip" id="mTip" role="tooltip" hidden></div>
+          <div class="zoom">
+            <button type="button" class="btn" id="zFx" aria-label="Effets visuels" aria-pressed="true" title="Effets visuels"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6zM13 11l.7 1.8 1.8.7-1.8.7L13 16l-.7-1.8-1.8-.7 1.8-.7z"/></svg></button>
+            <button type="button" class="btn" id="zIn" aria-label="Zoom avant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/></svg></button>
+            <button type="button" class="btn" id="zOut" aria-label="Zoom arrière"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7h12v2H2z"/></svg></button>
+            <button type="button" class="btn" id="zFit" aria-label="Voir toute la carte"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/></svg></button>
+          </div>
+        </div>
 
-      <div class="tb">
-        <div class="tb-row">
+        <div class="vw-card vw-rail"><div class="in">
+          <h4>Chercher un système</h4>
+          <label class="sr" for="mFind">Chercher un système</label>
+          <input id="mFind" type="search" list="mSys" placeholder="ex. Stanton" autocomplete="off" spellcheck="false">
+          <datalist id="mSys"></datalist>
+          <h4>Camps</h4>
+          <div class="chips" id="mFac" role="group" aria-label="Filtrer par camp"></div>
+          <div class="m-key" id="mLegend"></div>
+          <button type="button" class="btn" id="mLink">Copier le lien</button>
+        </div></div>
+
+        <aside class="vw-card vw-side"><div class="in">
+          <div class="pn" id="mDetail"></div>
+          <div class="pn"><h4 style="margin-top:0">Derniers changements</h4><ul class="feed" id="mFeed"></ul></div>
+        </div></aside>
+
+        <div class="vw-card vw-console"><div class="in">
+          <div class="tb-row">
           <div class="yearbig"><small>ANNÉE</small><span id="mYear">2956</span></div>
           <div class="ctl">
             <button type="button" class="btn" id="mPrev" aria-label="Changement précédent" title="Changement précédent"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg></button>
@@ -147,36 +176,9 @@
           </div>
           <span class="tcount" id="mCount"></span>
         </div>
-        <input type="range" id="mRange" min="2100" max="2956" step="1" value="2956" aria-label="Année">
-        <div class="keys" id="mKeys" role="group" aria-label="Dates clés"></div>
-        <div class="tb-row tb-find">
-          <label class="fl" for="mFind">Chercher un système</label>
-          <input id="mFind" type="search" list="mSys" placeholder="ex. Stanton" autocomplete="off" spellcheck="false">
-          <datalist id="mSys"></datalist>
-          <div class="chips" id="mFac" role="group" aria-label="Filtrer par camp"></div>
-          <button type="button" class="btn" id="mLink">Copier le lien</button>
-        </div>
-      </div>
-
-      <div class="mp-grid">
-        <div class="mapbox" id="mapbox">
-          <svg id="mapsvg" role="img" aria-label="Carte des systèmes stellaires connus à l’année choisie" preserveAspectRatio="xMidYMid meet"></svg>
-          <div class="m-era" id="mEra" aria-hidden="true"></div>
-          <div class="m-key" id="mLegend"></div>
-          <ul class="m-log" id="mLog" aria-hidden="true"></ul>
-          <div class="m-year" id="mBig" aria-hidden="true"></div>
-          <div class="m-tip" id="mTip" role="tooltip" hidden></div>
-          <div class="zoom">
-            <button type="button" class="btn" id="zFx" aria-label="Effets visuels" aria-pressed="true" title="Effets visuels"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1l1.6 4.4L14 7l-4.4 1.6L8 13l-1.6-4.4L2 7l4.4-1.6zM13 11l.7 1.8 1.8.7-1.8.7L13 16l-.7-1.8-1.8-.7 1.8-.7z"/></svg></button>
-            <button type="button" class="btn" id="zIn" aria-label="Zoom avant"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2h2v5h5v2H9v5H7V9H2V7h5z"/></svg></button>
-            <button type="button" class="btn" id="zOut" aria-label="Zoom arrière"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 7h12v2H2z"/></svg></button>
-            <button type="button" class="btn" id="zFit" aria-label="Voir toute la carte"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v2H4v3H2zM14 2v5h-2V4H9V2zM2 14V9h2v3h3v2zM14 14H9v-2h3V9h2z"/></svg></button>
-          </div>
-        </div>
-        <aside class="side">
-          <div class="pn" id="mDetail"></div>
-          <div class="pn"><h4 style="margin-top:0">Derniers changements</h4><ul class="feed" id="mFeed"></ul></div>
-        </aside>
+          <input type="range" id="mRange" min="2100" max="2956" step="1" value="2956" aria-label="Année">
+          <div class="keys" id="mKeys" role="group" aria-label="Dates clés"></div>
+        </div></div>
       </div>
       <p class="mnote">Les positions suivent la disposition d’une carte de référence de l’univers, sans refléter les distances réelles ; les zones colorées figurent l’influence de chaque camp. Seule une partie des systèmes de l’univers est représentée : ceux dont la liaison figure dans la chronologie du wiki. Les liaisons en pointillés sont déduites ou issues du jeu. Les systèmes sont datés selon leur découverte par l’humanité, même quand les Xi’an ou les Banu les connaissaient depuis longtemps.</p>
     </section>

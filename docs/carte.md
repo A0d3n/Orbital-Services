@@ -35,3 +35,7 @@ Comparaison faite le 12 octobre 2026 avec les données de la StarMap officielle 
 
 - Plusieurs systèmes que la StarMap classe « non revendiqués » (Nul, Leir, Cathcart, Hades, Taranis, Nyx, Tanga, Oberon) restent au camp de l’humanité, car des humains y vivent.
 - Les noms humains sont conservés pour les systèmes xi’ans (Hadur plutôt que Yā’mon).
+
+## Apparence : Star Viewer
+
+L’onglet s’appelle désormais **Star Viewer**. Il reprend l’allure de la StarMap de RSI tout en gardant la charte de l’application : carte plein cadre sur fond à grille de points, panneaux aux coins coupés (filtres à gauche, fiche du système à droite), console du temps flottante en bas, repères en anneaux marqués d’un point et liaisons fines vert sauge. Sous 1 100 px de large, les panneaux passent sous la carte.

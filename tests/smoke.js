@@ -49,7 +49,7 @@ async function waitUp(port) {
     page.on("pageerror", e => errors.push(e.message + (process.env.DBG ? " @ " + e.stack : "")));
     page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
 
-    // Chronologie et Carte du temps sont sous le menu Lore
+    // Chronologie, Star Viewer et Comm-Links sont sous le menu Lore
     async function go(v) {
       if ((v === "time" || v === "map" || v === "cl") && (await page.getAttribute("#loreBtn", "aria-expanded")) !== "true") await page.click("#loreBtn");
       await page.click('.tab[data-v="' + v + '"]');
@@ -69,7 +69,7 @@ async function waitUp(port) {
     await go("home");
     check("menu Lore : fermé sur l'accueil", (await page.getAttribute("#loreBtn", "aria-expanded")) === "false" && !(await page.isVisible("#loreMenu")));
     await page.click("#loreBtn");
-    check("menu Lore : s'ouvre avec Chronologie et Carte du temps", (await page.isVisible('#loreMenu .tab[data-v="time"]')) && (await page.isVisible('#loreMenu .tab[data-v="map"]')) && (await page.isVisible('#loreMenu .tab[data-v="cl"]')));
+    check("menu Lore : s'ouvre avec Chronologie, Star Viewer et Comm-Links", (await page.isVisible('#loreMenu .tab[data-v="time"]')) && (await page.isVisible('#loreMenu .tab[data-v="map"]')) && (await page.isVisible('#loreMenu .tab[data-v="cl"]')));
     await go("map");
     check("menu Lore : l'entrée active est marquée", (await page.getAttribute('.tab[data-v="map"]', "aria-current")) === "page" && (await page.evaluate(() => document.getElementById("loreBtn").classList.contains("on"))));
     /* Comm-Links */

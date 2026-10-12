@@ -500,3 +500,59 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 .cl-ser-l{margin:6px 0 0;color:var(--sage);font:400 11px var(--f-mono);letter-spacing:.03em}
 .cl-more{margin:20px 0 0;text-align:center}
 #clGrid{margin-top:14px}
+
+/* Star Viewer : carte plein cadre, panneaux HUD aux coins coupés, console du temps flottante */
+.vw .mp-sub{display:none}
+.vw-stage{position:relative;height:clamp(620px,calc(100vh - 150px),940px);border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0a0c0b}
+.vw-stage .mapbox{position:absolute;inset:0;height:auto;border:0;border-radius:0;
+  --vpl:0px;--vpr:0px;--vpt:0px;--vpb:0px;--mbg:#0a0c0b;--mline:#b8d9a6;--mk:#9bb08f;--mk-2:#7d8f75;
+  background:radial-gradient(60% 60% at 52% 48%,rgba(184,217,166,.05),transparent),radial-gradient(circle at 1px 1px,#222a25 1px,transparent 1.4px) 0 0/28px 28px,#0a0c0b}
+.vw-card{padding:1px;background:#2a332d;--cut:16px;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)))}
+.vw-card>.in{background:rgba(14,18,16,.95);clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)));padding:16px;box-sizing:border-box}
+.vw-card h4{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin:14px 0 8px}
+.vw-card h4:first-child{margin-top:0}
+.vw-rail{position:absolute;left:16px;top:16px;width:222px;z-index:2;--mline:#b8d9a6;--mk:#c9d1cb;--mk-2:#9fb3a9}
+.vw-rail input{width:100%;box-sizing:border-box}
+.vw-rail .chips{flex-direction:column;align-items:stretch;gap:6px}
+.vw-rail .chip{justify-content:flex-start;border-radius:9px;padding:7px 10px;font-size:12.5px;text-align:left}
+.vw-rail .m-key{position:static;background:none;border:0;padding:0;pointer-events:auto;font-size:11px;margin-top:14px}
+.vw-rail .m-key h5{font:500 11px var(--f-mono);letter-spacing:.1em;color:var(--sage);margin:0 0 8px}
+.vw-rail .m-key .jp{white-space:nowrap;margin:0 0 6px}
+.vw-rail .m-key .cols{flex-direction:column;gap:6px}
+.vw-rail .btn{margin-top:14px;width:100%}
+.vw-side{position:absolute;right:16px;top:16px;width:318px;max-height:calc(100% - 32px);z-index:2;--cut:16px}
+.vw-side>.in{max-height:calc(100% - 0px);overflow-y:auto;scrollbar-width:thin;padding:18px}
+.vw-side .pn{border:0;background:none;padding:0;border-radius:0}
+.vw-side .pn+.pn{border-top:1px solid var(--line);margin-top:16px;padding-top:16px}
+.vw-console{position:absolute;left:254px;right:350px;bottom:16px;z-index:2;--cut:26px}
+.vw-console>.in{padding:14px 34px 12px;display:grid;gap:10px}
+.vw-console .tb-row{gap:.5rem 1.2rem}
+.vw-console .yearbig{font-family:var(--f-mono);color:var(--ink);font-size:34px;min-width:4.2ch}
+.vw-console .yearbig small{font-size:11px;color:var(--sage);letter-spacing:.14em}
+.vw-console .keys{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;padding-bottom:4px}
+.vw-console .keys .chip{flex:none}
+.vw-console .keys .chip{padding:.3rem .6rem;font-size:.74rem}
+.vw-stage .zoom{left:calc(var(--vpl) + (100% - var(--vpl) - var(--vpr)) / 2);right:auto;top:38px;bottom:auto;transform:translateX(-50%);flex-direction:row}
+.vw-stage .zoom .btn{min-width:2.2rem;height:2.2rem}
+.vw-stage .m-era{left:calc(var(--vpl) + (100% - var(--vpl) - var(--vpr)) / 2);transform:translateX(-50%);top:16px;font:500 12px var(--f-mono);letter-spacing:.14em;color:var(--sage);background:none;border:0;padding:0}
+.vw-stage .m-year,.vw-stage .m-log{display:none}
+.vw-stage .nd .c{fill:#0a0c0b;stroke:var(--oc);stroke-width:2px}
+.vw-stage .nd .c.ring{stroke-dasharray:3 3}
+.vw-stage .nd .dot{fill:var(--oc);pointer-events:none}
+.vw-stage .nd.sel .c{stroke:#fff}
+.vw-stage .nd text{font-family:var(--f-mono);font-weight:500;letter-spacing:.1em;fill:#9bb08f}
+.vw-stage .nd.sel text{fill:#e7ebe8}
+.vw-stage .edge{stroke:var(--sage);stroke-width:1px}
+.vw-stage .edge.on{opacity:.34}
+.vw-stage .edge.hl{stroke:#fff;opacity:.9}
+@media (min-width:1100px){.vw-stage .mapbox{--vpl:254px;--vpr:350px;--vpt:88px;--vpb:150px}}
+@media (max-width:1099px){
+  .vw-stage{height:auto;overflow:visible;border:0;background:none;display:grid;gap:12px}
+  .vw-stage .mapbox{position:relative;height:60vh;border:1px solid var(--line);border-radius:14px}
+  .vw-rail,.vw-side,.vw-console{position:static;width:auto;max-height:none}
+  .vw-card,.vw-card>.in{clip-path:none}
+  .vw-card{border-radius:14px;background:var(--line)}
+  .vw-card>.in{border-radius:13px}
+  .vw-console{order:-1}
+  .vw-side>.in{max-height:none;overflow:visible}
+}
