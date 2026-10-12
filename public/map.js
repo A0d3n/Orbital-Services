@@ -10,7 +10,7 @@ var EDG=EL.map(function(p){
 });
 var CH=[];
 SYS.forEach(function(s){
-  if(s.d>0)CH.push({y:s.d,t:"Découverte du système "+s.n,s:s.i});
+  if(s.d>0&&!s.nd)CH.push({y:s.d,t:"Découverte du système "+s.n,s:s.i});
   s.o.forEach(function(o){if(o[0]>s.d)CH.push({y:o[0],t:s.n+" : "+o[2],s:s.i})});
   s.p.forEach(function(p){p[1].forEach(function(e){if(e[0]>s.d)CH.push({y:e[0],t:p[0]+" ("+s.n+") : "+e[1],s:s.i})})});
 });
@@ -72,7 +72,7 @@ function render(){
     var on=s.d<=year;if(on)known++;
     s.g.classList.toggle("on",on);
     s.g.setAttribute("tabindex",on?"0":"-1");
-    s.g.classList.toggle("fresh",on&&s.d>0&&year-s.d<12);
+    s.g.classList.toggle("fresh",on&&s.d>0&&!s.nd&&year-s.d<12);
     s.g.classList.toggle("sel",s.i===sel);
     s.g.classList.toggle("dim",!!facF&&stateAt(s,year)[1]!==facF);
     var ok=stateAt(s,year)[1],v="var("+OW[ok][1]+")";
@@ -98,7 +98,7 @@ function renderDetail(){
   var s=BY[sel];
   if(!s){detail.innerHTML='<p class="hint">Cliquez sur un système pour voir ses planètes et ses lieux à la date choisie.</p>';return}
   var h='<div class="dh"><h3>'+s.n+'</h3><button type="button" class="x" data-clr="1">Fermer</button></div>';
-  h+='<p class="meta">'+(s.d?("Découvert en "+s.d+(s.by?" · "+s.by:"")):s.by)+'</p>';
+  h+='<p class="meta">'+(s.nd?"Date de découverte non précisée":s.d?("Découvert en "+s.d+(s.by?" · "+s.by:"")):s.by)+'</p>';
   if(year<s.d){detail.innerHTML=h+'<p class="hint">Ce système n’est pas encore connu en '+year+'. Avancez jusqu’en '+s.d+'.</p>';return}
   var st=stateAt(s,year);
   h+='<span class="own" style="--oc:var('+OW[st[1]][1]+')"><i></i>'+OW[st[1]][0]+'</span><p class="note2">'+st[2]+'</p>';
@@ -301,7 +301,7 @@ svg.addEventListener("pointermove",function(e){
   var n=e.target.closest&&e.target.closest(".nd");
   if(!n||n.classList.contains("dim")){hideTip();return}
   var s=BY[n.getAttribute("data-i")],st=stateAt(s,year),r=box.getBoundingClientRect();
-  tip.innerHTML='<b>'+s.n+'</b><span>'+OW[st[1]][0]+(s.d?' · découvert en '+s.d:'')+'</span>';
+  tip.innerHTML='<b>'+s.n+'</b><span>'+OW[st[1]][0]+(s.d&&!s.nd?' · découvert en '+s.d:'')+'</span>';
   tip.hidden=false;
   tip.style.left=Math.max(60,Math.min(r.width-60,e.clientX-r.left))+"px";
   tip.style.top=(e.clientY-r.top)+"px";
