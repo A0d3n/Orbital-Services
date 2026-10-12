@@ -41,7 +41,7 @@ var cardN=0;
 function card(e,era){
   var n=++cardN,long=e.d.length>130;
   return '<article class="ev'+(e.m?' major':'')+'" data-g="'+e.g+'" data-y="'+esc(e.y)+'" style="--tc:var(--c-'+e.g+')">'+
-    '<div class="ev-img">'+scene(e.g,n)+'</div>'+
+    '<div class="ev-img">'+(window.__orbVisual?window.__orbVisual(e._k,e.g,n,e.y):scene(e.g,n))+'</div>'+
     '<div class="body"><div class="ev-top"><div class="ev-ti"><h3>'+e.t+'</h3><div class="ev-sub">'+era.n+' · '+TAGS[e.g]+'</div></div><span class="ev-y">'+e.y+'</span></div>'+
     '<p class="ev-desc">'+e.d+'</p>'+(long?'<button type="button" class="ev-more" aria-expanded="false">Lire la suite</button>':'')+
     '<div class="ev-tags">'+(e.m?'<span class="tg major">Majeur</span>':'')+'<span class="tg">'+TAGS[e.g]+'</span></div>'+
@@ -49,6 +49,7 @@ function card(e,era){
 }
 ERAS.forEach(function(era,i){
   total+=era.e.length;
+  era.e.forEach(function(e,j){e._k=i+'.'+j});
   html+='<section class="era" id="'+era.id+'" data-i="'+i+'" style="--era:'+era.c+'">'+
    '<header class="era-h"><div class="orb">'+orbit(i)+'</div><div class="era-t">'+
    '<p class="kicker">Saut '+pad(i+1)+' / '+pad(ERAS.length)+'</p><h2>'+era.n+'</h2><p class="range">'+era.r+'</p></div>'+

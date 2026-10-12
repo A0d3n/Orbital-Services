@@ -99,6 +99,15 @@ async function waitUp(port) {
     await go("time");
     const cards = await page.evaluate(() => document.querySelectorAll("#app .ev").length);
     check("chronologie : les événements sont des cartes", cards === (await page.evaluate(() => window.__orb.events)) && cards > 30);
+    const vis = await page.evaluate(() => {
+      const keys = []; ERAS.forEach((era, i) => era.e.forEach((e, j) => keys.push(i + "." + j)));
+      const imgs = [...document.querySelectorAll("#app .ev-img")];
+      return { missing: keys.filter(k => !window.__orbHasVisual(k)), total: keys.length, withSvg: imgs.filter(d => d.querySelector("svg")).length,
+        distinct: new Set(imgs.map(d => d.querySelector("svg").innerHTML.replace(/id="v\d+[a-z0-9]*"|url\(#v\d+[a-z0-9]*\)|#v\d+[a-z0-9]*/g, ""))).size,
+        labelled: imgs.filter(d => d.querySelector("text")).length };
+    });
+    check("chronologie : chaque événement a son motif de visuel", vis.missing.length === 0, vis.missing.join(", "));
+    check("chronologie : un visuel par carte, tous différents, avec la date", vis.withSvg === vis.total && vis.labelled === vis.total && vis.distinct === vis.total, JSON.stringify(vis));
     await page.fill("#tlQ", "Stanton");
     const found = await page.evaluate(() => [...document.querySelectorAll("#app .ev")].filter(e => !e.hidden).length);
     check("chronologie : la recherche filtre les cartes", found > 0 && found < cards, String(found));
