@@ -3,7 +3,7 @@
 - `evt-0-0` à `evt-0-4` : images fournies par le propriétaire du projet.
 - `evt-1-0`, `evt-1-8`, `evt-3-0`, `evt-3-4`, `evt-4-7`, `evt-5-2`, `evt-6-0`, `evt-6-1`, `evt-7-1` : visuels officiels de [robertsspaceindustries.com](https://robertsspaceindustries.com) (Comm-Links), recadrés en 2,8 : 1. Ils appartiennent à Cloud Imperium Games : à retirer si le dépôt ou l'image Docker devient public.
 - `evt-0-5`, `evt-0-6`, `evt-1-1`, `evt-1-6`, `evt-1-7`, `evt-2-3`, `evt-3-2`, `evt-4-3`, `evt-7-9` : photos de la NASA (domaine public, [images.nasa.gov](https://images.nasa.gov)), recadrées en 2,8 : 1. Détail ci-dessous.
-- Les autres événements gardent l'illustration dessinée par le code (`visuals.js`). Les prompts pour en générer de nouvelles sont dans `prompts-visuels.md`.
+- Les autres événements gardent l'illustration dessinée par le code (`visuals.js`). Les prompts utilisés sont dans `prompts-visuels.md`.
 
 | Fichier | Événement | Source (Comm-Link RSI) |
 |---|---|---|
