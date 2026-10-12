@@ -1,6 +1,7 @@
 /* Historique des versions : une entrée par commit (les fusions de pull requests ne comptent pas).
    Pour en ajouter une : npm run version -- minor "Titre" "Commentaire"   puis   npm run version -- sync */
 var VERSIONS = [
+{"v":"1.15.1","d":"2026-10-12","c":"","t":"Image de la tragédie de Mars","n":"L’événement « La Grande Tragédie de Mars » a maintenant son image (une tour de terraformation qui explose sur un sol rouge). Les 64 événements ont une image."},
 {"v":"1.15.0","d":"2026-10-12","c":"88041d7","t":"Images de tous les événements","n":"63 événements sur 64 ont maintenant une image : 40 générées avec Canva en s’inspirant du style des visuels RSI, en plus des photos NASA et des visuels RSI. Seul l’événement de la tragédie de Mars garde son illustration dessinée."},
 {"v":"1.14.0","d":"2026-10-12","c":"","t":"Onglet Comm-Links et images libres","n":"Nouvel onglet Comm-Links sous Lore : 5 218 articles officiels de RSI avec recherche, filtre par chaîne et par série, liens vers le site. Neuf événements reçoivent une photo NASA (domaine public). Le serveur compresse maintenant les fichiers texte."},
 {"v":"1.13.1","d":"2026-10-12","c":"5a641f9","t":"Image de la naissance de RSI","n":"Ajout d’un visuel RSI (Constellation) pour l’événement « Naissance de Roberts Space Industries ». Neuf événements ont maintenant une vraie image."},
