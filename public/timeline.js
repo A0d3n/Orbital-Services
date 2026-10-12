@@ -90,7 +90,7 @@ Object.keys(TAGS).forEach(function(k){chips+='<button type="button" class="chip"
 chips+='<button type="button" class="chip reset" id="reset" style="--tc:var(--ink-2)">Tout afficher</button>';
 $('#chips').innerHTML=chips;
 var eras=[].slice.call(document.querySelectorAll('.era'));
-function evsAll(){return [].slice.call(document.querySelectorAll('.ev'))}
+function evsAll(){return [].slice.call(document.querySelectorAll('#v-time .ev'))}
 function apply(){
   var any=Object.keys(active).length>0,shown=0,flat=!$('#appFlat').hidden,qq=norm(q.trim());
   evsAll().forEach(function(e){

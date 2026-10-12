@@ -29,6 +29,7 @@
         <div class="lore-menu" id="loreMenu" role="group" aria-label="Lore" hidden>
           <button type="button" class="tab sub" data-v="time"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M9 2v14M5 5h8M5 9h8M5 13h8"/></svg><span>Chronologie</span></button>
           <button type="button" class="tab sub" data-v="map"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7"/><circle cx="9" cy="9" r="2.5"/><path d="M9 1v3M9 14v3M1 9h3M14 9h3"/></svg><span>Carte du temps</span></button>
+          <button type="button" class="tab sub" data-v="cl"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 4h12M3 9h12M3 14h8"/></svg><span>Comm-Links</span></button>
         </div>
       </div>
       <div class="nav-h side-about">Projet</div>
@@ -181,6 +182,20 @@
     </section>
   </div>
 
+  <div id="v-cl" hidden>
+    <section class="page-pad cl" aria-label="Comm-Links">
+      <p class="lead">Les communications officielles de Roberts Space Industries : rapports mensuels, guides du lore, fictions, présentations de vaisseaux. Chaque carte ouvre l’article sur le site de RSI.</p>
+      <div class="tl-row">
+        <div class="tl-search"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><label for="clQ" class="sr">Rechercher un Comm-Link</label><input id="clQ" type="search" placeholder="Rechercher un Comm-Link…" autocomplete="off" spellcheck="false"></div>
+        <label class="cl-ser"><span class="sr">Série</span><select id="clSer"><option value="">Toutes les séries</option></select></label>
+      </div>
+      <div class="chips" id="clChips"></div>
+      <span class="count" id="clCount" role="status"></span>
+      <div id="clGrid" class="evs"></div>
+      <p class="cl-more"><button type="button" class="btn" id="clMore" hidden>Afficher la suite</button></p>
+    </section>
+  </div>
+
   <div id="v-ver" hidden>
     <section class="page-pad ver" aria-label="Historique des versions">
       <div class="ver-top">
@@ -296,6 +311,7 @@
 <script src="visuals.js"></script>
 <script src="timeline.js"></script>
 
+<script src="comm.js"></script>
 <script src="map.js"></script>
 
 <script src="carnet.js"></script>

@@ -1,6 +1,6 @@
 // Serveur minimal (aucune dépendance) : sert la page et stocke le carnet de bord dans un fichier JSON.
 "use strict";
-const http = require("http"), fs = require("fs"), path = require("path"), crypto = require("crypto");
+const http = require("http"), fs = require("fs"), path = require("path"), crypto = require("crypto"), zlib = require("zlib");
 const PORT = +process.env.PORT || 8080;
 const PUB = process.env.PUBLIC_DIR || path.join(__dirname, "public");
 const DATA = process.env.DATA_DIR || path.join(__dirname, "data");
@@ -128,8 +128,12 @@ const server = http.createServer(async (req, res) => {
   fs.readFile(file, (err, buf) => {
     if (err) return send(res, 404, "introuvable", "text/plain; charset=utf-8");
     const noCache = /\.(html|css|js|webmanifest)$/.test(name);
-    send(res, 200, req.method === "HEAD" ? "" : buf, MIME[path.extname(file)] || "application/octet-stream",
-      { "Cache-Control": noCache ? "no-cache" : "public, max-age=86400" });
+    const extra = { "Cache-Control": noCache ? "no-cache" : "public, max-age=86400" };
+    let out = buf;
+    if (buf.length > 1024 && /\.(html|css|js|svg|webmanifest)$/.test(name) && /\bgzip\b/.test(req.headers["accept-encoding"] || "")) {
+      out = zlib.gzipSync(buf); extra["Content-Encoding"] = "gzip"; extra.Vary = "Accept-Encoding";
+    }
+    send(res, 200, req.method === "HEAD" ? "" : out, MIME[path.extname(file)] || "application/octet-stream", extra);
   });
 });
 const bye = () => { clearTimeout(timer); try { fs.writeFileSync(FILE, JSON.stringify(entries)); } catch (e) {} process.exit(0); };

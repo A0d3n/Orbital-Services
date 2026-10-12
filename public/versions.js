@@ -1,6 +1,7 @@
 /* Historique des versions : une entrée par commit (les fusions de pull requests ne comptent pas).
    Pour en ajouter une : npm run version -- minor "Titre" "Commentaire"   puis   npm run version -- sync */
 var VERSIONS = [
+{"v":"1.14.0","d":"2026-10-12","c":"","t":"Onglet Comm-Links et images libres","n":"Nouvel onglet Comm-Links sous Lore : 5 218 articles officiels de RSI avec recherche, filtre par chaîne et par série, liens vers le site. Neuf événements reçoivent une photo NASA (domaine public). Le serveur compresse maintenant les fichiers texte."},
 {"v":"1.13.1","d":"2026-10-12","c":"5a641f9","t":"Image de la naissance de RSI","n":"Ajout d’un visuel RSI (Constellation) pour l’événement « Naissance de Roberts Space Industries ». Neuf événements ont maintenant une vraie image."},
 {"v":"1.13.0","d":"2026-10-12","c":"6c8ceab","t":"Vraies images de la chronologie","n":"Huit événements affichent maintenant un visuel officiel tiré des Comm-Links RSI (Hull B, Banu, Xi’an, Aurora, Odin, Drake, microTech, Squadron 42), recadré en panoramique. Les autres gardent leur illustration dessinée. Sources listées dans docs/images.md."},
 {"v":"1.12.0","d":"2026-10-12","c":"0579b56","t":"Premières images de la chronologie","n":"Images générées pour les cinq premiers événements de l'époque « Les Anciens » : disparition des Hadésiens, premier vol xi'an, Grande Fracture, premier âge impérial et rencontre avec les Kr'Thak. Les bandes noires des images 0-0 et 0-4 sont rognées ; les 59 autres événements gardent leur illustration dessinée."},

@@ -322,11 +322,12 @@ applyFx();
 
 /* onglets */
 var tabs=[].slice.call(document.querySelectorAll(".tab[data-v]"));
-var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte",ver:"#versions"};
+var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte",cl:"#commlinks",ver:"#versions"};
 var SUBS={home:"Une carte qui change avec le temps, la chronologie de l’univers et votre carnet de bord.",
   log:"Journal personnel · aUEC · heures de vol",
   time:"",
   map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements.",
+  cl:"Les communications officielles de Roberts Space Industries.",
   ver:"Chaque modification de l’application, avec son numéro de version."};
 /* menu Lore : Chronologie et Carte du temps */
 function setLore(open){
@@ -342,20 +343,21 @@ document.addEventListener("click",function(e){
 function show(v){
   if(!VIEWS[v])v="home";
   var map=v==="map";
-  ["home","log","time","map","ver"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
+  ["home","log","time","map","cl","ver"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
   $("#bar").setAttribute("data-view",v);
   tabs.forEach(function(t){
     var on=t.dataset.v===v;
     if(on)t.setAttribute("aria-current","page");else t.removeAttribute("aria-current");
     if(on){$("#topTitle").textContent=t.querySelector("span").textContent;$("#topIc").innerHTML=t.querySelector("svg").outerHTML;$("#topSub").textContent=SUBS[v]||""}
   });
-  var lore=v==="time"||v==="map";
+  var lore=v==="time"||v==="map"||v==="cl";
   $("#loreBtn").classList.toggle("on",lore);
   setLore(lore&&!matchMedia("(max-width:860px)").matches);
   if(!map)stop();
   try{history.replaceState(null,"",map?"#carte/"+year+(sel?"/"+sel:""):VIEWS[v])}catch(e){}
   window.scrollTo(0,0);
   if(v==="time")window.dispatchEvent(new Event("scroll"));
+  if(v==="cl"&&window.__orbCL)window.__orbCL();
   if(map){fit();render()}
 }
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
@@ -383,7 +385,7 @@ function sysIn(text){
   return best;
 }
 function decorateEvents(root){
-  [].forEach.call((root||document).querySelectorAll(".ev:not([data-m])"),function(ev){
+  [].forEach.call((root||document.getElementById("v-time")).querySelectorAll(".ev:not([data-m])"),function(ev){
     ev.dataset.m="1";
     var m=/^(\d{4})(?!\d)/.exec(ev.dataset.y.replace(/[\s\u00a0\u202f]/g,""));
     if(!m)return;
@@ -412,7 +414,7 @@ document.addEventListener("click",function(e){
   n.hidden=false;
   n.querySelector("button").addEventListener("click",function(){toMap(last.s,last.y)});
 })();
-var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver","#commlinks":"cl"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
 /* un lien collé dans l’onglet déjà ouvert : on le suit sans recharger la page */
 addEventListener("hashchange",function(){
   var k=R[location.hash.split("/")[0]];

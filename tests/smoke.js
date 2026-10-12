@@ -46,12 +46,12 @@ async function waitUp(port) {
     browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
     const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
     const errors = [];
-    page.on("pageerror", e => errors.push(e.message));
+    page.on("pageerror", e => errors.push(e.message + (process.env.DBG ? " @ " + e.stack : "")));
     page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
 
     // Chronologie et Carte du temps sont sous le menu Lore
     async function go(v) {
-      if ((v === "time" || v === "map") && (await page.getAttribute("#loreBtn", "aria-expanded")) !== "true") await page.click("#loreBtn");
+      if ((v === "time" || v === "map" || v === "cl") && (await page.getAttribute("#loreBtn", "aria-expanded")) !== "true") await page.click("#loreBtn");
       await page.click('.tab[data-v="' + v + '"]');
     }
     await page.goto(base + "/");
@@ -60,7 +60,7 @@ async function waitUp(port) {
     check("accueil : le nombre de systèmes vient des données", (await page.textContent("#hsSys")) === String(nSys) && nSys > 0);
     check("accueil : l'image de Terra est chargée", await page.evaluate(() => { const i = document.querySelector(".hm-img img"); return i.complete && i.naturalWidth > 0; }));
 
-    for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["ver", "#v-ver"], ["home", "#v-home"]]) {
+    for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["cl", "#v-cl"], ["ver", "#v-ver"], ["home", "#v-home"]]) {
       await go(v);
       check("onglet « " + v + " » s'affiche", await page.isVisible(sel));
     }
@@ -69,9 +69,24 @@ async function waitUp(port) {
     await go("home");
     check("menu Lore : fermé sur l'accueil", (await page.getAttribute("#loreBtn", "aria-expanded")) === "false" && !(await page.isVisible("#loreMenu")));
     await page.click("#loreBtn");
-    check("menu Lore : s'ouvre avec Chronologie et Carte du temps", (await page.isVisible('#loreMenu .tab[data-v="time"]')) && (await page.isVisible('#loreMenu .tab[data-v="map"]')));
+    check("menu Lore : s'ouvre avec Chronologie et Carte du temps", (await page.isVisible('#loreMenu .tab[data-v="time"]')) && (await page.isVisible('#loreMenu .tab[data-v="map"]')) && (await page.isVisible('#loreMenu .tab[data-v="cl"]')));
     await go("map");
     check("menu Lore : l'entrée active est marquée", (await page.getAttribute('.tab[data-v="map"]', "aria-current")) === "page" && (await page.evaluate(() => document.getElementById("loreBtn").classList.contains("on"))));
+    /* Comm-Links */
+    await go("cl");
+    await page.waitForSelector("#clGrid .cl-card");
+    const nCl = await page.evaluate(() => window.COMMLINKS.rows.length);
+    check("comm-links : la liste est chargée et affichée par pages", nCl > 1000 && (await page.locator("#clGrid .cl-card").count()) === 60, String(nCl));
+    check("comm-links : liens sortants vers RSI", await page.evaluate(() => [...document.querySelectorAll("#clGrid .cl-card")].every(a => a.href.indexOf("https://robertsspaceindustries.com/comm-link/") === 0 && a.rel.indexOf("noopener") >= 0)));
+    await page.fill("#clQ", "vanduul");
+    await page.waitForTimeout(400);
+    check("comm-links : la recherche filtre la liste", await page.evaluate(() => { const n = +document.getElementById("clCount").textContent.split(" sur ")[1].split(" ")[0]; return n > 0 && n < window.COMMLINKS.rows.length; }));
+    await page.fill("#clQ", "");
+    await page.waitForTimeout(400);
+    await page.click("#clChips .chip:nth-child(5)");
+    check("comm-links : le filtre par chaîne fonctionne", await page.evaluate(() => [...document.querySelectorAll("#clGrid .ev-lab")].every(l => l.textContent.indexOf("Engineering") === 0)));
+    await page.click("#clMore").catch(() => {});
+
     const pkg = require(path.join(ROOT, "package.json"));
     const vs = await page.evaluate(() => window.VERSIONS.map(v => v.v));
     check("versions : la dernière entrée est la version de package.json", vs[0] === pkg.version, vs[0] + " / " + pkg.version);

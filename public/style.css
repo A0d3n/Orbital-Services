@@ -487,3 +487,16 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 .ver-t{margin:8px 0 4px;font:600 16px var(--f-display);color:#f6f8f6}
 .ver-n{margin:0;color:#aab3ac;font-size:13.5px;line-height:1.6;max-width:70ch}
 @media (max-width:860px){.page-pad.ver{margin:0 auto}.ver-c{margin-left:0}}
+
+/* Comm-Links */
+.page-pad.cl{max-width:1560px}
+.cl .lead{max-width:62ch;margin:0 0 16px;color:var(--ink-2);font-size:14px;line-height:1.6}
+.cl .tl-row{margin-bottom:12px}
+.cl .chips{margin-bottom:10px}
+.cl-ser select{height:42px;padding:0 12px;border:1px solid var(--line);border-radius:11px;background:#0b0d0c;color:var(--ink);font:400 14px var(--f-body);max-width:100%}
+.cl-card{text-decoration:none;color:inherit}
+.cl-card:hover{border-color:rgba(184,217,166,.55)}
+.cl-card .body h3{font-size:15px}
+.cl-ser-l{margin:6px 0 0;color:var(--sage);font:400 11px var(--f-mono);letter-spacing:.03em}
+.cl-more{margin:20px 0 0;text-align:center}
+#clGrid{margin-top:14px}
