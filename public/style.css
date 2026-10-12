@@ -392,7 +392,9 @@ input[type=range],#mRange{accent-color:var(--sage)}
 .ev:hover{border-color:var(--line-2)}
 .ev.major{border-color:rgba(184,217,166,.28)}
 .ev.major::before,.ev.major::after,.ev .body::before,.ev .body::after{content:none}
-.ev-img{height:134px;flex:none;background:#0a0c0b;overflow:hidden}
+.ev-img{position:relative;height:134px;flex:none;background:#0a0c0b;overflow:hidden}
+.ev-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ev-lab{position:absolute;left:8px;bottom:8px;padding:2px 9px;border-radius:999px;background:rgba(11,13,12,.72);color:#e7ebe8;font:400 10px/1.6 var(--f-mono);letter-spacing:.04em}
 .ev-img svg{display:block;width:100%;height:100%}
 .ev .body{grid-area:auto;display:flex;flex-direction:column;flex:1;padding:16px 18px;margin:0;border:0;background:none;position:static}
 .ev-top{display:flex;justify-content:space-between;gap:12px}

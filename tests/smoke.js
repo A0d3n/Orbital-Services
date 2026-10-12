@@ -47,7 +47,7 @@ async function waitUp(port) {
     const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
     const errors = [];
     page.on("pageerror", e => errors.push(e.message));
-    page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
+    page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
 
     // Chronologie et Carte du temps sont sous le menu Lore
     async function go(v) {
@@ -104,7 +104,7 @@ async function waitUp(port) {
       const imgs = [...document.querySelectorAll("#app .ev-img")];
       return { missing: keys.filter(k => !window.__orbHasVisual(k)), total: keys.length, withSvg: imgs.filter(d => d.querySelector("svg")).length,
         distinct: new Set(imgs.map(d => d.querySelector("svg").innerHTML.replace(/id="v\d+[a-z0-9]*"|url\(#v\d+[a-z0-9]*\)|#v\d+[a-z0-9]*/g, ""))).size,
-        labelled: imgs.filter(d => d.querySelector("text")).length };
+        labelled: imgs.filter(d => d.querySelector(".ev-lab")).length };
     });
     check("chronologie : chaque événement a son motif de visuel", vis.missing.length === 0, vis.missing.join(", "));
     check("chronologie : un visuel par carte, tous différents, avec la date", vis.withSvg === vis.total && vis.labelled === vis.total && vis.distinct === vis.total, JSON.stringify(vis));

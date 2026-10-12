@@ -41,7 +41,9 @@ var cardN=0;
 function card(e,era){
   var n=++cardN,long=e.d.length>130;
   return '<article class="ev'+(e.m?' major':'')+'" data-g="'+e.g+'" data-y="'+esc(e.y)+'" style="--tc:var(--c-'+e.g+')">'+
-    '<div class="ev-img">'+(window.__orbVisual?window.__orbVisual(e._k,e.g,n,e.y):scene(e.g,n))+'</div>'+
+    '<div class="ev-img">'+(window.__orbVisual?window.__orbVisual(e._k,e.g,n):scene(e.g,n))+
+    '<img class="ev-photo" src="evt-'+e._k.replace('.','-')+'.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()">'+
+    '<span class="ev-lab">'+e.y+'</span></div>'+
     '<div class="body"><div class="ev-top"><div class="ev-ti"><h3>'+e.t+'</h3><div class="ev-sub">'+era.n+' · '+TAGS[e.g]+'</div></div><span class="ev-y">'+e.y+'</span></div>'+
     '<p class="ev-desc">'+e.d+'</p>'+(long?'<button type="button" class="ev-more" aria-expanded="false">Lire la suite</button>':'')+
     '<div class="ev-tags">'+(e.m?'<span class="tg major">Majeur</span>':'')+'<span class="tg">'+TAGS[e.g]+'</span></div>'+
