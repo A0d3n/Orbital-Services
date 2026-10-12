@@ -10,6 +10,12 @@ L'image `ghcr.io/a0d3n/orbital-services` contient le serveur et la page. Il n'y 
 
 Si le paquet GitHub est privé, connectez-vous d'abord à `ghcr.io` avec un jeton personnel (`read:packages`), ou rendez le paquet public dans les réglages du dépôt.
 
+## Mettre à jour
+
+À chaque changement sur `dev`, GitHub Actions publie une nouvelle image `ghcr.io/a0d3n/orbital-services:dev` (onglet Actions du dépôt, workflow « Image Docker », il faut compter environ une minute). Le NAS ne la récupère pas tout seul : arrêtez puis redémarrez l'application. Avec `pull_policy: always` dans `docker-compose.yml`, le redémarrage télécharge la dernière image. Pour vérifier, le numéro de version est affiché en bas de la barre latérale (et dans l'onglet Versions).
+
+Si l'application a été installée avec l'ancien compose (fichiers copiés dans `app/`), elle ne se met à jour qu'en recopiant les fichiers : remplacez-la par le `docker-compose.yml` actuel.
+
 ## Sans image publiée
 
 `docker compose -f docker-compose.build.yml up -d --build` construit l'image sur la machine à partir des sources.

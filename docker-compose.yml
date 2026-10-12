@@ -6,6 +6,7 @@ services:
     image: ghcr.io/a0d3n/orbital-services:dev      # ou :latest quand main est publié
     container_name: orbital-services
     restart: unless-stopped
+    pull_policy: always                             # récupère la dernière image à chaque démarrage
     user: "568:568"                                 # utilisateur « apps » de TrueNAS
     environment:
       PORT: "8080"
