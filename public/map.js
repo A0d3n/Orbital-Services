@@ -321,21 +321,37 @@ $("#zFx").addEventListener("click",function(){fxOn=!fxOn;try{localStorage.setIte
 applyFx();
 
 /* onglets */
-var tabs=[].slice.call(document.querySelectorAll(".tab"));
-var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte"};
+var tabs=[].slice.call(document.querySelectorAll(".tab[data-v]"));
+var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte",ver:"#versions"};
 var SUBS={home:"Une carte qui change avec le temps, la chronologie de l’univers et votre carnet de bord.",
   log:"Journal personnel · aUEC · heures de vol",
   time:"",
-  map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements."};
+  map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements.",
+  ver:"Chaque modification de l’application, avec son numéro de version."};
+/* menu Lore : Chronologie et Carte du temps */
+function setLore(open){
+  var b=$("#loreBtn"),m=$("#loreMenu");
+  b.setAttribute("aria-expanded",String(open));m.hidden=!open;
+}
+$("#loreBtn").addEventListener("click",function(){setLore(this.getAttribute("aria-expanded")!=="true")});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("#loreBtn").getAttribute("aria-expanded")==="true"){setLore(false);$("#loreBtn").focus()}});
+document.addEventListener("click",function(e){
+  if(!matchMedia("(max-width:860px)").matches)return;
+  if(!e.target.closest(".lore"))setLore(false);
+});
 function show(v){
   if(!VIEWS[v])v="home";
   var map=v==="map";
-  ["home","log","time","map"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
+  ["home","log","time","map","ver"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
   $("#bar").setAttribute("data-view",v);
   tabs.forEach(function(t){
-    var on=t.dataset.v===v;t.setAttribute("aria-selected",String(on));
+    var on=t.dataset.v===v;
+    if(on)t.setAttribute("aria-current","page");else t.removeAttribute("aria-current");
     if(on){$("#topTitle").textContent=t.querySelector("span").textContent;$("#topIc").innerHTML=t.querySelector("svg").outerHTML;$("#topSub").textContent=SUBS[v]||""}
   });
+  var lore=v==="time"||v==="map";
+  $("#loreBtn").classList.toggle("on",lore);
+  setLore(lore&&!matchMedia("(max-width:860px)").matches);
   if(!map)stop();
   try{history.replaceState(null,"",map?"#carte/"+year+(sel?"/"+sel:""):VIEWS[v])}catch(e){}
   window.scrollTo(0,0);
@@ -396,7 +412,7 @@ document.addEventListener("click",function(e){
   n.hidden=false;
   n.querySelector("button").addEventListener("click",function(){toMap(last.s,last.y)});
 })();
-var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
 /* un lien collé dans l’onglet déjà ouvert : on le suit sans recharger la page */
 addEventListener("hashchange",function(){
   var k=R[location.hash.split("/")[0]];

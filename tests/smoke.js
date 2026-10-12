@@ -49,16 +49,37 @@ async function waitUp(port) {
     page.on("pageerror", e => errors.push(e.message));
     page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
 
+    // Chronologie et Carte du temps sont sous le menu Lore
+    async function go(v) {
+      if ((v === "time" || v === "map") && (await page.getAttribute("#loreBtn", "aria-expanded")) !== "true") await page.click("#loreBtn");
+      await page.click('.tab[data-v="' + v + '"]');
+    }
     await page.goto(base + "/");
     await page.waitForSelector(".hm-banner");
     const nSys = await page.evaluate(() => SYS.length);
     check("accueil : le nombre de systèmes vient des données", (await page.textContent("#hsSys")) === String(nSys) && nSys > 0);
     check("accueil : l'image de Terra est chargée", await page.evaluate(() => { const i = document.querySelector(".hm-img img"); return i.complete && i.naturalWidth > 0; }));
 
-    for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["home", "#v-home"]]) {
-      await page.click('.tab[data-v="' + v + '"]');
+    for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["ver", "#v-ver"], ["home", "#v-home"]]) {
+      await go(v);
       check("onglet « " + v + " » s'affiche", await page.isVisible(sel));
     }
+
+    /* menu Lore et historique des versions */
+    await go("home");
+    check("menu Lore : fermé sur l'accueil", (await page.getAttribute("#loreBtn", "aria-expanded")) === "false" && !(await page.isVisible("#loreMenu")));
+    await page.click("#loreBtn");
+    check("menu Lore : s'ouvre avec Chronologie et Carte du temps", (await page.isVisible('#loreMenu .tab[data-v="time"]')) && (await page.isVisible('#loreMenu .tab[data-v="map"]')));
+    await go("map");
+    check("menu Lore : l'entrée active est marquée", (await page.getAttribute('.tab[data-v="map"]', "aria-current")) === "page" && (await page.evaluate(() => document.getElementById("loreBtn").classList.contains("on"))));
+    const pkg = require(path.join(ROOT, "package.json"));
+    const vs = await page.evaluate(() => window.VERSIONS.map(v => v.v));
+    check("versions : la dernière entrée est la version de package.json", vs[0] === pkg.version, vs[0] + " / " + pkg.version);
+    const cmp = (x, y) => { const p = x.split(".").map(Number), q = y.split(".").map(Number); for (let i = 0; i < 3; i++) if (p[i] !== q[i]) return p[i] - q[i]; return 0; };
+    check("versions : numéros 1.x.x, uniques et du plus récent au plus ancien", vs.every(v => /^1\.\d+\.\d+$/.test(v)) && vs.every((v, i) => i === 0 || cmp(vs[i - 1], v) > 0), vs.join(" "));
+    await go("ver");
+    check("versions : une carte par version avec son commentaire", (await page.evaluate(() => [...document.querySelectorAll("#verList .ver-item")].every(li => li.querySelector(".ver-n").textContent.length > 20))) && (await page.evaluate(() => document.querySelectorAll("#verList .ver-item").length)) === vs.length);
+    check("versions : la version actuelle est affichée", (await page.textContent("#verCur")) === "v" + pkg.version && (await page.textContent("#sideVer")) === "v" + pkg.version);
 
     /* carte */
     await page.goto(base + "/#carte/2903/stanton");
@@ -75,7 +96,7 @@ async function waitUp(port) {
     check("carte : les flèches changent d'année", (await page.textContent("#mYear")) !== y0);
 
     /* chronologie : recherche, tri, cartes */
-    await page.click('.tab[data-v="time"]');
+    await go("time");
     const cards = await page.evaluate(() => document.querySelectorAll("#app .ev").length);
     check("chronologie : les événements sont des cartes", cards === (await page.evaluate(() => window.__orb.events)) && cards > 30);
     await page.fill("#tlQ", "Stanton");
@@ -90,14 +111,14 @@ async function waitUp(port) {
     check("chronologie : aucun bouton « carte » pour une année hors carte", bad === 0, String(bad));
 
     /* liens entre onglets */
-    await page.click('.tab[data-v="time"]');
+    await go("time");
     const nb = await page.evaluate(() => document.querySelectorAll(".ev-map").length);
     check("chronologie : des boutons « voir sur la carte »", nb > 10);
     await page.locator('.ev-map[data-s="vega"]').first().click();
     check("chronologie → carte : année et système repris", (await page.textContent("#mYear")) === "2945" && (await page.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === "vega");
 
     /* carnet */
-    await page.click('.tab[data-v="log"]');
+    await go("log");
     await page.fill("#fDur", "60"); await page.fill("#fAuec", "120000"); await page.fill("#fTitle", "Minage de test");
     await page.click("#fSave");
     await page.waitForFunction(() => /\+120\s?000/.test(document.querySelector("#lgStats").textContent.replace(/ | /g, " ")), null, { timeout: 5000 }).catch(() => {});

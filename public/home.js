@@ -19,3 +19,23 @@ window.addEventListener("lg:update",paint);paint();
 if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
   addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
 }
+
+/* historique des versions */
+(function(){
+  var V=window.VERSIONS||[],list=document.getElementById("verList");
+  if(!list||!V.length)return;
+  function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+  var cur="v"+V[0].v;
+  document.getElementById("verCur").textContent=cur;
+  var sv=document.getElementById("sideVer");if(sv)sv.textContent=cur;
+  V.forEach(function(e,i){
+    var li=el("li","ver-item"+(i===0?" current":""));
+    var head=el("div","ver-head");
+    head.appendChild(el("span","ver-v","v"+e.v));
+    if(i===0)head.appendChild(el("span","pill s","Actuelle"));
+    var d=el("time","ver-d",new Date(e.d+"T12:00:00").toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}));d.dateTime=e.d;head.appendChild(d);
+    if(e.c)head.appendChild(el("code","ver-c",e.c));
+    li.appendChild(head);li.appendChild(el("h3","ver-t",e.t));li.appendChild(el("p","ver-n",e.n));
+    list.appendChild(li);
+  });
+})();
