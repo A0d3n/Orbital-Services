@@ -556,3 +556,6 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
   .vw-console{order:-1}
   .vw-side>.in{max-height:none;overflow:visible}
 }
+
+/* mêmes couleurs de camp sur la carte, les filtres, la légende et la fiche (xi’an vert, banu jaune, tevarin violet) */
+.vw-stage{--c-hum:#38a8d4;--c-xian:#62b53c;--c-banu:#e3c63a;--c-tev:#9a5fd8;--c-van:#e03c3c;--c-myst:#f08a2a;--c-tech:#dca545;--c-corp:#8b919b}
