@@ -187,10 +187,12 @@ async function waitUp(port) {
     await page.focus("#gHandle"); await page.keyboard.press("Tab");
     const imp = await page.evaluate(() => ({ id: document.activeElement.id, ol: getComputedStyle(document.activeElement.closest("label")).outlineStyle, ow: getComputedStyle(document.activeElement.closest("label")).outlineWidth }));
     check("carnet : « Importer Game.log » est atteignable au clavier avec un focus visible", imp.id === "gFile" && imp.ol !== "none" && parseFloat(imp.ow) >= 2, JSON.stringify(imp));
-    const [fc1] = await Promise.all([page.waitForEvent("filechooser", { timeout: 4000 }).catch(() => null), page.keyboard.press("Enter")]);
+    /* Chromium headless rate parfois la 1re frappe sur un input file (même sur un input nu) : jusqu'à 3 essais */
+    const pressForChooser = async key => { for (let k = 0; k < 3; k++) { await page.focus(k ? "#" + (await page.evaluate(() => document.activeElement.id || "gFile")) : "#" + (await page.evaluate(() => document.activeElement.id || "gFile"))); const [fc] = await Promise.all([page.waitForEvent("filechooser", { timeout: 1500 }).catch(() => null), page.keyboard.press(key)]); if (fc) return fc; } return null; };
+    const fc1 = await pressForChooser("Enter");
     check("carnet : Entrée ouvre le sélecteur de fichier (Game.log)", !!fc1);
     await page.keyboard.press("Tab");
-    const [fc2] = await Promise.all([page.waitForEvent("filechooser", { timeout: 4000 }).catch(() => null), page.keyboard.press("Space")]);
+    const fc2 = await pressForChooser("Space");
     check("carnet : « Importer un carnet (JSON) » atteignable, Espace ouvre le sélecteur", (await page.evaluate(() => document.activeElement.id)) === "jFile" && !!fc2);
     await page.fill("#fDur", "-5"); await page.click("#fSave");
     const vm = await page.evaluate(() => document.getElementById("fDur").validationMessage);
