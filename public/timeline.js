@@ -18,7 +18,7 @@ function orbit(i){
 
 var total=0,html='',ecs='';
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
-function norm(t){return String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").toLowerCase()}
+function norm(t){return String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").replace(/[  ]/g,' ').toLowerCase()}
 function ynum(y){var t=String(y).replace(/−/g,'-').replace(/[\s  ]/g,''),m=/^(-?\d+)/.exec(t);return m?+m[1]:0}
 
 /* illustration d'une carte : ciel, étoiles et planète aux couleurs du thème de l'événement */
@@ -99,6 +99,12 @@ function apply(){
     if(!h&&(!!e.closest('#appFlat'))===flat)shown++;
   });
   eras.forEach(function(s){s.hidden=!s.querySelector('.ev:not([hidden])')});
+  var em=$('#tlEmpty'),hasQ=q.trim()!=='';
+  em.hidden=shown>0;
+  if(!em.hidden){
+    $('#tlEmptyT').textContent=hasQ?'Aucun événement ne correspond à « '+q.trim()+' ».':'Aucun événement ne correspond à ces filtres.';
+    $('#tlEmptyB').textContent=hasQ?'Effacer la recherche':'Tout afficher';
+  }
   $('#count').textContent=shown+' événement'+(shown>1?'s':'')+' affiché'+(shown>1?'s':'')+' sur '+total;
   onScroll();
 }
@@ -109,6 +115,10 @@ $('#chips').addEventListener('click',function(ev){
   apply();
 });
 $('#tlQ').addEventListener('input',function(){q=this.value;apply()});
+$('#tlEmptyB').addEventListener('click',function(){
+  if(q.trim()!==''){q='';$('#tlQ').value=''}else{active={};[].forEach.call(document.querySelectorAll('.chip[data-g]'),function(c){c.setAttribute('aria-pressed','false')})}
+  apply();$('#tlQ').focus();
+});
 
 /* « Lire la suite » */
 document.addEventListener('click',function(e){

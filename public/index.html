@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip" href="#main" id="skip">Aller au contenu</a>
 <div class="app">
   <aside class="sidebar" aria-label="Navigation">
     <a class="brand-row" href="#accueil" data-go="home" aria-label="Orbital Services, accueil">
@@ -56,6 +57,7 @@
     <div class="prog"><i id="prog"></i></div>
   </header>
 
+  <main id="main" tabindex="-1">
   <div id="v-home">
     <section class="page-pad hm" aria-label="Accueil">
       <div class="hm-banner">
@@ -75,7 +77,7 @@
       </div>
       <ul class="hm-tiles" aria-label="Chiffres clés">
         <li class="tile hl"><b id="hsYear">2956</b><span>Année</span></li>
-        <li class="tile"><b id="hsSys">61</b><span>Systèmes connus</span></li>
+        <li class="tile"><b id="hsSys">90</b><span>Systèmes connus</span></li>
         <li class="tile"><b id="hsEras">8</b><span>Époques</span></li>
         <li class="tile"><b id="hsEv">64</b><span>Événements</span></li>
       </ul>
@@ -94,21 +96,21 @@
         </button>
         <button type="button" class="hm-card" data-go="map">
           <span class="hm-k">Star Viewer</span>
-          <b id="hmSysN">61 systèmes</b>
+          <b id="hmSysN">90 systèmes</b>
           <span class="hm-d">Avancez et reculez de 2100 à 2956 pour voir les systèmes, leurs planètes et leurs propriétaires changer.</span>
           <span class="hm-go">Ouvrir la carte →</span>
         </button>
       </div>
       <div class="hm-news" id="hmNews" hidden></div>
       <div class="hm-last" id="hmLast" hidden>
-        <div class="fl">Dernière activité</div>
+        <h2 class="fl">Dernière activité</h2>
         <div id="hmLastT"></div>
       </div>
     </section>
   </div>
 
   <div id="v-time" hidden>
-  <main class="page-pad">
+  <div class="page-pad">
     <section class="tl-tools" aria-label="Filtres">
       <div class="tl-row">
         <div class="tl-search"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><label for="tlQ" class="sr">Rechercher un événement</label><input id="tlQ" type="search" placeholder="Rechercher un événement…" autocomplete="off" spellcheck="false"></div>
@@ -119,16 +121,18 @@
     </section>
     <div id="app"></div>
     <div id="appFlat" class="evs" hidden></div>
+    <div class="tl-empty" id="tlEmpty" hidden><p id="tlEmptyT"></p><button type="button" class="btn" id="tlEmptyB">Effacer la recherche</button></div>
     <section class="today" id="today">
       <h2>Position actuelle</h2>
       <p class="y">2956</p>
       <p>C’est l’année en cours dans le lore. Elle avance au rythme du temps réel, avec 930 ans d’avance. Les événements de Squadron 42 se déroulent en 2945 et 2946.</p>
     </section>
-  </main>
+  </div>
   </div>
 
   <div id="v-map" hidden>
     <section class="page-pad mp vw" aria-label="Star Viewer">
+      <div class="sr" id="mAnnounce" role="status" aria-live="polite"></div>
       <div class="vw-stage">
         <div class="mapbox" id="mapbox">
           <svg id="mapsvg" role="img" aria-label="Carte des systèmes stellaires connus à l’année choisie" preserveAspectRatio="xMidYMid meet"></svg>
@@ -150,11 +154,12 @@
         </div>
 
         <div class="vw-card vw-rail" id="vwRail"><div class="in">
-          <h4>Chercher un système</h4>
+          <h2>Chercher un système</h2>
           <label class="sr" for="mFind">Chercher un système</label>
           <input id="mFind" type="search" list="mSys" placeholder="ex. Stanton" autocomplete="off" spellcheck="false">
           <datalist id="mSys"></datalist>
-          <h4>Camps</h4>
+          <p class="m-nomatch" id="mNoMatch" role="status"></p>
+          <h2>Camps</h2>
           <div class="chips" id="mFac" role="group" aria-label="Filtrer par camp"></div>
           <div class="m-key" id="mLegend"></div>
           <button type="button" class="btn" id="mLink">Copier le lien</button>
@@ -162,7 +167,7 @@
 
         <aside class="vw-card vw-side" id="vwSide"><div class="in">
           <div class="pn" id="mDetail"></div>
-          <div class="pn"><h4 style="margin-top:0">Derniers changements</h4><ul class="feed" id="mFeed"></ul></div>
+          <div class="pn"><h2 style="margin-top:0">Derniers changements</h2><ul class="feed" id="mFeed"></ul></div>
         </div></aside>
 
         <div class="vw-card vw-console"><div class="in">
@@ -181,7 +186,7 @@
           </div>
           <span class="tcount" id="mCount"></span>
         </div>
-          <input type="range" id="mRange" min="2100" max="2956" step="1" value="2956" aria-label="Année">
+          <input type="range" id="mRange" min="2100" max="2956" step="1" value="2956" aria-label="Année" aria-valuetext="Année 2956">
           <div class="keys" id="mKeys" role="group" aria-label="Dates clés"></div>
         </div></div>
       </div>
@@ -191,6 +196,7 @@
 
   <div id="v-cl" hidden>
     <section class="page-pad cl" aria-label="Comm-Links">
+      <h2 class="sr">Comm-Links</h2>
       <p class="lead">Les communications officielles de Roberts Space Industries : rapports mensuels, guides du lore, fictions, présentations de vaisseaux. Chaque carte ouvre l’article sur le site de RSI.</p>
       <div class="tl-row">
         <div class="tl-search"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><label for="clQ" class="sr">Rechercher un Comm-Link</label><input id="clQ" type="search" placeholder="Rechercher un Comm-Link…" autocomplete="off" spellcheck="false"></div>
@@ -209,6 +215,7 @@
         <div class="tile hl ver-cur"><b id="verCur">v1.9.0</b><span>Version actuelle</span></div>
         <p class="lead">Chaque commit de l’application a son numéro de version et un commentaire sur ce qui a changé. Les fusions de pull requests ne sont pas listées : elles ne modifient rien par elles-mêmes.</p>
       </div>
+      <h2 class="sr">Versions</h2>
       <ol class="ver-list" id="verList"></ol>
     </section>
   </div>
@@ -221,7 +228,7 @@
       <div class="lg-grid">
         <div class="lg-col">
           <div class="lg-panel lg-timer" id="lgTimer">
-            <div class="fl">Chronomètre de session</div>
+            <h2 class="fl">Chronomètre de session</h2>
             <div class="lg-clock" id="lgClock" aria-live="off">00:00:00</div>
             <div class="lg-row">
               <button type="button" class="btn play lg-wide" id="lgStart">Démarrer la session</button>
@@ -231,7 +238,7 @@
           </div>
 
           <form class="lg-panel" id="lgForm" autocomplete="off">
-            <div class="fl" id="lgFormTitle">Nouvelle entrée</div>
+            <h2 class="fl" id="lgFormTitle">Nouvelle entrée</h2>
             <div class="lg-fields">
               <label>Activité<select id="fType" required></select></label>
               <label>Date et heure<input type="datetime-local" id="fWhen" required></label>
@@ -250,11 +257,11 @@
           </form>
 
           <div class="lg-panel">
-            <div class="fl">Import / export</div>
+            <h2 class="fl">Import / export</h2>
             <label class="lg-handle">Votre pseudo en jeu (pour repérer vos éliminations et vos morts)<input type="text" id="gHandle" maxlength="40" placeholder="ex. MonPseudo"></label>
             <div class="lg-row">
-              <label class="btn lg-file">Importer Game.log<input type="file" id="gFile" accept=".log,.txt,text/plain" hidden></label>
-              <label class="btn lg-file">Importer un carnet (JSON)<input type="file" id="jFile" accept=".json,application/json" hidden></label>
+              <label class="btn lg-file">Importer Game.log<input type="file" id="gFile" accept=".log,.txt,text/plain"></label>
+              <label class="btn lg-file">Importer un carnet (JSON)<input type="file" id="jFile" accept=".json,application/json"></label>
             </div>
             <div class="lg-row">
               <button type="button" class="btn" id="xCsv">Exporter en CSV</button>
@@ -268,7 +275,7 @@
         <div class="lg-col">
           <div class="lg-panel">
             <div class="lg-stathead">
-              <div class="fl">Bilan</div>
+              <h2 class="fl">Bilan</h2>
               <div class="chips" id="lgRange" role="group" aria-label="Période">
                 <button type="button" class="chip" data-d="0" aria-pressed="true">Tout</button>
                 <button type="button" class="chip" data-d="30" aria-pressed="false">30 jours</button>
@@ -282,14 +289,14 @@
               <div class="lg-goalbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Progression de l’objectif" id="lgGoalBar"><i></i></div>
               <div class="lg-row"><label class="lg-goalin" for="lgGoal">Objectif en aUEC</label><input type="number" id="lgGoal" inputmode="numeric" min="0" step="1000" placeholder="ex. 500000"></div>
             </div>
-            <div class="fl lg-sub">30 derniers jours</div>
+            <h3 class="fl lg-sub">30 derniers jours</h3>
             <div class="lg-days" id="lgDays" role="img" aria-label="Entrées par jour sur les 30 derniers jours"></div>
             <div class="lg-axis" id="lgAxis" aria-hidden="true"></div>
           </div>
 
           <div class="lg-panel">
             <div class="lg-stathead">
-              <div class="fl" id="lgCount">Journal</div>
+              <h2 class="fl" id="lgCount">Journal</h2>
               <input type="search" id="lgSearch" class="lg-search" placeholder="Rechercher…" aria-label="Rechercher dans le carnet">
             </div>
             <div class="chips" id="lgFilter" role="group" aria-label="Filtrer par activité"></div>
@@ -299,6 +306,8 @@
       </div>
     </section>
   </div>
+
+  </main>
 
   <footer id="about">
     <div class="page-pad">

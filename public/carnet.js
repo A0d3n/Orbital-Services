@@ -75,18 +75,37 @@ function fillForm(e){
   fType.value=e.type;fWhen.value=localInput(e.ts);fDur.value=e.dur||"";fAuec.value=e.auec||"";
   fTitle.value=e.title||"";fPlace.value=e.place||"";fShip.value=e.ship||"";fNotes.value=e.notes||"";
 }
+/* messages de validation en français (à la place des messages natifs du navigateur) */
+function frInvalid(f){
+  var v=f.validity;
+  if(v.valueMissing)return "Veuillez renseigner ce champ.";
+  if(v.badInput)return "Veuillez saisir une valeur valide.";
+  if(v.rangeUnderflow)return "La valeur doit être supérieure ou égale à "+f.min+".";
+  if(v.rangeOverflow)return "La valeur doit être inférieure ou égale à "+f.max+".";
+  if(v.stepMismatch)return "Veuillez saisir un nombre entier.";
+  if(v.tooLong)return "Le texte est trop long.";
+  return "Valeur invalide.";
+}
+$("#lgForm").addEventListener("invalid",function(ev){
+  var f=ev.target;f.setCustomValidity("");f.setCustomValidity(frInvalid(f));
+},true);
+$("#lgForm").addEventListener("input",function(ev){if(ev.target.setCustomValidity)ev.target.setCustomValidity("")});
 $("#lgForm").addEventListener("submit",function(ev){
-  ev.preventDefault();
+  ev.preventDefault();say(fMsg,"");
   var ts=new Date(fWhen.value).getTime();
   if(!isFinite(ts)){say(fMsg,"Date invalide.",true);return}
   var d=clean({type:fType.value,ts:ts,dur:fDur.value,auec:fAuec.value,title:fTitle.value,place:fPlace.value,ship:fShip.value,notes:fNotes.value,src:editing&&entries[editing]?entries[editing].src:"manual"});
   var id=editing||newId(),was=!!editing;
-  $("#fSave").disabled=true;
+  $("#fSave").disabled=true;var failed=false;
   store.put(id,d).then(function(){
     ls("sclog_lasttype",d.type);
     if(store.mode!=="db")refresh();
     resetForm(true);say(fMsg,was?"Entrée modifiée.":"Entrée ajoutée au carnet.");
-  }).catch(function(e){say(fMsg,"Impossible d’enregistrer ("+(e&&e.code||"erreur")+").",true)}).then(function(){$("#fSave").disabled=false});
+  }).catch(function(e){failed=true;say(fMsg,"Impossible d’enregistrer ("+(e&&e.code||"erreur")+").",true)}).then(function(){
+    $("#fSave").disabled=false;
+    /* le focus ne reste pas sur un bouton désactivé : retour au bouton en cas d’échec, au premier champ sinon */
+    (failed?$("#fSave"):fType).focus({preventScroll:true});
+  });
 });
 $("#fReset").addEventListener("click",function(){resetForm()});
 
@@ -100,10 +119,10 @@ function showTimer(){
   function paint(){var s=Math.max(0,Math.floor((Date.now()-start)/1000));$("#lgClock").textContent=p2(Math.floor(s/3600))+":"+p2(Math.floor(s/60)%60)+":"+p2(s%60)}
   if(on){paint();tick=setInterval(paint,1000)}else $("#lgClock").textContent="00:00:00";
 }
-$("#lgStart").addEventListener("click",function(){ls(TK,String(Date.now()));showTimer()});
-$("#lgCancel").addEventListener("click",function(){ls(TK,null);showTimer()});
+$("#lgStart").addEventListener("click",function(){say(fMsg,"");ls(TK,String(Date.now()));showTimer();$("#lgStop").focus()});
+$("#lgCancel").addEventListener("click",function(){say(fMsg,"");ls(TK,null);showTimer();$("#lgStart").focus()});
 $("#lgStop").addEventListener("click",function(){
-  var start=+ls(TK)||Date.now();ls(TK,null);showTimer();
+  say(fMsg,"");var start=+ls(TK)||Date.now();ls(TK,null);showTimer();
   resetForm();fType.value="session";fWhen.value=localInput(start);fDur.value=Math.max(1,Math.round((Date.now()-start)/60000));
   say(fMsg,"Session terminée : complétez les détails puis enregistrez.");
   $("#lgForm").scrollIntoView({behavior:"smooth",block:"center"});fTitle.focus({preventScroll:true});
@@ -268,6 +287,7 @@ $("#jFile").addEventListener("change",function(){
 /* ── export ── */
 var dl=null;
 function exp(name,data){
+  say(fMsg,"");
   if(!all().length){say(fMsg,"Le carnet est vide.",true);return}
   if(!dl){try{var b=new Blob([data],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},600);say(fMsg,"Fichier prêt.")}catch(e){say(fMsg,"Export impossible.",true)}return}
   dl.save({filename:name,data:data}).then(function(){say(fMsg,"Fichier prêt.")}).catch(function(e){if(e&&e.code!=="declined")say(fMsg,"Export impossible ("+(e&&e.code||"erreur")+").",true)});

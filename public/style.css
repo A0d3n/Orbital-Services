@@ -4,7 +4,7 @@
 :root{
   color-scheme:dark;
   --bg:#0b0d0c; --bg-2:#111412; --panel:#111412; --line:#232826; --line-2:#2e3531;
-  --ink:#e7ebe8; --ink-2:#9ca59e; --dim:#6a736c; --sage:#b8d9a6; --holo:#b8d9a6; --amber:#b8d9a6;
+  --ink:#e7ebe8; --ink-2:#9ca59e; --dim:#858f87; --sage:#b8d9a6; --holo:#b8d9a6; --amber:#b8d9a6;
   --c-hum:#6fa6d6; --c-xian:#a98bdb; --c-banu:#6fcf93; --c-tev:#f0944a;
   --c-van:#f07468; --c-tech:#8fb0d4; --c-corp:#a9a28a; --c-myst:#e07ab8;
   --f-display:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -97,7 +97,7 @@ a{color:var(--holo)}
 .m-tip span{color:var(--mk-2)}
 .mapbox.lite .nd .halo{display:none}
 .m-key{position:absolute;right:.6rem;top:.6rem;pointer-events:none;background:rgba(8,11,16,.78);border:1px solid #2b3440;padding:.55rem .7rem .6rem;font-size:.66rem;line-height:1.25;color:var(--mk);max-width:48%}
-.m-key h5{margin:0 0 .3rem;font:700 .72rem var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#fff}
+.m-key h3,.m-key h4,.m-key h5{margin:0 0 .3rem;font:700 .72rem var(--f-display);letter-spacing:.14em;text-transform:uppercase;color:#fff}
 .m-key .jp{display:flex;align-items:center;gap:.45rem;margin:0 0 .5rem;font-family:var(--f-mono);color:var(--mk-2)}
 .m-key .jp i{width:1.4rem;height:0;border-top:2px solid var(--mline)}
 .m-key .jp i.d{border-top:2px dashed var(--mline)}
@@ -137,7 +137,7 @@ a{color:var(--holo)}
 .pn{border:1px solid var(--line);padding:1rem 1.1rem 1.1rem;background:color-mix(in srgb,var(--bg-2) 72%,transparent);min-width:0}
 .dh{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem}
 .pn h3{font-family:var(--f-display);font-weight:700;font-size:1.55rem;line-height:1.1;margin:0 0 .3rem}
-.pn h4{font-family:var(--f-mono);font-weight:400;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin:1.1rem 0 .55rem}
+.pn h2,.pn h4{font-family:var(--f-mono);font-weight:400;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin:1.1rem 0 .55rem}
 .pn .meta{font-family:var(--f-mono);font-size:.8rem;color:var(--ink-2);margin:0 0 .7rem}
 .pn .hint{color:var(--ink-2);margin:0}
 .x{background:none;border:1px solid var(--line-2);color:var(--ink-2);font:500 .75rem var(--f-display);padding:.3rem .55rem;cursor:pointer;border-radius:2px}
@@ -189,7 +189,9 @@ a{color:var(--holo)}
 .lg textarea{resize:vertical}
 .lg input::placeholder,.lg textarea::placeholder{color:#8a7d66}
 .lg input:focus,.lg select:focus,.lg textarea:focus{outline:2px solid var(--holo);outline-offset:1px}
-.lg-file{cursor:pointer}
+.lg-file{cursor:pointer;position:relative}
+.lg-file input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0;padding:0;border:0}
+.lg-file:has(input:focus-visible){outline:2px solid var(--sage);outline-offset:2px}
 .lg-msg{margin:0;min-height:1.2em;font-size:.86rem;color:var(--amber)}
 .lg-msg.err{color:#ff8a8f}
 .lg-help{margin:0;font-size:.8rem;color:var(--ink-2);line-height:1.5}
@@ -326,7 +328,7 @@ input[type=range],#mRange{accent-color:var(--sage)}
 .lg-msg{color:var(--sage)}.lg-msg.err{color:#ff8a8f}
 .lg-days i{background:var(--sage)}.lg-days i.z{background:var(--line-2)}
 .pn h3{font-weight:600;color:var(--ink)}
-.pn h4,.kicker,.hm-k,.eyebrow{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage)}
+.pn h2,.pn h4,.kicker,.hm-k,.eyebrow{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage)}
 .feed button:hover{color:var(--sage)}
 .lead{color:var(--ink-2)}
 .lg .lead,.mp .sub{max-width:72ch;font-size:13.5px;margin:0 0 12px}
@@ -513,14 +515,14 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
   background:radial-gradient(60% 60% at 52% 48%,rgba(184,217,166,.05),transparent),linear-gradient(rgba(184,217,166,.16) 1px,transparent 1px) 0 0/100px 100px,linear-gradient(90deg,rgba(184,217,166,.16) 1px,transparent 1px) 0 0/100px 100px,linear-gradient(rgba(184,217,166,.06) 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,rgba(184,217,166,.06) 1px,transparent 1px) 0 0/20px 20px,#0a0c0b}
 .vw-card{padding:1px;background:#2a332d;--cut:16px;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)))}
 .vw-card>.in{background:rgba(14,18,16,.95);clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)));padding:16px;box-sizing:border-box}
-.vw-card h4{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin:14px 0 8px}
-.vw-card h4:first-child{margin-top:0}
+.vw-card h2,.vw-card h4{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin:14px 0 8px}
+.vw-card h2:first-child,.vw-card h4:first-child{margin-top:0}
 .vw-rail{position:absolute;left:16px;top:16px;width:222px;z-index:2;--mline:#b8d9a6;--mk:#c9d1cb;--mk-2:#9fb3a9}
 .vw-rail input{width:100%;box-sizing:border-box}
 .vw-rail .chips{flex-direction:column;align-items:stretch;gap:6px}
 .vw-rail .chip{justify-content:flex-start;border-radius:9px;padding:7px 10px;font-size:12.5px;text-align:left}
 .vw-rail .m-key{position:static;background:none;border:0;padding:0;pointer-events:auto;font-size:11px;margin-top:14px}
-.vw-rail .m-key h5{font:500 11px var(--f-mono);letter-spacing:.1em;color:var(--sage);margin:0 0 8px}
+.vw-rail .m-key h3,.vw-rail .m-key h4,.vw-rail .m-key h5{font:500 11px var(--f-mono);letter-spacing:.1em;color:var(--sage);margin:0 0 8px}
 .vw-rail .m-key .jp{white-space:nowrap;margin:0 0 6px}
 .vw-rail .m-key .cols{flex-direction:column;gap:6px}
 .vw-rail .btn{margin-top:14px;width:100%}
@@ -606,3 +608,15 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 /* mêmes couleurs de camp sur la carte, les filtres, la légende et la fiche (xi’an vert, banu jaune, tevarin violet) */
 .vw-stage{--c-hum:#5fbfe8;--c-xian:#7ccf5e;--c-banu:#ecd25a;--c-tev:#b48ae8;--c-van:#f0645a;--c-myst:#f59a40;--c-tech:#e6b35a;--c-corp:#9aa1ab}
 .vw-stage .mapbox{--c-hum:inherit;--c-xian:inherit;--c-banu:inherit;--c-tev:inherit;--c-van:inherit;--c-myst:inherit;--c-tech:inherit;--c-corp:inherit}
+
+/* accessibilité : titres de panneaux (même apparence que .fl), lien d'évitement, états vides */
+h2.fl,h3.fl{margin:0;font:500 11px/1.5 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+main{flex:1 0 auto;min-width:0}
+main:focus{outline:none}
+.skip{position:absolute;left:8px;top:-64px;z-index:100;padding:10px 16px;border-radius:9px;background:var(--sage);color:#0c110b;font:600 14px var(--f-body);text-decoration:none}
+.skip:focus,.skip:focus-visible{top:8px;outline:2px solid #fff;outline-offset:2px}
+.tl-empty{color:var(--ink-2);font-size:.92rem;padding:.6rem 0;display:flex;flex-wrap:wrap;align-items:center;gap:.8rem}
+.tl-empty p{margin:0}
+.m-nomatch{margin:0;font-size:12.5px;color:var(--ink-2)}
+.m-nomatch:not(:empty){margin-top:8px}
+h3.fl.lg-sub{margin-top:.2rem}

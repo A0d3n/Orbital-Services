@@ -35,7 +35,7 @@ async function waitUp(port) {
     check("healthz : la page est trouvée", hz.ok === true && hz.page === true);
     check("serveur : image .webp avec le bon type", (await fetch(base + "/terra.webp")).headers.get("content-type") === "image/webp");
     check("serveur : URL mal formée → 400", (await fetch(base + "/%E0%A4%A")).status === 400);
-    const put = await fetch(base + "/api/entries/t1", { method: "PUT", body: JSON.stringify({ title: "essai", type: "mining", dur: 30, auec: 1000 }) });
+    const put = await fetch(base + "/api/entries/t1", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: "essai", type: "mining", dur: 30, auec: 1000 }) });
     const list = await (await fetch(base + "/api/entries")).json();
     check("API du carnet : écriture puis lecture", put.ok && list.length === 1 && list[0].title === "essai");
     check("authentification : 401 sans mot de passe", (await fetch("http://127.0.0.1:" + port2 + "/")).status === 401);
@@ -59,6 +59,14 @@ async function waitUp(port) {
     const nSys = await page.evaluate(() => SYS.length);
     check("accueil : le nombre de systèmes vient des données", (await page.textContent("#hsSys")) === String(nSys) && nSys > 0);
     check("accueil : l'image de Terra est chargée", await page.evaluate(() => { const i = document.querySelector(".hm-img img"); return i.complete && i.naturalWidth > 0; }));
+
+    /* accessibilité : lien d'évitement */
+    await page.keyboard.press("Tab");
+    const skip = await page.evaluate(() => { const a = document.activeElement, r = a.getBoundingClientRect(); return { id: a.id, txt: a.textContent, top: r.top, h: r.height }; });
+    check("accessibilité : « Aller au contenu » est le premier élément focusable et visible au focus", skip.id === "skip" && skip.txt === "Aller au contenu" && skip.top >= 0 && skip.h > 10, JSON.stringify(skip));
+    await page.keyboard.press("Enter");
+    check("accessibilité : le lien d'évitement place le focus dans <main>", (await page.evaluate(() => document.activeElement.tagName + "#" + document.activeElement.id)) === "MAIN#main");
+    check("accessibilité : valeurs de secours de l'accueil à jour (plus de « 61 »)", await page.evaluate(() => !/61/.test(document.getElementById("v-home").textContent)));
 
     for (const [v, sel] of [["log", "#v-log"], ["time", "#v-time"], ["map", "#v-map"], ["cl", "#v-cl"], ["ver", "#v-ver"], ["home", "#v-home"]]) {
       await go(v);
@@ -87,6 +95,14 @@ async function waitUp(port) {
     check("comm-links : le filtre par chaîne fonctionne", await page.evaluate(() => [...document.querySelectorAll("#clGrid .ev-lab")].every(l => l.textContent.indexOf("Engineering") === 0)));
     await page.click("#clMore").catch(() => {});
 
+    /* titres : pas de saut de niveau, h2 présents */
+    const heads = async (view) => page.evaluate((id) => {
+      const hs = [document.querySelector("h1"), ...document.querySelectorAll("#" + id + " h1,#" + id + " h2,#" + id + " h3,#" + id + " h4,#" + id + " h5")].filter(h => !h.closest("[hidden]"));
+      return hs.map(h => +h.tagName[1]);
+    }, view);
+    const skipsLevel = l => l.some((n, i) => i > 0 && n - l[i - 1] > 1);
+    check("titres : Comm-Links a un h2 et aucun saut de niveau", await (async () => { const l = await heads("v-cl"); return l.includes(2) && !skipsLevel(l); })());
+
     const pkg = require(path.join(ROOT, "package.json"));
     const vs = await page.evaluate(() => window.VERSIONS.map(v => v.v));
     check("versions : la dernière entrée est la version de package.json", vs[0] === pkg.version, vs[0] + " / " + pkg.version);
@@ -109,6 +125,14 @@ async function waitUp(port) {
     await page.evaluate(() => document.activeElement && document.activeElement.blur());
     const y0 = await page.textContent("#mYear"); await page.keyboard.press("ArrowRight");
     check("carte : les flèches changent d'année", (await page.textContent("#mYear")) !== y0);
+    const y1 = await page.textContent("#mYear");
+    check("Star Viewer : aria-valuetext « Année N » sur le curseur, mis à jour", (await page.getAttribute("#mRange", "aria-valuetext")) === "Année " + y1 && y1 !== y0);
+    await page.waitForTimeout(600);
+    check("Star Viewer : une région role=status annonce le système et l'année", await page.evaluate((y) => { const a = document.getElementById("mAnnounce"); return a.getAttribute("role") === "status" && a.textContent === "Magnus sélectionné, année " + y; }, y1), await page.textContent("#mAnnounce"));
+    await page.fill("#mFind", "Zzzzz"); await page.dispatchEvent("#mFind", "change");
+    check("Star Viewer : un système inconnu affiche « Aucun système nommé … » (role=status)", (await page.textContent("#mNoMatch")) === "Aucun système nommé « Zzzzz »." && (await page.getAttribute("#mNoMatch", "role")) === "status");
+    await page.fill("#mFind", "");
+    check("titres : Star Viewer sans saut de niveau (plus de h4 sous h1)", await (async () => { const l = await heads("v-map"); return l.includes(2) && !skipsLevel(l); })());
 
     /* chronologie : recherche, tri, cartes */
     await go("time");
@@ -126,6 +150,13 @@ async function waitUp(port) {
     await page.fill("#tlQ", "Stanton");
     const found = await page.evaluate(() => [...document.querySelectorAll("#app .ev")].filter(e => !e.hidden).length);
     check("chronologie : la recherche filtre les cartes", found > 0 && found < cards, String(found));
+    check("titres : Chronologie sans saut de niveau", !skipsLevel(await heads("v-time")));
+    /* état vide de la recherche */
+    await page.fill("#tlQ", "zzzxq");
+    const emp = await page.evaluate(() => ({ vis: !document.getElementById("tlEmpty").hidden, txt: document.getElementById("tlEmptyT").textContent, btn: document.getElementById("tlEmptyB").textContent }));
+    check("chronologie : message d'état vide avec le texte cherché et bouton « Effacer la recherche »", emp.vis && emp.txt === "Aucun événement ne correspond à « zzzxq »." && emp.btn === "Effacer la recherche", JSON.stringify(emp));
+    await page.click("#tlEmptyB");
+    check("chronologie : « Effacer la recherche » rétablit la liste et remet le focus sur le champ", (await page.evaluate(() => document.getElementById("tlEmpty").hidden && document.getElementById("tlQ").value === "" && document.activeElement.id === "tlQ")));
     await page.fill("#tlQ", "");
     await page.click('#tlSort button[data-sort="recent"]');
     const first = await page.evaluate(() => { const e = [...document.querySelectorAll("#appFlat .ev")].find(x => !x.hidden); return e && e.dataset.y; });
@@ -150,6 +181,29 @@ async function waitUp(port) {
     // 2 entrées : 30 min / 1 000 aUEC (via l'API) et 60 min / 120 000 aUEC (via le formulaire) = 121 000 aUEC en 1 h 30, soit 80 667 aUEC / heure
     check("carnet : une entrée est enregistrée et le gain par heure est calculé", /121\s?000/.test(stats) && /80\s?667/.test(stats), stats);
     check("carnet : graphique sur 30 jours", (await page.evaluate(() => document.querySelectorAll("#lgDays i").length)) === 30);
+
+    /* carnet : accessibilité */
+    check("titres : Carnet a des h2 et aucun saut de niveau", await (async () => { const l = await heads("v-log"); return l.filter(n => n === 2).length >= 4 && !skipsLevel(l); })());
+    await page.focus("#gHandle"); await page.keyboard.press("Tab");
+    const imp = await page.evaluate(() => ({ id: document.activeElement.id, ol: getComputedStyle(document.activeElement.closest("label")).outlineStyle, ow: getComputedStyle(document.activeElement.closest("label")).outlineWidth }));
+    check("carnet : « Importer Game.log » est atteignable au clavier avec un focus visible", imp.id === "gFile" && imp.ol !== "none" && parseFloat(imp.ow) >= 2, JSON.stringify(imp));
+    const [fc1] = await Promise.all([page.waitForEvent("filechooser", { timeout: 4000 }).catch(() => null), page.keyboard.press("Enter")]);
+    check("carnet : Entrée ouvre le sélecteur de fichier (Game.log)", !!fc1);
+    await page.keyboard.press("Tab");
+    const [fc2] = await Promise.all([page.waitForEvent("filechooser", { timeout: 4000 }).catch(() => null), page.keyboard.press("Space")]);
+    check("carnet : « Importer un carnet (JSON) » atteignable, Espace ouvre le sélecteur", (await page.evaluate(() => document.activeElement.id)) === "jFile" && !!fc2);
+    await page.fill("#fDur", "-5"); await page.click("#fSave");
+    const vm = await page.evaluate(() => document.getElementById("fDur").validationMessage);
+    check("carnet : message de validation en français", /supérieure ou égale à 0/.test(vm), vm);
+    await page.fill("#fDur", "");
+    await page.evaluate(() => { document.getElementById("fMsg").textContent = "ancien message"; });
+    await page.click("#lgStart");
+    check("carnet : « Démarrer la session » déplace le focus sur « Terminer et noter » et vide le statut", (await page.evaluate(() => document.activeElement.id)) === "lgStop" && (await page.textContent("#fMsg")) === "");
+    await page.click("#lgStop");
+    check("carnet : après l'arrêt, le focus est sur le champ Titre", (await page.evaluate(() => document.activeElement.id)) === "fTitle");
+    await page.click("#fSave");
+    await page.waitForFunction(() => document.activeElement.id === "fType", null, { timeout: 4000 }).catch(() => {});
+    check("carnet : après « Enregistrer », le focus revient sur le premier champ du formulaire", (await page.evaluate(() => document.activeElement.id)) === "fType" && /ajoutée/.test(await page.textContent("#fMsg")));
 
     /* Star Viewer sur téléphone (400 px) */
     const mctx = await browser.newContext({ viewport: { width: 400, height: 800 }, hasTouch: true, isMobile: true });

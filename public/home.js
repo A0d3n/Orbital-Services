@@ -39,3 +39,9 @@ if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
     list.appendChild(li);
   });
 })();
+
+/* lien d'évitement : place le focus sur le contenu sans modifier l'adresse (le hash sert à la navigation) */
+(function(){
+  var a=document.getElementById("skip"),m=document.getElementById("main");
+  if(a&&m)a.addEventListener("click",function(e){e.preventDefault();m.focus({preventScroll:true});window.scrollTo(0,0)});
+})();

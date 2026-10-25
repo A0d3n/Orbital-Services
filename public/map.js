@@ -11,8 +11,8 @@ var EDG=EL.map(function(p){
 var CH=[];
 SYS.forEach(function(s){
   if(s.d>0&&!s.nd)CH.push({y:s.d,t:"Découverte du système "+s.n,s:s.i});
-  s.o.forEach(function(o){if(o[0]>s.d)CH.push({y:o[0],t:s.n+" : "+o[2],s:s.i})});
-  s.p.forEach(function(p){p[1].forEach(function(e){if(e[0]>s.d)CH.push({y:e[0],t:p[0]+" ("+s.n+") : "+e[1],s:s.i})})});
+  s.o.forEach(function(o){if(o[0]>s.d)CH.push({y:o[0],t:s.n+" : "+o[2],s:s.i})});
+  s.p.forEach(function(p){p[1].forEach(function(e){if(e[0]>s.d)CH.push({y:e[0],t:p[0]+" ("+s.n+") : "+e[1],s:s.i})})});
 });
 CH.sort(function(a,b){return a.y-b.y});
 var CY=[];CH.forEach(function(c){if(c.y>=MIN&&c.y<=MAX&&CY.indexOf(c.y)<0)CY.push(c.y)});
@@ -57,7 +57,7 @@ SYS.forEach(function(s){
 /* légende et dates clés */
 var OK=["hum","xian","banu","tev","van","out","con","none"];
 function icon(k){return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><path class="ic'+(k==="con"?' ring':'')+'" style="--oc:var('+OW[k][1]+')" d="'+shapeD(SH[k],0,0,5.5)+'"/><circle class="icd" style="--oc:var('+OW[k][1]+')" r="1.7"/></svg>'}
-$("#mLegend").innerHTML='<h5>Légende</h5><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><div class="cols"><div><h5>Gouvernance</h5><ul>'+
+$("#mLegend").innerHTML='<h3>Légende</h3><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><div class="cols"><div><h4>Gouvernance</h4><ul>'+
   OK.map(function(k){return '<li>'+icon(k)+OW[k][0]+'</li>'}).join("")+'</ul></div></div><p class="jp" style="margin:.5rem 0 0"><span class="sw" style="--oc:var(--c-hum)"></span>Zone d’influence</p>';
 /* époques affichées en bandeau (années de début tirées des périodes de la chronologie) */
 var MERA=[[2100,"L’aube spatiale"],[2271,"L’expansion"],[2438,"Premiers contacts"],[2541,"Tevarin et Empire"],[2681,"L’ombre vanduul"],[2794,"Les temps modernes"],[2903,"Le présent"]];
@@ -68,7 +68,7 @@ $("#mKeys").innerHTML=KEYS.map(function(k){return '<button type="button" class="
 function stateAt(s,y){var st=s.o[0];for(var i=0;i<s.o.length;i++){if(s.o[i][0]<=y)st=s.o[i]}return st}
 
 function render(){
-  yEl.textContent=year;range.value=year;
+  yEl.textContent=year;range.value=year;range.setAttribute("aria-valuetext","Année "+year);
   var known=0;
   SYS.forEach(function(s){
     var on=s.d<=year;if(on)known++;
@@ -95,7 +95,17 @@ function render(){
   $("#mKeys").querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(+c.dataset.y===year))});
   renderDetail();renderFeed();
   $("#vwSideN").textContent=sel&&BY[sel]?" · "+BY[sel].n:"";
-  queueLabels();
+  queueLabels();announce();
+}
+/* annonce pour lecteur d’écran : système sélectionné et année (différée, jamais pendant la lecture automatique) */
+var annT=0,annLast="";
+function announce(){
+  clearTimeout(annT);
+  if(playing||$("#v-map").hidden)return;
+  annT=setTimeout(function(){
+    var m=(sel&&BY[sel]?BY[sel].n+" sélectionné, année ":"Année ")+year;
+    if(m===annLast)return;annLast=m;$("#mAnnounce").textContent=m;
+  },350);
 }
 
 function renderDetail(){
@@ -323,7 +333,7 @@ $("#mLink").addEventListener("click",function(){
 });
 
 /* recherche d’un système */
-function norm(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g,"").toLowerCase().trim()}
+function norm(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g,"").replace(/[  ]/g," ").toLowerCase().trim()}
 $("#mSys").innerHTML=SYS.slice().sort(function(a,b){return a.n.localeCompare(b.n,"fr")}).map(function(s){return '<option value="'+s.n+'"></option>'}).join("");
 function findSys(q){
   q=norm(q);if(!q)return null;
@@ -332,10 +342,13 @@ function findSys(q){
   return hit;
 }
 function goFind(){
-  var s=findSys($("#mFind").value);if(!s)return;
+  var v=$("#mFind").value.trim(),s=findSys(v),nm=$("#mNoMatch");
+  nm.textContent=(!s&&v)?"Aucun système nommé « "+v+" ».":"";
+  if(!s)return;
   pick(s.i,year<s.d?s.d:year);
 }
 $("#mFind").addEventListener("change",goFind);
+$("#mFind").addEventListener("input",function(){$("#mNoMatch").textContent=""});
 $("#mFind").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();goFind()}});
 
 /* filtre par camp */
