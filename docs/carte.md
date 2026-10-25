@@ -23,13 +23,13 @@ Comparaison faite le 12 octobre 2026 avec les données de la StarMap officielle 
   | Kabal | 2941 (Usuni Colo) | Galactic Guide |
   | Tamsa | 2943 (Kofi Baféuma) | StarMap |
 
-  Quinze systèmes n’ont pas de date publiée : Bacchus et Kins (les sources se contredisent), K.ap’a’ri, Malkail, El’sin (« données incomplètes ») et dix systèmes vanduul classés secret défense (Virgo, Viking, Volt, Vesper, Vanguard, Veritas, Vagabond, Voodoo, Vermilion, Vendetta). Ils apparaissent sur la carte en 2956, leur fiche indique « Date de découverte non précisée » et ils n’ont pas d’entrée dans le fil des événements.
+  Quinze systèmes n’avaient pas de date publiée (14 aujourd’hui : Vanguard a reçu 2943, source communautaire) : Bacchus et Kins (les sources se contredisent), K.ap’a’ri, Malkail, El’sin (« données incomplètes ») et dix systèmes vanduul classés secret défense (Virgo, Viking, Volt, Vesper, Vanguard, Veritas, Vagabond, Voodoo, Vermilion, Vendetta). Ils apparaissent sur la carte en 2956, leur fiche indique « Date de découverte non précisée » et ils n’ont pas d’entrée dans le fil des événements.
 - **Liaisons** : 72 points de saut de la StarMap ajoutés (par exemple Nyx–Pyro, Terra–Magnus, Terra–Goss). La liaison Terra–Virgil n’existe pas dans la StarMap (Virgil ouvre sur Nyx, Vega, Tiber, Oberon et Kellog) : elle est retirée. Ferron–Oretani est conservée, car le saut s’est effondré en 2485.
 - **Positions** : la carte suit déjà la disposition de la StarMap à quelques dizaines de pixels près. Huit systèmes qui s’en écartaient de plus de 90 pixels ont été replacés d’après leurs coordonnées RSI : Banshee, Gliese, Yulin, Leir, Magnus, Stanton, Tayac et Castra.
 - **Histoire et camps** :
-  - Hadur, Pallas et Indra passent au camp xi’an en 2793 : le pacte de la ligne Perry, ratifié après la paix Kr.ē–Akari de 2789, cède Hadur aux Xi’an et coupe l’accès humain aux systèmes voisins (la StarMap les classe xi’an).
+  - Hadur, Pallas et Indra passent au camp xi’an en 2793 : le pacte de la ligne Perry, ratifié le 5 juillet 2793 à la suite de l’accord de paix Akari-Kray de 2789, partage les huit systèmes entre l’UEE et l’Empire xi’an ; Hadur, Pallas et Indra reviennent aux Xi’an (la StarMap les classe xi’an). Les frontières des « systèmes de transition » restent ouvertes au voyage et au commerce (voir `docs/lore-verifie.md`).
   - La chute de Caliban est datée de 2884 (et non 2871) ; le système passe au camp vanduul.
-  - Nexus : l’UNE reprend pied en 2931.
+  - Nexus : l’UEE reprend le système en 2931, après la course de Dean Kellar (sources : Galactapedia et Galactic Guide Nexus de RSI).
 
 ## Ce qui reste différent, volontairement
 

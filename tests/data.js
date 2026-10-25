@@ -17,7 +17,7 @@ const ynum = (y) => { const m = /^(-?\d+)/.exec(String(y).replace(/−/g, "-").r
 const yend = (y) => { const p = String(y).split("→"); return ynum(p[p.length - 1]); };
 
 // Liste blanche : texte dont la source reste a confirmer (Nexus 2931).
-const BLANCHE = ["L’UNE reprend pied dans le système après la découverte d’un nouveau gisement"];
+const BLANCHE = []; /* plus d’exception : Nexus 2931 est corrigé (UEE) */
 
 // ---- 1. Systèmes, positions, liaisons
 const ids = new Set(SYS.map((s) => s.i));
@@ -48,7 +48,6 @@ SYS.forEach((s) => {
 });
 const une = textes.filter((t) => t.y !== null && t.y > 2546 && /\bUNE\b/.test(t.txt) && !BLANCHE.some((b) => t.txt.includes(b)));
 check("aucun « UNE » dans un texte postérieur à 2546", une.length === 0, une.map((t) => t.src).join(" ; "));
-check("liste blanche Nexus 2931 toujours présente", textes.some((t) => t.y === 2931 && BLANCHE.some((b) => t.txt.includes(b))));
 
 // ---- 3. Typographie
 const toutes = []; // chaînes visibles

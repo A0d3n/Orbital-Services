@@ -54,7 +54,7 @@ var ERAS=[
  {y:"2544",t:"La bataille d’Idris IV",g:"tev",d:"Le 9 septembre, l’UPE tente de reprendre Idris IV (opération Nemesis), aidée par le renseignement des Greys. Le colonel Ivar Messer s’y distingue et devient le visage de la guerre."},
  {y:"2546",t:"L’Atrocité de Jata",g:"hum",d:"Une série d’attentats frappe l’UPE. Ivar Messer, alors haut-général, s’en sert pour attiser la ferveur publique en faveur de la création du poste de Premier citoyen."},
  {y:"2546",t:"Messer devient Imperator",g:"hum",m:1,d:"Messer ramène le chef tevarin capturé, ce qui met fin à la première guerre. Porté par sa popularité, il fait élire un Premier citoyen unique, lui-même, puis refond le gouvernement en Empire uni de la Terre (UEE) et se proclame Imperator. L’ère Messer commence."},
- {y:"2603 → 2610",t:"La seconde guerre tevarine",g:"tev",d:"Cinquante ans plus tard, les Tevarin reconstitués attaquent pour reprendre leur monde natal, Kaleeth, rebaptisé Elysium IV. Le 24 juin 2610, certains de la défaite, ils sabordent leurs vaisseaux sur la planète. Peu après, la plupart détruisent leurs codex lors de la Purge et abandonnent leur religion. Le peintre Aaron Fring immortalisera la scène dans Tears of Fire."},
+ {y:"2603 → 2610",t:"La seconde guerre tevarine",g:"tev",d:"Cinquante-sept ans après la fin de la première guerre, les Tevarin reconstitués attaquent pour reprendre leur monde natal, Kaleeth, rebaptisé Elysium IV. Le 24 juin 2610, certains de la défaite, ils sabordent leurs vaisseaux sur la planète. Peu après, la plupart détruisent leurs codex lors de la Purge et abandonnent leur religion. Le peintre Aaron Fring immortalisera la scène dans Tears of Fire."},
  {y:"2659",t:"L’Aurora arrive",g:"corp",d:"RSI met l’Aurora sur le marché, un vaisseau que de nombreux joueurs ont piloté en premier."}
  ]},
 {id:"vanduul",n:"L’ombre vanduul",r:"2681 → 2793",c:"#f07468",
@@ -83,7 +83,7 @@ var ERAS=[
  b:"Stanton s’ouvre, la frontière vanduul cède et l’Empire se demande ce qu’il est prêt à défendre. Squadron 42 (2945 → 2946) et le jeu persistant se situent ici.",
  e:[
  {y:"2903",t:"Ouverture de Stanton",g:"hum",m:1,d:"Le premier point de saut vers le système Stanton est découvert. Hurston Dynamics acquiert Stanton I et ses lunes en 2904, et la ville de Lorville est fondée en 2912."},
- {y:"2910",t:"Les Vanduul attaquent Squadron 42",g:"van",d:"Les Vanduul s’en prennent à l’unité Squadron 42, qui donne son nom à la campagne solo du jeu."},
+ {y:"2910",t:"Le 42nd Squadron affronte les Vanduul",g:"van",d:"D’après le wiki de la communauté, le 42nd Squadron affronte les Vanduul en 2910 et 2911. Le lien avec la campagne solo du jeu n’est pas confirmé par une source officielle."},
  {y:"2940 → 2941",t:"Kelos Costigan, Imperator",g:"hum",d:"L’Imperator Corbyn Salehi était mort en 2922. Kelos Costigan est élu en 2940. L’année suivante, il signe la loi sur la vérité historique, qui déclassifie des millions de documents d’archives."},
  {y:"2942",t:"Terra, nouvelle capitale ?",g:"hum",d:"Le 4 août, la sénatrice Mira Ngo propose un référendum pour décider si la capitale de l’Empire doit passer de la Terre à Terra."},
  {y:"2942 → 2943",t:"Le X12 retrouvé sans vie",g:"van",d:"Un porte-vaisseaux vanduul, le X12, est retrouvé inerte dans l’espace près de Garron. Une analyse des navires de guerre vanduul fuite le 10 mai 2943 depuis l’Office du renseignement naval."},
@@ -94,7 +94,7 @@ var ERAS=[
  {y:"2945",t:"Début de la guerre vanduul",g:"van",m:1,d:"Le 10 novembre 2945 commence officiellement la guerre contre les Vanduul. Les événements de Squadron 42 se déroulent en 2945 et 2946."},
  {y:"2946",t:"La mobilisation des milices",g:"hum",d:"L’initiative de mobilisation des milices invite le public à aider à défendre l’Empire contre les Vanduul et d’autres menaces. En mars a lieu l’opération Mandrake."},
  {y:"2947",t:"HuXa, puis un attentat",g:"xian",d:"En mars, l’initiative commerciale entre humains et Xi’an (HuXa) est annoncée. Le 30 mai, un assassin tente sans succès de tuer l’Imperator Costigan lors du Sommet de la Fédération bancaire à New York."},
- {y:"2950",t:"Élection impériale",g:"hum",d:"L’Empire élit son Imperator."}
+ {y:"2950",t:"Élection impériale",g:"hum",d:"Laylani Addison remporte l’élection impériale de 2950, d’après le Comm-Link officiel des résultats. Selon le wiki de la communauté, les résultats sont annoncés le 1er novembre 2950 et l’investiture a lieu le 1er janvier 2951."}
  ]}
 ];
 
@@ -152,7 +152,7 @@ S("davien","Davien",2430,"Wendell Dopse, via Sol",1,[[2430,"hum","Système où l
 S("cathcart","Cathcart",2438,"Adelaide Lorris, une fugitive, via Davien",0,[[2438,"hum","Nommé d’après le maréchal Cathcart, qui la poursuivait."],[2464,"hum","Cathcart tue Adelaide Lorris."],[2750,"hum","Forte population pirate ; le repaire Spider est découvert."]],[
  ["Spider",[[2750,"Un pilote de la Navy découvre ce repaire de pirates."]]]
 ]),
-S("nexus","Nexus",2445,"pilote Dominic Thapa, via Cathcart",1,[[2445,"hum","Système militaire de l’UNE."],[2468,"hum","Le Hathor Group rachète les droits d’exploitation aux enchères."],[2672,"out","Hathor abandonne le système, devenu le carrefour du crime."],[2931,"hum","L’UNE reprend pied dans le système après la découverte d’un nouveau gisement ; la bataille contre les criminels continue."]],[
+S("nexus","Nexus",2445,"pilote Dominic Thapa, via Cathcart",1,[[2445,"hum","Système militaire de l’UNE."],[2468,"hum","Le Hathor Group rachète les droits d’exploitation aux enchères."],[2672,"out","Hathor abandonne le système, devenu le carrefour du crime."],[2931,"hum","L’UEE reprend le système après la course folle de Dean Kellar ; l’opération de reconquête est toujours en cours."]],[
  ["Lago (Nexus IV)",[[2445,"Terraformée par l’armée."],[2672,"Les hors-la-loi y établissent leurs opérations."]]]
 ]),
 S("hades","Hades",2515,"équipage du Merry Crow, via Nexus",0,[[2515,"none","Découvert, mais non déclaré."],[2531,"hum","Cartographié et enregistré par la Dynamo Corporation."]],[
@@ -195,9 +195,9 @@ S("horus","Horus",2528,"Marie Sante, via Kiel",1,[[2528,"hum","Seul système ent
 ]),
 S("castra","Castra",2544,"éclaireurs militaires, via Hadrian",0,[[2544,"hum","Système sous contrôle militaire."],[2789,"hum","Ouvert au public après deux siècles de contrôle strict."]]),
 S("gurzil","Gurzil",2539,"Dahunsil Kosoko, sous le nom d’Odara, via Hadrian",0,[[2539,"hum","Étudié par des géomètres de l’ICC sous le nom d’Odara."],[2542,"hum","Un saut vers R.il’a, monde militaire xi’an, fait interdire le système aux civils : rebaptisé Gurzil."]]),
-S("hadur","Hadur",2529,"exploratrice xi’an Āi se Cho’an, sous le nom de Yā’mon",0,[[2529,"xian","Système d’approvisionnement de l’armée xi’an."],[2531,"xian","L’explorateur humain Teesa Morrison y croise une escorte militaire xi’an."],[2542,"hum","Rebaptisé Hadur et placé sous le contrôle de la Navy (ligne Perry)."],[2793,"xian","Le pacte de la ligne Perry, ratifié après la paix Kr.ē–Akari de 2789, cède Hadur aux Xi’an (Yā’mon) et coupe l’accès humain aux systèmes voisins."]]),
-S("pallas","Pallas",2530,"Kathryn Segovia, sous le nom de Th.us’ūng, via Baker",0,[[2530,"con","Gaia Planet Services entre en territoire xi’an : la guerre froide commence."],[2542,"hum","Rebaptisé Pallas (ligne Perry)."],[2793,"xian","Perdu par l’humanité avec le pacte de la ligne Perry (Th.us’ūng)."]]),
-S("indra","Indra",2548,"la Navy apprend l’existence du saut depuis Hadur (Kyuk’ya)",0,[[2548,"hum","Intégré à la ligne Perry sous le nom d’Indra."],[2793,"xian","Perdu par l’humanité avec le pacte de la ligne Perry (Kyuk’ya)."]]),
+S("hadur","Hadur",2529,"exploratrice xi’an Āi se Cho’an, sous le nom de Yā’mon",0,[[2529,"xian","Système d’approvisionnement de l’armée xi’an."],[2531,"xian","L’explorateur humain Teesa Morrison y croise une escorte militaire xi’an."],[2542,"hum","Rebaptisé Hadur et placé sous le contrôle de la Navy (ligne Perry)."],[2793,"xian","Le pacte de la ligne Perry, ratifié le 5 juillet 2793 à la suite de l’accord de paix Akari-Kray de 2789, partage les huit systèmes entre l’UEE et l’Empire xi’an ; Hadur (Yā’mon) revient aux Xi’an."]]),
+S("pallas","Pallas",2530,"Kathryn Segovia, sous le nom de Th.us’ūng, via Baker",0,[[2530,"con","Gaia Planet Services entre en territoire xi’an : la guerre froide commence."],[2542,"hum","Rebaptisé Pallas (ligne Perry)."],[2793,"xian","Attribué à l’Empire xi’an par le pacte de la ligne Perry en 2793 (Th.us’ūng)."]]),
+S("indra","Indra",2548,"la Navy apprend l’existence du saut depuis Hadur (Kyuk’ya)",0,[[2548,"hum","Intégré à la ligne Perry sous le nom d’Indra."],[2793,"xian","Attribué à l’Empire xi’an par le pacte de la ligne Perry en 2793 (Kyuk’ya)."]]),
 S("rila","R.il’a",2542,"saut découvert par Marie Sante depuis Horus",0,[[2542,"xian","Monde militaire xi’an Shorvu, utilisé depuis très longtemps pour l’entraînement."]]),
 S("kaipua","Kai’pua",2617,"lieutenants Ahmad Harar et Carl Dyson, via Horus",0,[[2617,"xian","Les deux officiers sont capturés, puis relâchés trois jours plus tard avec l’ordre de tirer à vue sur tout vaisseau de l’UEE qui reviendrait."]]),
 S("oya","Oya",2587,"lieutenant Eli Price, via Castra",0,[[2587,"hum","Revendiqué par l’UEE dans la ligne Perry ; les Xi’an rappellent leurs colons."]],[
@@ -211,7 +211,7 @@ S("tohil","Tohil",2716,"contrebandiers Oisha Suen et Aadya Firmino, via Nyx",0,[
 S("laou","La’uo",2759,"hors-la-loi xi’an, via Ē’aluth",0,[[2759,"xian","Les Xi’an refusent de le revendiquer : aucune planète terraformable."],[2771,"hum","L’UEE l’adopte dans la ligne Perry sous le nom de Virtus ; les hors-la-loi fuient."],[2789,"xian","L’empereur Kray reconnaît les hors-la-loi comme dirigeants légitimes, en récompense de leur rôle dans la paix de 2789."]]),
 S("nyx","Nyx",2582,"Carla Larry, via Bremen",0,[[2582,"hum","Système découvert via Bremen."]]),
 S("bremen","Bremen",2441,"Bao Yun, via Vega",1,[[2441,"hum","Système découvert via Vega."],[2792,"hum","Des militants y organisent le renversement du régime Messer."]],[
- ["Rytif",[[2603,"Les grands propriétaires fondent Bremen Mills."],[2640,"Krach du blé : Rytif et Bremen Mills déclinent."],[2716,"Fusion avec Terragra : Terra Mills est née et les Prallies conquièrent l’Empire."]]]
+ ["Rytif",[[2603,"Les grands propriétaires fondent Bremen Mills."],[2640,"Krach du blé : Rytif et Bremen Mills déclinent."],[2717,"Terragra fusionne avec Bremen Mills : l’entreprise devient Terra Mills."]]]
 ]),
 S("tanga","Tanga",2473,"via Bremen",0,[[2473,"hum","Système découvert via Bremen."]]),
 S("odin","Odin",2532,"via Tanga",0,[[2532,"hum","Système découvert via Tanga."]]),

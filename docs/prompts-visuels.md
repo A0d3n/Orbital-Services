@@ -448,7 +448,7 @@ A giant interspecies art installation among the asteroids of a belt: ribbons of 
 | Fichier | Date | Événement | Thème |
 |---|---|---|---|
 | `evt-7-0.webp` | 2903 | Ouverture de Stanton (majeur) | hum |
-| `evt-7-1.webp` | 2910 | Les Vanduul attaquent Squadron 42 | van |
+| `evt-7-1.webp` | 2910 | Le 42nd Squadron affronte les Vanduul | van |
 | `evt-7-2.webp` | 2940 → 2941 | Kelos Costigan, Imperator | hum |
 | `evt-7-3.webp` | 2942 | Terra, nouvelle capitale ? | hum |
 | `evt-7-4.webp` | 2942 → 2943 | Le X12 retrouvé sans vie | van |
@@ -467,7 +467,7 @@ A giant interspecies art installation among the asteroids of a belt: ribbons of 
 A new star system revealed through a jump point: four distinct planets in a row, a gas giant with a floating city, a city-covered world, a dusty industrial world, an icy corporate world. Palette: steel blue and cool cyan.
 ```
 
-**evt-7-1 : Les Vanduul attaquent Squadron 42**
+**evt-7-1 : Le 42nd Squadron affronte les Vanduul**
 
 ```
 A human carrier under attack: a squadron of fighters launching in V-formation to intercept dark red alien blades, tracer fire, determined pilots, cinematic. Palette: deep crimson and black, angular hostile shapes.

@@ -3,7 +3,7 @@
 - `evt-0-0` à `evt-0-4` : images fournies par le propriétaire du projet.
 - `evt-1-0`, `evt-1-8`, `evt-3-0`, `evt-3-4`, `evt-4-7`, `evt-5-2`, `evt-6-0`, `evt-6-1`, `evt-7-1` : visuels officiels de [robertsspaceindustries.com](https://robertsspaceindustries.com) (Comm-Links), recadrés en 2,8 : 1. Ils appartiennent à Cloud Imperium Games : à retirer si le dépôt ou l'image Docker devient public.
 - `evt-0-5`, `evt-0-6`, `evt-1-1`, `evt-1-6`, `evt-1-7`, `evt-2-3`, `evt-3-2`, `evt-4-3`, `evt-7-9` : photos de la NASA (domaine public, [images.nasa.gov](https://images.nasa.gov)), recadrées en 2,8 : 1. Détail ci-dessous.
-- Les autres événements gardent l'illustration dessinée par le code (`visuals.js`). Les prompts utilisés sont dans `prompts-visuels.md`.
+- Les 41 autres images (36 non listées ci-dessous + les 5 remplacées le 25 octobre 2026) sont générées avec Canva (Magic Media) à partir des prompts de `prompts-visuels.md`, dans le style des visuels officiels, sans texte ni logo. Cette origine vient de l'historique du projet (« 41 générées avec Canva ») : 5 fournies + 9 RSI + 9 NASA + 41 Canva = 64. L'illustration dessinée par le code (`visuals.js`) ne sert plus que de repli si une image manque.
 
 | Fichier | Événement | Source (Comm-Link RSI) |
 |---|---|---|
@@ -15,7 +15,7 @@
 | `evt-5-2` | Le siège de Tiber | Anvil Odin – The Allfather of War |
 | `evt-6-0` | Drake Interplanetary | Drake Golem – For the Workers |
 | `evt-6-1` | microTech est découverte | Race for Stanton : microTech |
-| `evt-7-1` | Les Vanduul attaquent Squadron 42 | Squadron 42 Newsletter |
+| `evt-7-1` | Le 42nd Squadron affronte les Vanduul | Squadron 42 Newsletter |
 
 ## Photos de la NASA
 
