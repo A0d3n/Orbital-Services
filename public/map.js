@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-var $=function(s,r){return (r||document).querySelector(s)};
+var $=OrbUtil.$;
 
 /* index */
 var BY={};SYS.forEach(function(s){BY[s.i]=s});
@@ -8,6 +8,8 @@ var EDG=EL.map(function(p){
   var a=BY[p[0]],b=BY[p[1]],sp=SP[p[0]+"-"+p[1]]||{};
   return{a:p[0],b:p[1],y:sp.y||Math.max(a.d,b.d),u:sp.u||0,dash:sp.dash||0};
 });
+/* systèmes sans aucune liaison dans EL (A25) : fiche avec une mention */
+var LINKED={};EDG.forEach(function(e){LINKED[e.a]=1;LINKED[e.b]=1});
 var CH=[];
 SYS.forEach(function(s){
   if(s.d>0&&!s.nd)CH.push({y:s.d,t:"Découverte du système "+s.n,s:s.i});
@@ -144,6 +146,7 @@ function renderDetail(){
     if(o&&BY[o].d<=year)nb.push(o);
   });
   if(nb.length)h+='<h4>Points de saut</h4><div class="lk">'+nb.map(function(o){return '<button type="button" data-s="'+o+'">'+BY[o].n+'</button>'}).join("")+'</div>';
+  if(!LINKED[s.i])h+='<p class="hint" style="margin:.8rem 0 0;font-size:.8rem">Aucun point de saut publié pour ce système.</p>';
   if(document.querySelector('.ev[data-y^="'+year+'"]'))h+='<button type="button" class="btn lk-t" data-ty="'+year+'">Voir la chronologie de '+year+'</button>';
   detail.innerHTML=h;
 }
@@ -428,7 +431,7 @@ var hashTimer=0;
 function syncHash(){
   if(!box.offsetParent)return;
   clearTimeout(hashTimer);
-  hashTimer=setTimeout(function(){try{history.replaceState(null,"","#carte/"+year+(sel?"/"+sel:""))}catch(e){}},250);
+  hashTimer=setTimeout(function(){if(!box.offsetParent)return;/* onglet quitté entre-temps : ne pas réécrire l'URL */try{history.replaceState(null,"","#carte/"+year+(sel?"/"+sel:""))}catch(e){}},250);
 }
 function readHash(h){
   var a=h.split("/");
@@ -445,7 +448,7 @@ $("#mLink").addEventListener("click",function(){
 });
 
 /* recherche d’un système */
-function norm(t){return t.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[’']/g,"").replace(/[  ]/g," ").toLowerCase().trim()}
+function norm(t){return OrbUtil.norm(t,{drop:/[\u2019']/g,sp:/[\u00a0\u202f]/g,trim:true})} /* apostrophes supprimées */
 $("#mSys").innerHTML=SYS.slice().sort(function(a,b){return a.n.localeCompare(b.n,"fr")}).map(function(s){return '<option value="'+s.n+'"></option>'}).join("");
 function findSys(q){
   q=norm(q);if(!q)return null;
@@ -604,8 +607,8 @@ function toTimeline(y){
   el.scrollIntoView({block:"center"});
   el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
 }
-function esc(t){return t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
-var NAMERX=SYS.map(function(s){return{s:s,rx:new RegExp("(^|[^A-Za-zÀ-ÿ’'])"+esc(s.n)+"(?![A-Za-zÀ-ÿ])")}});
+var escRe=OrbUtil.escRe;
+var NAMERX=SYS.map(function(s){return{s:s,rx:new RegExp("(^|[^A-Za-zÀ-ÿ’'])"+escRe(s.n)+"(?![A-Za-zÀ-ÿ])")}});
 function sysIn(text){
   var best=null,at=1e9;
   NAMERX.forEach(function(n){var m=n.rx.exec(text);if(m&&m.index<at){at=m.index;best=n.s}});

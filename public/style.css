@@ -661,3 +661,6 @@ h3.fl.lg-sub{margin-top:.2rem}
   .bar[data-view="time"] .tb-right{margin-left:auto}
   .bar[data-view="time"] .ecs{order:9;flex:1 0 100%}
 }
+
+/* Sous-pages du menu Lore sur téléphone : zone tactile >= 44 px (la règle générale à 38 px passait après la règle mobile) */
+@media (max-width:860px){.tab.sub,.tab.sub[aria-current="page"]{height:44px}}

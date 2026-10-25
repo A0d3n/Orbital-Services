@@ -4,7 +4,7 @@ window.__orbHash0=location.hash;
 var TAGS={hum:"Humanité",xian:"Xi’an",banu:"Banu",tev:"Tevarin",van:"Vanduul",tech:"Technologie",corp:"Industrie",myst:"Mystères"};
 
 
-function $(s,r){return (r||document).querySelector(s)}
+var $=OrbUtil.$;
 function pad(n){return n<10?"0"+n:""+n}
 function rnd(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
@@ -19,8 +19,8 @@ function orbit(i){
 }
 
 var total=0,html='',ecs='';
-function esc(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
-function norm(t){return String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").replace(/[  ]/g,' ').toLowerCase()}
+var esc=OrbUtil.esc;
+function norm(t){return OrbUtil.norm(t,{keep:true,sp:/[\u00a0\u202f]/g})} /* apostrophes ramenées à ' (conservées) */
 /* identifiant stable d'un événement : titre sans accents ni ponctuation ; année puis numéro si deux titres sont identiques */
 var usedIds={};
 function slugify(t){return norm(t).replace(/œ/g,'oe').replace(/æ/g,'ae').replace(/'/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'evenement'}
@@ -54,7 +54,7 @@ function scene(g,seed){
 var PHOTO_SIZES='(max-width:860px) calc(100vw - 30px), (max-width:905px) 610px, (max-width:1239px) 455px, 400px';
 function photo(k){
   var f='evt-'+k.replace('.','-');
-  return '<img class="ev-photo" src="'+f+'.webp" srcset="'+f+'-800.webp 800w, '+f+'.webp 1600w" sizes="'+PHOTO_SIZES+'" width="800" height="286" alt="" loading="lazy" decoding="async" onerror="this.remove()">';
+  return '<img class="ev-photo" src="'+f+'.webp" srcset="'+f+'-800.webp 800w, '+f+'.webp 1600w" sizes="'+PHOTO_SIZES+'" width="800" height="286" alt="" loading="lazy" decoding="async">';
 }
 var cardN=0;
 function card(e,era,flat){
@@ -78,6 +78,9 @@ ERAS.forEach(function(era,i){
    era.e.map(function(e){return card(e,era)}).join('')+'</div></section>';
   ecs+='<a class="ec" href="#'+era.id+'" data-i="'+i+'" style="--era:'+era.c+'">'+era.n+'</a>';
 });
+/* photo introuvable : on la retire (remplace l'ancien onerror en attribut, interdit par la CSP) ; l'événement error ne remonte pas, d'où la phase de capture */
+function dropBroken(e){var i=e.target;if(i&&i.tagName==='IMG'&&i.classList.contains('ev-photo'))i.remove()}
+['#app','#appFlat'].forEach(function(q){$(q).addEventListener('error',dropBroken,true)});
 $('#app').innerHTML=html;$('#ecs').innerHTML=ecs;
 window.__orb={eras:ERAS.length,events:total};
 function haystack(root){[].forEach.call(root.querySelectorAll('.ev'),function(c){c.dataset.s=norm(c.textContent)})}

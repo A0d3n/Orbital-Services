@@ -344,6 +344,64 @@ async function waitUp(port) {
     check("Star Viewer tactile : deux zones qui se recouvrent, le tap va au système le plus proche", (await tp.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === dense.a.i, JSON.stringify({ a: dense.a.i, b: dense.b.i, d: Math.round(dense.d) }));
     await tctx.close();
 
+    /* carte : mention des systèmes sans point de saut (A25), sans attribut on*, sans script inline */
+    await page.goto(base + "/#carte/2956/virgo");
+    await page.waitForSelector(".nd.sel");
+    const NOLINK = ["Virgo", "Volt", "Vesper", "K.ap’a’ri", "Veritas", "Vagabond", "Malkail", "El’sin", "Voodoo", "Vermilion", "Vendetta"];
+    check("carte : la fiche de Virgo indique qu'aucun point de saut n'est publié", (await page.textContent("#mDetail")).includes("Aucun point de saut publié pour ce système."));
+    const noLinkSys = await page.evaluate(() => { const l = new Set(); EL.forEach(p => { l.add(p[0]); l.add(p[1]); }); return SYS.filter(s => !l.has(s.i)).map(s => s.n); });
+    check("carte : exactement les 11 systèmes sans liaison sont concernés", noLinkSys.length === 11 && NOLINK.every(n => noLinkSys.indexOf(n) >= 0), noLinkSys.join(", "));
+    await page.goto(base + "/#carte/2956/stanton");
+    await page.waitForSelector(".nd.sel");
+    check("carte : la fiche de Stanton n'a pas cette mention", !(await page.textContent("#mDetail")).includes("Aucun point de saut publié"));
+
+    /* CSP : aucun code inline (attribut on*, script inline) dans le DOM de chaque onglet */
+    const inl = [];
+    for (const v of ["home", "log", "time", "map", "cl", "ver"]) {
+      await go(v); await page.waitForTimeout(v === "cl" ? 800 : 200);
+      const r = await page.evaluate(() => ({
+        on: [...document.querySelectorAll("*")].filter(e => [...e.attributes].some(a => /^on/i.test(a.name))).map(e => e.tagName + "#" + e.id),
+        scripts: [...document.querySelectorAll("script:not([src])")].length,
+        js: [...document.querySelectorAll("[href^='javascript:' i],[src^='javascript:' i]")].length }));
+      if (r.on.length || r.scripts || r.js) inl.push(v + " " + JSON.stringify(r));
+    }
+    check("CSP : aucun attribut on*, <script> inline ni URL javascript: dans les 6 onglets", inl.length === 0, inl.join(" | "));
+
+    /* CSP : l'application chargée avec l'en-tête strict ne déclenche aucune violation */
+    const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://robertsspaceindustries.com https://*.robertsspaceindustries.com; connect-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'";
+    const cctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await cctx.route(base + "/**", async route => {
+      const resp = await route.fetch();
+      await route.fulfill({ response: resp, headers: Object.assign({}, resp.headers(), { "content-security-policy": CSP }) });
+    });
+    await cctx.addInitScript(() => { window.__csp = []; document.addEventListener("securitypolicyviolation", e => window.__csp.push(e.violatedDirective + " " + e.blockedURI + " " + (e.sourceFile || "") + ":" + (e.lineNumber || ""))); });
+    const cp = await cctx.newPage();
+    const cspMsgs = [];
+    cp.on("pageerror", e => cspMsgs.push("pageerror " + e.message));
+    cp.on("console", m => { if (/Content Security Policy|Refused to/i.test(m.text())) cspMsgs.push(m.text()); });
+    async function cgo(v) {
+      if ((v === "time" || v === "map" || v === "cl") && (await cp.getAttribute("#loreBtn", "aria-expanded")) !== "true") await cp.click("#loreBtn");
+      await cp.click('.tab[data-v="' + v + '"]');
+    }
+    await cp.goto(base + "/");
+    await cp.waitForSelector(".hm-banner");
+    for (const v of ["log", "time", "map", "cl", "ver", "home"]) { await cgo(v); await cp.waitForTimeout(v === "cl" ? 1000 : 300); }
+    await cgo("time");
+    await cp.evaluate(() => document.querySelector(".ev-copy").click()).catch(() => {});
+    await cgo("map");
+    await cp.evaluate(() => document.querySelector('.nd[data-i="stanton"]').dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    await cp.keyboard.press("Escape");
+    await cp.mouse.click(5, 5);
+    await cp.keyboard.press("/");
+    await cp.waitForSelector("#srchQ", { state: "visible" });
+    await cp.fill("#srchQ", "stanton"); await cp.waitForTimeout(400);
+    await cp.keyboard.press("Enter"); await cp.waitForTimeout(400);
+    const sw = await cp.evaluate(() => Promise.race([navigator.serviceWorker.ready.then(r => !!r.active), new Promise(r => setTimeout(() => r(false), 8000))]));
+    const viol = await cp.evaluate(() => window.__csp);
+    check("CSP stricte : le service worker est enregistré", sw === true);
+    check("CSP stricte : aucune violation en parcourant les 6 onglets, la recherche, un événement et un système", viol.length === 0 && cspMsgs.length === 0, viol.concat(cspMsgs).join(" | "));
+    await cctx.close();
+
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
     check("exécution du test", false, e && e.stack || String(e));

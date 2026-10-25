@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-var $=function(s){return document.querySelector(s)};
+var $=OrbUtil.$;
 var TYPES=[
  ["session","Session de jeu","--holo"],["mining","Minage","--c-tev"],["cargo","Commerce / cargo","--c-hum"],
  ["combat","Combat","--c-van"],["explo","Exploration","--c-banu"],["mission","Mission","--c-xian"],
@@ -267,7 +267,7 @@ $("#gFile").addEventListener("change",function(){
 function commit(items,done){
   var i=0,ok=0,bad=0;
   function next(){
-    if(i>=items.length)return done(ok,bad);
+    if(i>=items.length){refresh();return done(ok,bad)}
     var it=items[i++];
     store.put(it.id,clean(it.d)).then(function(){ok++}).catch(function(){bad++}).then(function(){setTimeout(next,store.mode==="db"?60:0)});
   }
@@ -292,10 +292,12 @@ function exp(name,data){
   if(!dl){try{var b=new Blob([data],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},600);say(fMsg,"Fichier prêt.")}catch(e){say(fMsg,"Export impossible.",true)}return}
   dl.save({filename:name,data:data}).then(function(){say(fMsg,"Fichier prêt.")}).catch(function(e){if(e&&e.code!=="declined")say(fMsg,"Export impossible ("+(e&&e.code||"erreur")+").",true)});
 }
+/* une cellule de texte qui commence par = + - @ serait lue comme une formule par un tableur : on la préfixe d’une apostrophe */
+function csvTxt(v){v=String(v==null?"":v);return /^[=+\-@\t\r]/.test(v)?"'"+v:v}
 function csvCell(v){v=String(v==null?"":v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 $("#xCsv").addEventListener("click",function(){
   var rows=[["date","activité","durée_min","aUEC","titre","lieu","vaisseau","notes","source"]];
-  all().slice().reverse().forEach(function(e){rows.push([new Date(e.ts).toISOString(),tname(e.type),e.dur||0,e.auec||0,e.title,e.place,e.ship,e.notes,e.src||"manual"])});
+  all().slice().reverse().forEach(function(e){rows.push([new Date(e.ts).toISOString(),csvTxt(tname(e.type)),e.dur||0,e.auec||0,csvTxt(e.title),csvTxt(e.place),csvTxt(e.ship),csvTxt(e.notes),csvTxt(e.src||"manual")])});
   exp("carnet-star-citizen.csv","﻿"+rows.map(function(r){return r.map(csvCell).join(";")}).join("\r\n"));
 });
 $("#xJson").addEventListener("click",function(){exp("carnet-star-citizen.json",JSON.stringify(all().map(function(e){var o=Object.assign({},e);return o}),null,1))});

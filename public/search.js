@@ -18,9 +18,8 @@ var GROUPS = [
 var SUGGEST = ["Stanton", "Terra", "Xi’an", "Monthly Report"];
 
 /* ---------- normalisation : accents, casse, apostrophes (supprimées), espaces insécables ---------- */
-var DIA = /[̀-ͯ]/g;
-function norm(s) {
-  return String(s).normalize("NFD").replace(DIA, "").replace(/[’‘ʼ'`´]/g, "").replace(/[\s  ]/g, " ").toLowerCase();
+function norm(s) { /* apostrophes supprimées, toutes les espaces ramenées à une espace simple */
+  return OrbUtil.norm(s, { drop: /[\u2019\u2018\u02bc'`\u00b4]/g, sp: /[\s\u00a0\u202f]/g });
 }
 /* même normalisation, avec la position de chaque caractère dans le texte d'origine (pour surligner) */
 function normMap(s) {
@@ -31,7 +30,7 @@ function normMap(s) {
   }
   return { n: n, map: map };
 }
-function esc(t) { return String(t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+var esc = OrbUtil.esc;
 
 /* ---------- index ---------- */
 var IDX = null, CL = { state: 0, rows: null, series: null, channels: null, nt: null, nx: null, ne: null };

@@ -1,11 +1,11 @@
 {
   "name": "orbital-services",
-  "version": "1.25.2",
+  "version": "1.26.0",
   "private": true,
   "description": "Carnet de bord, chronologie et carte du temps pour Star Citizen",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/data.js && node tests/server.js && node tests/smoke.js && node tests/search.js && node tests/perf-fonts-sw.js && node tests/perf-images.js",
+    "test": "node tests/data.js && node tests/server.js && node tests/smoke.js && node tests/search.js && node tests/perf-fonts-sw.js && node tests/perf-images.js && node tests/features.js",
     "version": "node scripts/version.js"
   },
   "devDependencies": {

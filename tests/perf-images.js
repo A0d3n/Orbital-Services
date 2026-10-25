@@ -82,7 +82,7 @@ const free = () => new Promise((res, rej) => { const s = require("net").createSe
         return m && m[1] === m[2] && m[1] + ".webp" === i.src && fs.existsSync(path.join(PUB, m[1] + "-800.webp"));
       });
       check("chronologie : chaque événement illustré a un srcset avec sa version -800 existante (" + ok.length + "/64)", withFile.length === 64 && ok.length === 64, withFile.length + " cartes avec fichier");
-      check("chronologie : sizes, width/height, lazy, decoding et onerror conservés", info.every(i => i.sizes && /calc\(100vw/.test(i.sizes) && i.w === "800" && i.h === "286" && i.lazy === "lazy" && i.dec === "async" && i.oe === "this.remove()"));
+      check("chronologie : sizes, width/height, lazy, decoding et sans onerror inline", info.every(i => i.sizes && /calc\(100vw/.test(i.sizes) && i.w === "800" && i.h === "286" && i.lazy === "lazy" && i.dec === "async" && i.oe === null));
       /* à 390 px (écran 2x), le navigateur choisit la -800 */
       await page.evaluate(() => document.querySelector("#app .ev-photo").scrollIntoView());
       await page.waitForFunction(() => { const i = document.querySelector("#app .ev-photo"); return i && i.complete && i.currentSrc; });

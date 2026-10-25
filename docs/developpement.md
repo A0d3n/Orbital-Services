@@ -11,6 +11,20 @@
 | `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
 | `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
+| `util.js` | Utilitaires partagés (`OrbUtil` : `# Développement
+
+## Organisation de `public/`
+
+| Fichier | Contenu |
+|---|---|
+| `index.html` | Structure de la page (accueil, carnet, chronologie, carte) |
+| `style.css` | Tous les styles |
+| `data.js` | Données : époques et événements, systèmes de la carte, liaisons, positions |
+| `timeline.js` | Chronologie et fond étoilé |
+| `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
+| `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
+| `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
+, `esc`, `escRe`, `norm`), chargé en premier |
 | `search.js`, `search.css` | Recherche globale (touche « / » ou loupe) : événements, systèmes, planètes, Comm-Links ; copie de lien |
 | `versions.js` | Historique des versions (une entrée par commit) |
 | `sw.js` | Mode hors ligne |
@@ -31,7 +45,7 @@ npx playwright install chromium
 npm test
 ```
 
-`npm test` lance six séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) et `tests/perf-images.js` (images de la chronologie, Comm-Links). Les deux premières n’ouvrent pas de navigateur.
+`npm test` lance sept séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) `tests/perf-images.js` (images de la chronologie, Comm-Links) et `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne). Les deux premières n’ouvrent pas de navigateur.
 
 Le test lance le serveur, ouvre chaque onglet dans Chromium et vérifie la carte, les liens entre onglets, le carnet, l'API et l'authentification. Il échoue s'il y a une erreur dans la console. Avec un Chromium déjà installé : `CHROMIUM_PATH=/chemin/vers/chromium npm test`.
 

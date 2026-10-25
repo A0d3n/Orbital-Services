@@ -1,10 +1,9 @@
 /* Onglet Comm-Links : liste des communications de RSI, chargée au premier affichage. */
 (function(){
-var $=function(s){return document.querySelector(s)};
+var $=OrbUtil.$,esc=OrbUtil.esc;
 var D=null,loading=false,started=false,list=[],shown=0,FIRST=12,STEP=18,ch=-1,live=null;
 var SITE="https://robertsspaceindustries.com",MEDIA="https://media.robertsspaceindustries.com";
-function norm(t){return t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")}
-function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function norm(t){return OrbUtil.norm(t)} /* accents et casse seulement */
 function img(p){return !p?"":p.indexOf("/media/")===0?SITE+p:p.indexOf("http")===0?p:MEDIA+p}
 /* vignette : RSI publie aussi chaque média en « slideshow » (648 x 366, ~40 % du poids de channel_item_full 1119 x 600).
    Variante vérifiée sur les URL de commlinks.js (voir docs/images.md). Seule la vignette est chargée (suffisante même en 2x) ; repli sur l'original si elle échoue.
