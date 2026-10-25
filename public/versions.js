@@ -1,6 +1,7 @@
 /* Historique des versions : une entrée par commit (les fusions de pull requests ne comptent pas).
    Pour en ajouter une : npm run version -- minor "Titre" "Commentaire"   puis   npm run version -- sync */
 var VERSIONS = [
+{"v":"1.25.2","d":"2026-10-25","c":"","t":"Docs : six séries de tests (correctif)","n":"Le commit précédent annonçait cette mise à jour sans la contenir ; docs/developpement.md décrit maintenant les six séries lancées par npm test."},
 {"v":"1.25.1","d":"2026-10-25","c":"e2d3158","t":"Docs : six séries de tests","n":"docs/developpement.md décrit les six séries lancées par npm test."},
 {"v":"1.25.0","d":"2026-10-25","c":"75ffe87","t":"Performance : images et Comm-Links","n":"Chronologie : 64 versions 800 px (srcset/sizes), 3,0 Mo → 1,2 Mo pour l'onglet entier. Comm-Links : 12 cartes à l'ouverture puis « Voir plus » (+18), vignette RSI « slideshow » 648 px (repli sur l'original) : 16,7 Mo → 2,8 Mo à l'ouverture. 27 vérifications ajoutées."},
 {"v":"1.24.0","d":"2026-10-25","c":"ef2f7c2","t":"Performance : polices locales, accueil, service worker","n":"Geist et Geist Mono hébergées (84 Ko, licence OFL) : plus aucune requête vers Google. Image d'accueil allégée (351 Ko → 64 Ko, srcset, fetchpriority) : LCP en Fast 3G 3,9 s → 2,0 s, octets de l'accueil −57 %. Service worker : nom du cache lié à la version (écrit par scripts/version.js), cache d'exécution plafonné à 150 entrées, uniquement même origine ; accueil servi hors ligne. Type MIME woff2 ajouté au serveur. 32 vérifications ajoutées."},

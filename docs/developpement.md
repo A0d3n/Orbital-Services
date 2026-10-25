@@ -31,6 +31,8 @@ npx playwright install chromium
 npm test
 ```
 
+`npm test` lance six séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) et `tests/perf-images.js` (images de la chronologie, Comm-Links). Les deux premières n’ouvrent pas de navigateur.
+
 Le test lance le serveur, ouvre chaque onglet dans Chromium et vérifie la carte, les liens entre onglets, le carnet, l'API et l'authentification. Il échoue s'il y a une erreur dans la console. Avec un Chromium déjà installé : `CHROMIUM_PATH=/chemin/vers/chromium npm test`.
 
 ## Historique des versions
