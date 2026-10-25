@@ -8,6 +8,13 @@ services:
     restart: unless-stopped
     pull_policy: always                             # récupère la dernière image à chaque démarrage
     user: "568:568"                                 # utilisateur « apps » de TrueNAS
+    read_only: true                                 # système de fichiers du conteneur en lecture seule
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - "no-new-privileges:true"
     environment:
       PORT: "8080"
       DATA_DIR: /data

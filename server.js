@@ -7,6 +7,8 @@ const DATA = process.env.DATA_DIR || path.join(__dirname, "data");
 const FILE = path.join(DATA, "entries.json");
 const BACKUPS = path.join(DATA, "backups");
 const KEEP_BACKUPS = Math.max(1, +process.env.KEEP_BACKUPS || 14);
+const BACKUP_INTERVAL_MS = Math.max(50, +process.env.BACKUP_INTERVAL_MS || 3600000);
+const CSP_HEADER = process.env.CSP_REPORT_ONLY === "1" ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy";
 const AUTH_USER_SET = !!process.env.AUTH_USER;
 const AUTH_USER = process.env.AUTH_USER || "orbital";
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD || "";
@@ -27,40 +29,57 @@ const startup = pageStatus();
 if (!startup.ok) console.error("ATTENTION : " + startup.hint);
 
 fs.mkdirSync(DATA, { recursive: true });
+let loadedOk = false;
 let entries = Object.create(null); // sans prototype : "__proto__", "constructor"... sont de simples ids
-try { const o = JSON.parse(fs.readFileSync(FILE, "utf8")); if (o && typeof o === "object") for (const k of Object.keys(o)) entries[k] = o[k]; } catch (e) {}
+try { const o = JSON.parse(fs.readFileSync(FILE, "utf8")); if (o && typeof o === "object") for (const k of Object.keys(o)) entries[k] = o[k]; loadedOk = true; } catch (e) {}
 
-/* ── sauvegardes : une copie par jour, les plus anciennes sont supprimées ── */
-let lastBackupDay = "";
-function backupDaily() {
-  const day = new Date().toISOString().slice(0, 10);
-  if (day === lastBackupDay || !fs.existsSync(FILE)) return;
+/* ── écriture atomique : .tmp, fsync, puis rename ── */
+function atomicWrite(dest, data) {
+  const tmp = dest + ".tmp";
+  try {
+    const fd = fs.openSync(tmp, "w");
+    try { fs.writeSync(fd, data); fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+    fs.renameSync(tmp, dest);
+  } catch (e) { try { fs.unlinkSync(tmp); } catch (e2) {} throw e; }
+}
+
+/* ── sauvegardes : au démarrage, puis toutes les BACKUP_INTERVAL_MS si les données ont changé ──
+   Un seul fichier par jour (entries-AAAA-MM-JJ.json), mis à jour atomiquement ; les plus anciens sont supprimés. */
+let dirty = false; // des changements n'ont pas encore été sauvegardés
+function backupNow() {
   try {
     fs.mkdirSync(BACKUPS, { recursive: true });
-    const dest = path.join(BACKUPS, "entries-" + day + ".json");
-    if (!fs.existsSync(dest)) fs.copyFileSync(FILE, dest);
-    lastBackupDay = day;
+    const day = new Date().toISOString().slice(0, 10);
+    atomicWrite(path.join(BACKUPS, "entries-" + day + ".json"), JSON.stringify(entries));
+    dirty = false;
     const all = fs.readdirSync(BACKUPS).filter(f => /^entries-\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort();
     all.slice(0, Math.max(0, all.length - KEEP_BACKUPS)).forEach(f => { try { fs.unlinkSync(path.join(BACKUPS, f)); } catch (e) {} });
   } catch (e) { console.error("sauvegarde impossible :", e.message); }
 }
-backupDaily();
+if (loadedOk) backupNow(); // jamais depuis un fichier illisible : on ne remplace pas une bonne copie par du vide
+else if (fs.existsSync(FILE)) console.error("ATTENTION : " + FILE + " est illisible, pas de sauvegarde au démarrage.");
+const backupTimer = setInterval(() => { if (dirty) backupNow(); }, BACKUP_INTERVAL_MS);
+backupTimer.unref();
 
 let timer = null;
-function writeNow() { // écriture atomique : .tmp puis rename
-  const tmp = FILE + ".tmp";
-  try { fs.writeFileSync(tmp, JSON.stringify(entries)); fs.renameSync(tmp, FILE); }
+function writeNow() {
+  try { atomicWrite(FILE, JSON.stringify(entries)); }
   catch (e) { console.error("écriture impossible :", e.message); }
 }
 function persist() {
+  dirty = true;
   clearTimeout(timer);
-  timer = setTimeout(() => { backupDaily(); writeNow(); }, 150);
+  timer = setTimeout(writeNow, 150);
 }
 
 const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp", ".woff2": "font/woff2", ".jpg": "image/jpeg", ".ico": "image/x-icon",
   ".json": "application/json", ".webmanifest": "application/manifest+json", ".txt": "text/plain; charset=utf-8" };
-const HDR = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "X-Frame-Options": "SAMEORIGIN" };
+const CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://robertsspaceindustries.com https://*.robertsspaceindustries.com; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'";
+// Pas de COOP/COEP : ils risquent de casser window.open vers RSI. CORP same-origin : toutes les ressources sont servies à la page elle-même.
+const HDR = { "X-Content-Type-Options": "nosniff", "Referrer-Policy": "no-referrer", "X-Frame-Options": "SAMEORIGIN",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()", "Cross-Origin-Resource-Policy": "same-origin" };
+HDR[CSP_HEADER] = CSP;
 const send = (res, code, body, type, extra) => {
   res.writeHead(code, Object.assign({ "Content-Type": type || "application/json; charset=utf-8", "Cache-Control": "no-store" }, HDR, extra));
   res.end(body);
@@ -192,6 +211,6 @@ const server = http.createServer(async (req, res) => {
 server.requestTimeout = 30000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
 process.on("uncaughtException", e => console.error("exception non gérée :", (e && e.stack) || e));
 process.on("unhandledRejection", e => console.error("rejet non géré :", (e && e.stack) || e));
-const bye = () => { clearTimeout(timer); writeNow(); process.exit(0); };
+const bye = () => { clearTimeout(timer); writeNow(); if (dirty) backupNow(); process.exit(0); };
 process.on("SIGTERM", bye); process.on("SIGINT", bye);
 server.listen(PORT, () => console.log("Orbital Services en écoute sur :" + PORT + " — données : " + FILE + (AUTH_PASSWORD ? " — accès protégé" : "")));

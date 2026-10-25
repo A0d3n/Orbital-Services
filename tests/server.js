@@ -107,6 +107,36 @@ const JSONH = { "Content-Type": "application/json" };
     check("sauvegarde du jour créée", fs.existsSync(path.join(a.data, "backups", "entries-" + day + ".json")));
     check("données relues après redémarrage", JSON.parse((await raw(a2.port, "GET", "/api/entries")).body).some(e => e.id === "t1"));
 
+    /* A27 : en-têtes de sécurité */
+    for (const p of ["/", "/api/entries", "/n-existe-pas"]) {
+      const r = await raw(a2.port, "GET", p);
+      const csp = r.headers["content-security-policy"] || "";
+      check("CSP + Permissions-Policy sur " + p + " (" + r.status + ")", csp.includes("script-src 'self'") && csp.includes("frame-ancestors 'self'") && /camera=()/.test(r.headers["permissions-policy"] || "") && r.headers["cross-origin-resource-policy"] === "same-origin" && !r.headers["content-security-policy-report-only"], csp);
+    }
+    const ro = await startServer({ CSP_REPORT_ONLY: "1" }); kids.push(ro.child);
+    const rr = await raw(ro.port, "GET", "/");
+    check("CSP_REPORT_ONLY=1 → en-tête Report-Only, pas d'en-tête bloquant", !!rr.headers["content-security-policy-report-only"] && !rr.headers["content-security-policy"]);
+
+    /* A28 : sauvegardes */
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orbital-bk-")), bk = path.join(dir, "backups");
+    fs.mkdirSync(bk);
+    for (let i = 1; i <= 20; i++) fs.writeFileSync(path.join(bk, "entries-2020-01-" + String(i).padStart(2, "0") + ".json"), "{}");
+    fs.writeFileSync(path.join(dir, "entries.json"), JSON.stringify({ vieux: { title: "ancien" } }));
+    const d = await startServer({ DATA_DIR: dir, KEEP_BACKUPS: "5", BACKUP_INTERVAL_MS: "300" }); kids.push(d.child);
+    const todayF = path.join(bk, "entries-" + new Date().toISOString().slice(0, 10) + ".json");
+    check("sauvegarde créée au démarrage (état chargé)", fs.existsSync(todayF) && !!JSON.parse(fs.readFileSync(todayF, "utf8")).vieux);
+    check("rotation : 20 anciens + 1 → KEEP_BACKUPS (5) restants", fs.readdirSync(bk).filter(f => /^entries-.*.json$/.test(f)).length === 5, fs.readdirSync(bk).length);
+    await raw(d.port, "PUT", "/api/entries/nouveau", { "Content-Type": "application/json", "Content-Length": 17 }, '{"title":"frais"}');
+    await wait(1200);
+    const bkNow = JSON.parse(fs.readFileSync(todayF, "utf8"));
+    check("sauvegarde planifiée : contient la NOUVELLE entrée", bkNow.nouveau && bkNow.nouveau.title === "frais" && bkNow.vieux);
+    const m1 = fs.statSync(todayF).mtimeMs;
+    await wait(1000);
+    check("rien de changé → fichier non réécrit (mtime identique)", fs.statSync(todayF).mtimeMs === m1);
+    check("aucun .tmp résiduel (données et sauvegardes)", !fs.readdirSync(dir).concat(fs.readdirSync(bk)).some(f => f.endsWith(".tmp")));
+    check("rotation toujours respectée après sauvegardes planifiées", fs.readdirSync(bk).length === 5, fs.readdirSync(bk).length);
+
     /* plafond MAX_ENTRIES : on ne peut pas créer 20000 entrées vite, on vérifie au moins que le compte est borné par des ids distincts */
 
     /* A4 : authentification */

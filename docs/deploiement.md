@@ -33,9 +33,32 @@ Si l'application a été installée avec l'ancien compose (fichiers copiés dans
 | `DATA_DIR` | Dossier des données | `/data` |
 | `AUTH_PASSWORD` | Active l'authentification de base si renseigné | vide (accès libre) |
 | `AUTH_USER` | Identifiant demandé | `orbital` |
-| `KEEP_BACKUPS` | Nombre de sauvegardes quotidiennes conservées | `14` |
+| `KEEP_BACKUPS` | Nombre de fichiers de sauvegarde (un par jour) conservés | `14` |
+| `BACKUP_INTERVAL_MS` | Intervalle de la sauvegarde planifiée, en ms (minimum 50) | `3600000` (1 h) |
+| `CSP_REPORT_ONLY` | `1` : la politique de sécurité (CSP) est envoyée en mode « rapport seulement » (`Content-Security-Policy-Report-Only`) : rien n'est bloqué, le navigateur signale seulement dans sa console | vide (CSP appliquée) |
 
-Les sauvegardes sont dans `data/backups/entries-AAAA-MM-JJ.json`. Pour restaurer, arrêtez l'application, remplacez `data/entries.json` par la copie voulue, puis redémarrez.
+## Sauvegardes
+
+- Une sauvegarde est faite **au démarrage**, puis **toutes les heures uniquement si les données ont changé**, et une dernière à l'arrêt propre (SIGTERM) s'il reste des changements.
+- Il y a un fichier par jour, `data/backups/entries-AAAA-MM-JJ.json`, réécrit de façon atomique (fichier temporaire, `fsync`, puis renommage) : il contient l'état le plus récent du jour. Les `KEEP_BACKUPS` derniers jours sont gardés.
+- **Restaurer** : arrêtez l'application, remplacez `data/entries.json` par la copie voulue, puis redémarrez.
+- **Attention : le dossier `backups` est dans le même volume que les données.** Si le dataset est perdu ou corrompu, les sauvegardes le sont aussi. Copiez-les régulièrement ailleurs que sur le NAS.
+
+### Copier les sauvegardes hors du NAS
+
+- Le plus simple : copier le dossier `backups` (ou `entries.json`) à la main ou par script vers un autre ordinateur ou un disque externe.
+- Avec rsync, depuis une autre machine (adaptez l'utilisateur, l'adresse et les chemins) :
+  `rsync -av --ignore-existing utilisateur@IP-DU-NAS:/mnt/POOL/apps/orbital-services/data/backups/ ~/sauvegardes/orbital/`
+  (sans `--ignore-existing`, le fichier du jour est mis à jour à chaque passage.)
+- Planifié dans TrueNAS : *Data Protection* → **Rsync Task** (vers un autre serveur en SSH) ou **Cloud Sync Task** (vers un stockage cloud), source `/mnt/POOL/apps/orbital-services/data/backups`, une exécution par jour. Une **Periodic Snapshot Task** du dataset est un complément utile, mais reste sur le même NAS.
+
+## Conteneur durci
+
+`docker-compose.yml` et `docker-compose.build.yml` démarrent le conteneur avec `read_only: true`, `tmpfs: [/tmp]`, `cap_drop: [ALL]` et `no-new-privileges`. Le serveur n'écrit que dans `DATA_DIR` (`/data`) : ce volume reste **inscriptible pour l'utilisateur 568** (propriétaire du dataset), le reste du système de fichiers est en lecture seule. Le contrôle de santé (`wget` vers `/healthz`) n'écrit rien et fonctionne en lecture seule. Si une version future a besoin d'écrire ailleurs, retirez `read_only: true` pour dépanner.
+
+## En-têtes de sécurité
+
+Toutes les réponses portent une `Content-Security-Policy` (scripts, styles, polices, connexions : uniquement le site lui-même ; images : le site, `data:` et robertsspaceindustries.com), une `Permissions-Policy`, `Cross-Origin-Resource-Policy: same-origin`, `nosniff`, `Referrer-Policy: no-referrer` et `X-Frame-Options`. Pas de COOP/COEP, pour ne pas casser l'ouverture de liens vers RSI. **Secours** : si une mise à jour affiche une page cassée à cause de la CSP, ajoutez `CSP_REPORT_ONLY: "1"` dans `environment` et redémarrez : la politique n'est plus appliquée, seulement signalée dans la console du navigateur.
 
 ## Authentification : limites et précautions
 
