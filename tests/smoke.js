@@ -402,6 +402,15 @@ async function waitUp(port) {
     check("CSP stricte : aucune violation en parcourant les 6 onglets, la recherche, un événement et un système", viol.length === 0 && cspMsgs.length === 0, viol.concat(cspMsgs).join(" | "));
     await cctx.close();
 
+    /* fil « Derniers changements » : propre au système sélectionné (régression : « Découverte du système Tamsa » s'affichait sous chaque fiche) */
+    await page.goto(base + "/#carte/2956/terra"); await page.waitForSelector("#mFeed li"); await page.waitForTimeout(500);
+    const fTerra = await page.evaluate(() => ({ h: document.querySelector("#mFeedH").textContent, s: [...document.querySelectorAll("#mFeed button")].map(b => b.dataset.s), t: document.querySelector("#mFeed").textContent }));
+    check("carte : le fil des changements suit le système sélectionné (Terra)", /Terra/.test(fTerra.h) && fTerra.s.length > 0 && fTerra.s.every(x => x === "terra") && !/Tamsa/.test(fTerra.t), JSON.stringify(fTerra));
+    await page.goto(base + "/#carte/2956/tamsa"); await page.waitForTimeout(600);
+    check("carte : « Découverte du système Tamsa » n'apparaît que pour Tamsa", /Tamsa/.test(await page.textContent("#mFeed")));
+    await page.goto(base + "/#carte/2956/sol"); await page.waitForTimeout(600);
+    check("carte : le fil de Sol n’affiche pas la découverte de Tamsa", !/Tamsa/.test(await page.textContent("#mFeed")));
+    await page.keyboard.press("Escape"); await page.mouse.click(700, 450).catch(() => {}); await page.waitForTimeout(300);
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
     check("exécution du test", false, e && e.stack || String(e));

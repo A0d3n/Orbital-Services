@@ -157,12 +157,14 @@ function renderLog(){
 }
 function drawShape(s){var r=s.r||6;s.c.setAttribute("d",shapeD(s.k||"o",POS[s.i][0],POS[s.i][1],r))}
 
+/* le fil suit le système sélectionné (sinon : tous les systèmes) : sans cela les mêmes changements s'affichaient sous chaque fiche */
 function renderFeed(){
-  var past=[],next=[];
-  for(var i=0;i<CH.length;i++){var c=CH[i];if(c.y<=year)past.push(c);else if(next.length<3)next.push(c)}
+  var past=[],next=[],src=sel?CH.filter(function(c){return c.s===sel}):CH;
+  $("#mFeedH").textContent=sel&&BY[sel]?"Changements · "+BY[sel].n:"Derniers changements";
+  for(var i=0;i<src.length;i++){var c=src[i];if(c.y<=year)past.push(c);else if(next.length<3)next.push(c)}
   past=past.slice(-8).reverse();
   function li(c,cl){return '<li class="'+cl+'"><span class="fy">'+c.y+'</span><button type="button" data-y="'+c.y+'" data-s="'+c.s+'">'+c.t+'</button></li>'}
-  feed.innerHTML=past.map(function(c){return li(c,"")}).join("")+(next.length?'<li class="sep">Prochains changements</li>'+next.map(function(c){return li(c,"next")}).join(""):"");
+  feed.innerHTML=(past.length||next.length||!sel?"":'<li class="sep">Aucun changement connu pour ce système.</li>')+past.map(function(c){return li(c,"")}).join("")+(next.length?'<li class="sep">Prochains changements</li>'+next.map(function(c){return li(c,"next")}).join(""):"");
 }
 
 /* temps */
