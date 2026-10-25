@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Star Viewer - C, holo sobre</title>
+<style>
+:root{--bg:#0b0d0c;--panel:#0e1110;--line:#232826;--ink:#e7ebe8;--ink2:#9ca59e;--dim:#6a736c;--sage:#b8d9a6;
+--hum:#6fa6d6;--xian:#7fb86a;--banu:#d9c35a;--tev:#a98bdb;--van:#e0665a;
+--mono:"Geist Mono",ui-monospace,Consolas,monospace;--sans:Geist,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.5 var(--sans);padding:12px;min-height:100vh}
+h1{font:500 12px var(--mono);letter-spacing:.14em;color:var(--sage);text-transform:uppercase;margin:4px 2px 10px}
+.stage{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;display:grid;grid-template-columns:1fr;background:#0a0c0b}
+.map{display:block;width:100%;height:auto;aspect-ratio:8/5;min-height:260px}
+.grid1{stroke:var(--sage);stroke-width:.5;opacity:.07}.grid2{stroke:var(--sage);stroke-width:.6;opacity:.16}
+.edge{stroke:var(--sage);stroke-width:.8;opacity:.4;fill:none}
+.edge.sel{opacity:.9;stroke-width:1}
+.nd .c{fill:none;stroke:var(--sage);stroke-width:1}
+.nd .t{fill:none;stroke:var(--oc);stroke-width:1.4}
+.nd .d{fill:var(--oc)}
+.nd text{font:500 10px var(--mono);letter-spacing:.16em;fill:#9bb08f;text-anchor:middle}
+.nd.sel text{fill:#fff}.nd.sel .c{stroke:#fff;stroke-dasharray:2 3}
+.hum{--oc:var(--hum)}.xian{--oc:var(--xian)}.banu{--oc:var(--banu)}.tev{--oc:var(--tev)}.van{--oc:var(--van)}
+.legend{position:absolute;left:10px;top:10px;display:flex;flex-wrap:wrap;gap:4px 12px;max-width:calc(100% - 20px);font:500 10px var(--mono);letter-spacing:.1em;color:var(--ink2);text-transform:uppercase;background:rgba(10,12,11,.8);border:1px solid var(--line);padding:6px 9px}
+.legend i{display:inline-block;width:10px;height:0;border-top:2px solid var(--oc);margin-right:6px;vertical-align:3px}
+.sheet{margin:0 10px 10px;background:rgba(14,17,16,.94);border:1px solid var(--line);padding:16px;
+clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.sheet h2{font:500 20px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
+.tag{display:inline-block;font:500 10px var(--mono);letter-spacing:.14em;color:var(--hum);border-bottom:1px solid var(--hum);margin:4px 0 14px;text-transform:uppercase}
+.sheet dl{display:grid;grid-template-columns:auto 1fr;gap:0 14px;font-size:13px}
+.sheet dt,.sheet dd{padding:6px 0;border-top:1px solid var(--line)}
+.sheet dt{font:500 10px var(--mono);letter-spacing:.14em;color:var(--dim);text-transform:uppercase;padding-top:9px}
+.sheet p{margin-top:12px;color:var(--ink2);font-size:13px}
+.console{margin-top:12px;border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:12px 14px;display:grid;grid-template-columns:auto 1fr;gap:8px 14px;align-items:center}
+.era{font:500 12px var(--mono);letter-spacing:.16em;color:var(--sage)}
+.btns{display:flex;gap:6px}
+.btn{width:36px;height:36px;border:1px solid var(--line);background:transparent;color:var(--ink2);border-radius:0;font:500 14px var(--mono);display:grid;place-items:center}
+.btn.p{border-color:var(--sage);color:var(--sage)}
+input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--sage);height:28px}
+.ticks{grid-column:1/-1;display:flex;justify-content:space-between;font:10px var(--mono);color:var(--dim);letter-spacing:.1em}
+@media(min-width:900px){body{padding:20px}
+.stage{grid-template-columns:1fr 330px;align-items:start}.sheet{margin:16px 16px 16px 0}
+.console{grid-template-columns:auto auto 1fr}input[type=range]{grid-column:auto}}
+</style></head><body>
+<h1>Star Viewer · Option C · tableau holographique sobre</h1>
+<div class="stage">
+<svg class="map" viewBox="0 0 800 500" role="img" aria-label="Carte de 12 systèmes">
+<defs><pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path class="grid1" d="M20 0H0V20" fill="none"/></pattern>
+<pattern id="g2" width="100" height="100" patternUnits="userSpaceOnUse"><path class="grid2" d="M100 0H0V100" fill="none"/></pattern></defs>
+<rect width="800" height="500" fill="url(#g1)"/><rect width="800" height="500" fill="url(#g2)"/>
+<circle cx="400" cy="250" r="90" fill="none" stroke="#b8d9a6" stroke-width=".5" opacity=".2"/><circle cx="400" cy="250" r="180" fill="none" stroke="#b8d9a6" stroke-width=".5" opacity=".14" stroke-dasharray="2 5"/>
+<path class="edge sel" d="M400 250L680 110M400 250L280 170M400 250L560 180M400 250L480 420M400 250L650 300"/>
+<path class="edge" d="M560 180L250 360M560 180L650 300M280 170L160 260M280 170L150 110M160 260L120 400M160 260L250 360M120 400L250 360M150 110L420 70M420 70L680 110M700 430L650 300M700 430L480 420M250 360L480 420"/>
+<g class="nd hum sel"><circle class="c" cx="400" cy="250" r="16"/><circle class="t" cx="400" cy="250" r="8"/><circle class="d" cx="400" cy="250" r="2.5"/><text x="400" y="284">STANTON</text></g>
+<g class="nd van"><circle class="t" cx="560" cy="180" r="7"/><circle class="d" cx="560" cy="180" r="2"/><text x="560" y="206">PYRO</text></g>
+<g class="nd hum"><circle class="t" cx="280" cy="170" r="7"/><circle class="d" cx="280" cy="170" r="2"/><text x="280" y="196">TERRA</text></g>
+<g class="nd hum"><circle class="t" cx="160" cy="260" r="7"/><circle class="d" cx="160" cy="260" r="2"/><text x="160" y="286">SOL</text></g>
+<g class="nd banu"><circle class="t" cx="250" cy="360" r="7"/><circle class="d" cx="250" cy="360" r="2"/><text x="250" y="386">NYX</text></g>
+<g class="nd hum"><circle class="t" cx="150" cy="110" r="7"/><circle class="d" cx="150" cy="110" r="2"/><text x="150" y="136">CASTRA</text></g>
+<g class="nd xian"><circle class="t" cx="120" cy="400" r="7"/><circle class="d" cx="120" cy="400" r="2"/><text x="120" y="426">TAYAC</text></g>
+<g class="nd tev"><circle class="t" cx="420" cy="70" r="7"/><circle class="d" cx="420" cy="70" r="2"/><text x="420" y="96">HADUR</text></g>
+<g class="nd xian"><circle class="t" cx="650" cy="300" r="7"/><circle class="d" cx="650" cy="300" r="2"/><text x="650" y="326">BACCHUS</text></g>
+<g class="nd van"><circle class="t" cx="700" cy="430" r="7"/><circle class="d" cx="700" cy="430" r="2"/><text x="700" y="456">VEGA</text></g>
+<g class="nd hum"><circle class="t" cx="480" cy="420" r="7"/><circle class="d" cx="480" cy="420" r="2"/><text x="480" y="446">TIBER</text></g>
+<g class="nd hum"><circle class="t" cx="680" cy="110" r="7"/><circle class="d" cx="680" cy="110" r="2"/><text x="680" y="136">MAGNUS</text></g>
+</svg>
+<div class="legend"><span class="hum"><i></i>Humanité</span><span class="xian"><i></i>Xi'an</span><span class="banu"><i></i>Banu</span><span class="tev"><i></i>Tevarin</span><span class="van"><i></i>Vanduul</span></div>
+<aside class="sheet"><h2>Stanton</h2><span class="tag">Humanité</span>
+<dl><dt>Étoile</dt><dd>Type G (fiction)</dd><dt>Planètes</dt><dd>4 corps principaux</dd><dt>Liaisons</dt><dd>5 systèmes voisins</dd><dt>Statut</dt><dd>Exemple de maquette</dd></dl>
+<p>Données fictives de maquette. Le camp n'est signalé que par l'anneau intérieur du système.</p></aside>
+</div>
+<div class="console"><div class="era">2955 · ÈRE ACTUELLE</div><div class="btns"><button class="btn">◀</button><button class="btn p">▶</button><button class="btn">▶▶</button></div>
+<input type="range" min="2300" max="2955" value="2955" aria-label="Année"><div class="ticks"><span>2300</span><span>2500</span><span>2700</span><span>2955</span></div></div>
+</body></html>

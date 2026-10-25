@@ -39,3 +39,18 @@ Comparaison faite le 12 octobre 2026 avec les données de la StarMap officielle 
 ## Apparence : Star Viewer
 
 L’onglet s’appelle désormais **Star Viewer**. Il reprend l’allure de la StarMap de RSI tout en gardant la charte de l’application : carte plein cadre sur fond à grille de points, panneaux aux coins coupés (filtres à gauche, fiche du système à droite), console du temps flottante en bas, repères en anneaux marqués d’un point et liaisons fines vert sauge. Sous 1 100 px de large, les panneaux passent sous la carte.
+
+## Recherche de dates pour les 15 systèmes sans date (25 octobre 2026)
+
+Résultat : **aucune date officielle** n'a été trouvée. La StarMap et la Galactic Guide de RSI n'ont pas pu être relues pour ces systèmes ; les fiches du wiki starcitizen.tools donnent au mieux des fourchettes. Aucune donnée de `data.js` n'a donc été changée.
+
+| Système | Ce que disent les sources | Décision proposée |
+|---|---|---|
+| Bacchus | wiki : « entre 2449 et 2530 » ; une version « 2439 » circule mais n'a pas pu être vérifiée | garder « non précisée » |
+| Kins | wiki : « entre 2509 et 2542 » | garder « non précisée » |
+| K.ap’a’ri, Malkail, El’sin | wiki : « entre 2530 et 2945 » (même valeur pour les trois, sans explication) | garder « non précisée » |
+| Vesper, Vagabond, Voodoo, Vendetta, Virgo, Volt, Veritas, Vermilion | wiki : « entre 2726 et 2945 » (même valeur pour les huit) | garder « non précisée » |
+| Vanguard | wiki : visité en 2943 (Christian Meyer) ; campement vanduul sur Vanguard III en 2943 | **à décider** : afficher 2943 en le marquant « source communautaire » |
+| Viking | wiki : « connu » en 2686, « visité » en 2883 (les deux valeurs se contredisent) | garder « non précisée » |
+
+À faire si tu veux aller plus loin : ouvrir la Galactapedia de RSI dans un navigateur (le champ « Discovered in » se charge dynamiquement) pour Bacchus et Vanguard.
