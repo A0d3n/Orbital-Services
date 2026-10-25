@@ -1,6 +1,6 @@
 /* Service worker : l'app s'ouvre même sans réseau (page et scripts gardés en cache). */
-var VERSION = "orbital-v6";
-var CORE = ["./", "style.css", "data.js", "visuals.js", "timeline.js", "comm.js", "map.js", "carnet.js", "versions.js", "home.js", "terra.webp", "favicon.svg", "site.webmanifest"];
+var VERSION = "orbital-v7";
+var CORE = ["./", "style.css", "data.js", "visuals.js", "timeline.js", "comm.js", "map.js", "carnet.js", "versions.js", "home.js", "search.js", "search.css", "terra.webp", "favicon.svg", "site.webmanifest"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) {

@@ -1,3 +1,5 @@
+/* le lien #chronologie/<id> est lu ici, avant que map.js ne le remplace par #chronologie */
+window.__orbHash0=location.hash;
 (function(){
 var TAGS={hum:"Humanité",xian:"Xi’an",banu:"Banu",tev:"Tevarin",van:"Vanduul",tech:"Technologie",corp:"Industrie",myst:"Mystères"};
 
@@ -19,6 +21,15 @@ function orbit(i){
 var total=0,html='',ecs='';
 function esc(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
 function norm(t){return String(t).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[’']/g,"'").replace(/[  ]/g,' ').toLowerCase()}
+/* identifiant stable d'un événement : titre sans accents ni ponctuation ; année puis numéro si deux titres sont identiques */
+var usedIds={};
+function slugify(t){return norm(t).replace(/œ/g,'oe').replace(/æ/g,'ae').replace(/'/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')||'evenement'}
+function evId(e){
+  var b=slugify(e.t),id=b,n=1;
+  if(usedIds[id])id=b+'-'+slugify(String(e.y).split('→')[0]);
+  while(usedIds[id])id=b+'-'+(++n);
+  usedIds[id]=1;return id;
+}
 function ynum(y){var t=String(y).replace(/−/g,'-').replace(/[\s  ]/g,''),m=/^(-?\d+)/.exec(t);return m?+m[1]:0}
 
 /* illustration d'une carte : ciel, étoiles et planète aux couleurs du thème de l'événement */
@@ -38,20 +49,20 @@ function scene(g,seed){
   return s;
 }
 var cardN=0;
-function card(e,era){
+function card(e,era,flat){
   var n=++cardN,long=e.d.length>130;
-  return '<article class="ev'+(e.m?' major':'')+'" data-g="'+e.g+'" data-y="'+esc(e.y)+'" style="--tc:var(--c-'+e.g+')">'+
+  return '<article class="ev'+(e.m?' major':'')+'"'+(flat?'':' id="ev-'+e.id+'" tabindex="-1"')+' data-id="'+e.id+'" data-g="'+e.g+'" data-y="'+esc(e.y)+'" style="--tc:var(--c-'+e.g+')">'+
     '<div class="ev-img">'+(window.__orbVisual?window.__orbVisual(e._k,e.g,n):scene(e.g,n))+
     '<img class="ev-photo" src="evt-'+e._k.replace('.','-')+'.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()">'+
     '<span class="ev-lab">'+e.y+'</span></div>'+
     '<div class="body"><div class="ev-top"><div class="ev-ti"><h3>'+e.t+'</h3><div class="ev-sub">'+era.n+' · '+TAGS[e.g]+'</div></div><span class="ev-y">'+e.y+'</span></div>'+
     '<p class="ev-desc">'+e.d+'</p>'+(long?'<button type="button" class="ev-more" aria-expanded="false">Lire la suite</button>':'')+
     '<div class="ev-tags">'+(e.m?'<span class="tg major">Majeur</span>':'')+'<span class="tg">'+TAGS[e.g]+'</span></div>'+
-    '<div class="ev-foot"><span class="ev-src">Source : Star Citizen Wiki</span></div></div></article>';
+    '<div class="ev-foot"><span class="ev-src">Source : Star Citizen Wiki</span><button type="button" class="ev-copy" data-id="'+e.id+'" aria-label="Copier le lien vers « '+esc(e.t)+' »"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>Copier le lien</button></div></div></article>';
 }
 ERAS.forEach(function(era,i){
   total+=era.e.length;
-  era.e.forEach(function(e,j){e._k=i+'.'+j});
+  era.e.forEach(function(e,j){e._k=i+'.'+j;e.id=evId(e)});
   html+='<section class="era" id="'+era.id+'" data-i="'+i+'" style="--era:'+era.c+'">'+
    '<header class="era-h"><div class="orb">'+orbit(i)+'</div><div class="era-t">'+
    '<p class="kicker">Saut '+pad(i+1)+' / '+pad(ERAS.length)+'</p><h2>'+era.n+'</h2><p class="range">'+era.r+'</p></div>'+
@@ -70,7 +81,7 @@ function buildFlat(){
   if(flatBuilt)return;flatBuilt=true;
   var all=[];ERAS.forEach(function(era){era.e.forEach(function(e){all.push([e,era])})});
   all.sort(function(a,b){return ynum(b[0].y)-ynum(a[0].y)});
-  var f=$('#appFlat');f.innerHTML=all.map(function(a){return card(a[0],a[1])}).join('');
+  var f=$('#appFlat');f.innerHTML=all.map(function(a){return card(a[0],a[1],true)}).join('');
   haystack(f);
   if(window.__orbDecorate)window.__orbDecorate(f);
 }
@@ -156,6 +167,50 @@ function onScroll(){
 addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
 addEventListener('resize',onScroll);
 
+/* ouvre un événement : affichage par époque, filtres levés, défilement, mise en évidence */
+window.__orbOpenEv=function(id){
+  var el=document.getElementById('ev-'+id);
+  if(!el)return false;
+  if(!$('#appFlat').hidden)setSort('era');
+  if(el.hidden){q='';$('#tlQ').value='';active={};[].forEach.call(document.querySelectorAll('.chip[data-g]'),function(c){c.setAttribute('aria-pressed','false')});apply()}
+  function center(){try{el.scrollIntoView({block:'center',behavior:'instant'})}catch(x){el.scrollIntoView({block:'center'})}}
+  center();
+  el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');
+  try{el.focus({preventScroll:true})}catch(x){}
+  setTimeout(center,350); /* images et polices peuvent décaler la mise en page */
+  return true;
+};
 
 apply();
+})();
+
+/* lien partageable #chronologie/<id>, copie du lien et message « Lien copié » */
+(function(){
+var toastT=0;
+function toast(m){
+  var t=document.getElementById('orbToast');if(!t)return;
+  clearTimeout(toastT);t.textContent='';t.classList.remove('on');
+  setTimeout(function(){t.textContent=m;t.classList.add('on');toastT=setTimeout(function(){t.classList.remove('on');t.textContent=''},2600)},30);
+}
+/* copie : API du presse-papiers si le contexte est sûr, sinon sélection de texte + execCommand (HTTP sur le NAS) */
+function copy(text){
+  var prev=document.activeElement;
+  function fallback(){
+    var ta=document.createElement('textarea'),ok=false;
+    ta.value=text;ta.setAttribute('readonly','');ta.setAttribute('aria-hidden','true');
+    ta.style.cssText='position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+    document.body.appendChild(ta);ta.focus({preventScroll:true});ta.select();ta.setSelectionRange(0,text.length);
+    try{ok=document.execCommand('copy')}catch(e){}
+    ta.remove();if(prev&&prev.focus)prev.focus({preventScroll:true});
+    toast(ok?'Lien copié':'Copie impossible. Lien : '+text);
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText&&window.isSecureContext)navigator.clipboard.writeText(text).then(function(){toast('Lien copié')},fallback);
+  else fallback();
+}
+window.__orbToast=toast;window.__orbCopy=copy;
+window.__orbEvLink=function(id){return location.href.split('#')[0]+'#chronologie/'+id};
+document.addEventListener('click',function(e){
+  var b=e.target.closest('.ev-copy');if(b)copy(window.__orbEvLink(b.dataset.id));
+});
+
 })();

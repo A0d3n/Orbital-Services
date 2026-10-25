@@ -45,3 +45,15 @@ if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
   var a=document.getElementById("skip"),m=document.getElementById("main");
   if(a&&m)a.addEventListener("click",function(e){e.preventDefault();m.focus({preventScroll:true});window.scrollTo(0,0)});
 })();
+
+/* lien partagé #chronologie/<id> : ouvre la chronologie sur l'événement (au chargement et quand l'adresse change) */
+(function(){
+  function evId(h){var m=/^#chronologie\/([^\/?#]+)/.exec(h||"");if(!m)return null;try{return decodeURIComponent(m[1])}catch(e){return m[1]}}
+  function open(id){
+    if(!id||!window.__orbOpenEv||!window.__orbOpenEv(id))return;
+    try{history.replaceState(null,"","#chronologie/"+id)}catch(e){}
+  }
+  open(evId(window.__orbHash0));
+  /* ce gestionnaire passe après celui de map.js, qui a déjà affiché l'onglet */
+  addEventListener("hashchange",function(e){var i=(e.newURL||"").indexOf("#");open(evId(i<0?"":e.newURL.slice(i)))});
+})();

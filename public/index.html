@@ -12,6 +12,8 @@
 <style>html{color-scheme:dark}body{margin:0;font-size:14px}img{max-width:100%}[hidden]{display:none!important}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="search.css">
+<script src="search.js" defer></script>
 </head>
 <body>
 <a class="skip" href="#main" id="skip">Aller au contenu</a>
@@ -53,7 +55,7 @@
     <span class="tb-sub" id="topSub"></span>
     <div class="now" id="now" aria-live="off"><small>ANNÉE</small><span id="nowy">−300 000</span></div>
     <nav class="ecs" id="ecs" aria-label="Époques"></nav>
-    <div class="tb-right"><span class="tb-data">DONNÉES <b>STAR CITIZEN WIKI</b></span><span class="tb-pill" id="tbYear">2956</span></div>
+    <div class="tb-right"><button type="button" class="srch-btn" id="srchOpen" aria-haspopup="dialog" aria-keyshortcuts="/"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span class="srch-lbl">Rechercher</span><kbd aria-hidden="true">/</kbd></button><span class="tb-data">DONNÉES <b>STAR CITIZEN WIKI</b></span><span class="tb-pill" id="tbYear">2956</span></div>
     <div class="prog"><i id="prog"></i></div>
   </header>
 
@@ -322,6 +324,28 @@
   </footer>
   </div>
 </div>
+
+<div class="srch-ov" id="srchOv" hidden>
+  <div class="srch" id="srchDlg" role="dialog" aria-modal="true" aria-label="Recherche globale">
+    <div class="srch-q">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      <input id="srchQ" type="text" role="combobox" aria-expanded="false" aria-controls="srchLb" aria-autocomplete="list" aria-label="Rechercher un événement, un système, une planète ou un Comm-Link" placeholder="Rechercher : Stanton, Croshaw, Terra…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+      <button type="button" class="srch-k" id="srchClose" aria-label="Fermer la recherche"><span class="srch-d">Échap</span><span class="srch-m">Fermer</span></button>
+    </div>
+    <div class="srch-hint" id="srchHint">
+      <p>Un nom de système, une planète, un événement, une année ou un Comm-Link.</p>
+      <div class="srch-sug" id="srchSug"></div>
+    </div>
+    <ul class="srch-list" id="srchLb" role="listbox" aria-label="Résultats" hidden></ul>
+    <div class="srch-foot">
+      <span class="srch-h"><kbd>↑</kbd><kbd>↓</kbd> naviguer</span>
+      <span class="srch-h"><kbd>Entrée</kbd> ouvrir</span>
+      <span class="srch-count" id="srchCount" role="status" aria-live="polite"></span>
+      <button type="button" class="srch-copy" id="srchCopy" title="Ctrl+Entrée" aria-keyshortcuts="Control+Enter"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>Copier le lien</button>
+    </div>
+  </div>
+</div>
+<div class="srch-toast" id="orbToast" role="status"></div>
 
 <script src="data.js"></script>
 <script src="visuals.js"></script>

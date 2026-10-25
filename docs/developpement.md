@@ -11,6 +11,7 @@
 | `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
 | `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
+| `search.js`, `search.css` | Recherche globale (touche « / » ou loupe) : événements, systèmes, planètes, Comm-Links ; copie de lien |
 | `versions.js` | Historique des versions (une entrée par commit) |
 | `sw.js` | Mode hors ligne |
 
