@@ -1,4 +1,6 @@
-# Images Canva à valider ou remplacer
+# Images Canva : remplacées (époque 7)
+
+**Fait le 25 octobre 2026** : `evt-7-2`, `evt-7-3`, `evt-7-4`, `evt-7-7` et `evt-7-12` ont été régénérées avec Canva (une scène distincte par événement, sans texte ni logo) et remplacées en 1600 × 571. Les anciennes versions restent dans l'historique git. Le tableau ci-dessous garde le constat d'origine.
 
 Relecture de l'époque 7 « Le présent » (13 images, planche de contrôle faite le 25 octobre 2026). Les autres époques n'ont pas été relues : dis-moi si tu veux la même vérification.
 

@@ -50,7 +50,7 @@ Résultat : **aucune date officielle** n'a été trouvée. La StarMap et la Gala
 | Kins | wiki : « entre 2509 et 2542 » | garder « non précisée » |
 | K.ap’a’ri, Malkail, El’sin | wiki : « entre 2530 et 2945 » (même valeur pour les trois, sans explication) | garder « non précisée » |
 | Vesper, Vagabond, Voodoo, Vendetta, Virgo, Volt, Veritas, Vermilion | wiki : « entre 2726 et 2945 » (même valeur pour les huit) | garder « non précisée » |
-| Vanguard | wiki : visité en 2943 (Christian Meyer) ; campement vanduul sur Vanguard III en 2943 | **à décider** : afficher 2943 en le marquant « source communautaire » |
+| Vanguard | wiki : visité en 2943 (Christian Meyer) ; campement vanduul sur Vanguard III en 2943 | **fait** : 2943 affiché, marqué « source communautaire » (14 systèmes restent sans date) |
 | Viking | wiki : « connu » en 2686, « visité » en 2883 (les deux valeurs se contredisent) | garder « non précisée » |
 
 À faire si tu veux aller plus loin : ouvrir la Galactapedia de RSI dans un navigateur (le champ « Discovered in » se charge dynamiquement) pour Bacchus et Vanguard.

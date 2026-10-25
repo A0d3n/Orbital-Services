@@ -36,3 +36,7 @@ Chaque page source se trouve sur `https://images.nasa.gov/details/<identifiant>`
 ## Comm-Links
 
 L’onglet Lore › Comm-Links affiche `public/commlinks.js`, généré par `node scripts/commlinks.js` (liste, titres, dates, extraits et vignettes viennent de robertsspaceindustries.com ; les images ne sont pas copiées, elles sont chargées depuis le site de RSI). Relancez la commande pour actualiser la liste.
+
+## Remplacements du 25 octobre 2026
+
+`evt-7-2`, `evt-7-3`, `evt-7-4`, `evt-7-7` et `evt-7-12` : nouvelles images générées avec Canva (Magic Media), recadrées en 1600 × 571. À mentionner « généré par IA (Canva) » si le dépôt devient public (voir `docs/droits-images.md`).
