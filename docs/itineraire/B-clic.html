@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquette B · Itinéraire par clic sur la carte · Orbital Services</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d0c;--bg-2:#111412;--line:#232826;--line-2:#2e3531;--ink:#e7ebe8;--ink-2:#9ca59e;--dim:#858f87;--sage:#b8d9a6;--warn:#e8895a;
+--f:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;--m:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--f);-webkit-text-size-adjust:100%;overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:2px}
+.demo{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;padding:.35rem .6rem;border-bottom:1px dashed var(--line);font:400 .7rem var(--m);color:var(--dim)}
+.demo button{background:none;border:1px solid var(--line);color:var(--dim);padding:.25rem .5rem;border-radius:2px;font:400 .7rem var(--m);cursor:pointer;min-height:1.9rem}
+.demo button:hover{color:var(--ink);border-color:var(--line-2)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-width:2.75rem;height:2.75rem;padding:0 .8rem;background:transparent;border:1px solid var(--line-2);border-radius:2px;cursor:pointer;font:500 .85rem/1 var(--f)}
+.btn:hover{border-color:var(--sage);color:var(--sage)}
+.btn.pri{background:var(--sage);color:var(--bg);border-color:var(--sage)}
+.btn.pri:hover{color:var(--bg);filter:brightness(1.1)}
+
+.app{display:flex;flex-direction:column;min-height:calc(100svh - 2.7rem)}
+.center{display:flex;flex-direction:column;min-width:0;flex:1}
+.mapbox{position:relative;flex:1;height:min(62svh,560px);min-height:300px;border-bottom:1px solid var(--line);overflow:hidden;
+ background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/28px 28px,radial-gradient(ellipse at 50% 45%,#10151a,#07090a 80%)}
+#map{width:100%;height:100%;display:block;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+#map:focus-visible{outline-offset:-3px}
+.fit{position:absolute;top:.5rem;right:.5rem;width:2.75rem;height:2.75rem;display:grid;place-items:center;background:rgba(11,13,12,.8);border:1px solid var(--line-2);border-radius:2px;cursor:pointer;color:var(--ink-2)}
+.fit:hover{color:var(--sage);border-color:var(--sage)}
+@media (min-width:1000px){.app{height:calc(100vh - 2.7rem);min-height:640px}.mapbox{height:0;flex:1 1 0;min-height:0;border-bottom:0}}
+
+.eg{stroke:#5d6b62;stroke-width:1.1;fill:none}
+.eg.d{stroke-dasharray:3 4}
+.rh{stroke:var(--sage);stroke-width:10;opacity:.13;stroke-linecap:round}
+.rt{stroke:var(--sage);stroke-width:4.2;stroke-linecap:round}
+.rt.d{stroke-dasharray:9 6;stroke-linecap:butt}
+.bd,.tg{pointer-events:none}
+.bd circle{fill:var(--bg);stroke:var(--sage);stroke-width:1.3}
+.bd text{font:500 10px var(--m);fill:var(--sage);text-anchor:middle;dominant-baseline:central}
+.tg rect{fill:var(--sage)}
+.tg text{font:500 7.5px var(--m);letter-spacing:.08em;text-transform:uppercase;fill:var(--bg);text-anchor:middle;dominant-baseline:central}
+.nd{cursor:pointer}
+.nd .hit{fill:transparent}
+.nd .sh{fill:var(--bg);stroke:#cfd8d1;stroke-width:1.2}
+.nd.no .sh{stroke:#7b857e;stroke-dasharray:2 2}
+.nd.on .sh{fill:var(--sage);stroke:var(--sage)}
+.nd:hover .sh{stroke:var(--sage)}
+.nd text{font:500 10.5px var(--f);letter-spacing:.06em;text-transform:uppercase;fill:#cfd8d1;text-anchor:middle;paint-order:stroke;stroke:#07090a;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.nd.on text,.nd.end text{fill:#fff}
+.ring{display:none;fill:none}
+.nd.end .ring{display:block;stroke:var(--sage);stroke-width:1.2}
+#map:focus-visible .nd.cur .ring{display:block;stroke:#fff;stroke-width:1.3;stroke-dasharray:2 2.5}
+
+.tc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.4rem .9rem;align-items:center;padding:.7rem max(.8rem,2vw);border-top:1px solid var(--line-2);background:linear-gradient(180deg,rgba(184,217,166,.07),transparent)}
+.yr small{display:block;font:400 .62rem var(--m);letter-spacing:.2em;color:var(--ink-2)}
+.yr output{display:block;font:400 2rem/1 var(--m);color:var(--sage);font-variant-numeric:tabular-nums}
+.tc .row{display:flex;gap:.4rem;align-items:center;min-width:0}
+.tc input[type=range]{flex:1;min-width:0;accent-color:var(--sage);height:2.2rem;margin:0}
+.tc .btn{min-width:2.75rem;padding:0}
+.lg{padding:.2rem max(.8rem,2vw) .8rem;font-size:.78rem;color:var(--ink-2)}
+.lg summary{cursor:pointer;min-height:2.4rem;display:flex;align-items:center;font:400 .7rem var(--m);letter-spacing:.16em;text-transform:uppercase}
+.lg ul{list-style:none;margin:.2rem 0 .4rem;padding:0;display:flex;flex-wrap:wrap;gap:.35rem 1rem}
+.lg li{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap}
+.lg p{margin:.2rem 0 0;color:var(--dim);font-size:.72rem;max-width:70ch;overflow-wrap:anywhere}
+
+/* B : carte de système, aide, barre flottante */
+.hint,.card,.bar{position:absolute;z-index:5;background:rgba(11,13,12,.94);border:1px solid var(--line-2)}
+.hint[hidden],.card[hidden],.bar[hidden]{display:none}
+.hint{left:.5rem;top:.5rem;max-width:calc(100% - 4rem);padding:.55rem .75rem;font-size:.85rem;border-left:3px solid var(--sage);overflow-wrap:anywhere}
+.hint b{color:var(--sage);font-weight:500}
+.hint small{display:block;color:var(--ink-2);font-size:.74rem}
+.card{left:.5rem;top:.5rem;width:min(19rem,calc(100% - 4rem));padding:.8rem .9rem .9rem}
+.card h3{margin:0;font:700 1.3rem/1.15 var(--f);overflow-wrap:anywhere}
+.card .meta{margin:.15rem 0 .7rem;font:400 .78rem var(--m);color:var(--ink-2)}
+.card .acts{display:grid;gap:.45rem}
+.card .acts .btn{justify-content:flex-start;width:100%}
+.card .tipk{margin:.6rem 0 0;font-size:.72rem;color:var(--dim)}
+.bar{left:.5rem;right:.5rem;bottom:.5rem;max-width:34rem;border-left:3px solid var(--sage)}
+.bar-h{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .5rem;padding:.3rem .4rem .3rem .3rem}
+.bar-t{flex:1 1 9rem;min-width:0;margin:0;padding-left:.2rem;font-size:.95rem;overflow-wrap:anywhere}
+.bar-t b{font-weight:500;color:var(--sage);font-family:var(--m)}
+.bar .btn{height:2.75rem}
+.tgl svg{transition:transform .2s}
+.tgl[aria-expanded=true] svg{transform:rotate(180deg)}
+.bar-b{max-height:10rem;overflow:auto;padding:0 .5rem .6rem;border-top:1px solid var(--line)}
+.bar-b[hidden]{display:none}
+.steps{list-style:none;margin:.5rem 0 0;padding:0;border:1px solid var(--line)}
+.steps li+li{border-top:1px solid var(--line)}
+.stp{display:flex;align-items:center;gap:.7rem;width:100%;min-height:2.75rem;padding:.3rem .6rem;background:none;border:0;border-left:2px solid transparent;text-align:left;cursor:pointer;color:var(--ink)}
+.stp:hover{background:rgba(184,217,166,.07);border-left-color:var(--sage)}
+.stp b{flex:none;width:1.55rem;height:1.55rem;border:1px solid var(--sage);border-radius:50%;display:grid;place-items:center;font:500 .72rem var(--m);color:var(--sage)}
+.stp span{flex:1;min-width:0;overflow-wrap:anywhere}
+.ded{font:400 .66rem var(--m);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);border:1px dashed var(--line-2);padding:.1rem .35rem;border-radius:2px;white-space:nowrap}
+.note{margin:.5rem 0 0;font-size:.76rem;color:var(--dim)}
+.errd{margin:.6rem 0 0;font-size:.88rem;color:var(--ink-2);overflow-wrap:anywhere}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="demo" role="group" aria-label="Démonstration (hors maquette)">
+  <span>Démo :</span>
+  <button type="button" data-demo="found">Route trouvée</button>
+  <button type="button" data-demo="none">Aucune route (2900)</button>
+  <button type="button" data-demo="nojump">Sans point de saut (Virgo)</button>
+  <button type="button" data-demo="empty">Carte seule</button>
+</div>
+
+<div class="app">
+  <main class="center">
+    <div class="mapbox" id="mb">
+      <svg id="map" viewBox="0 0 400 300" role="application" aria-roledescription="carte" aria-label="Mini-carte schématique. Flèches : système voisin. Entrée : ouvrir la carte du système. Maj + Entrée : choisir comme arrivée. 0 : vue d’ensemble." tabindex="0"></svg>
+      <button type="button" class="fit" id="fit" aria-label="Vue d’ensemble" title="Vue d’ensemble (0)">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 6V2h4M12 2h4v4M16 12v4h-4M6 16H2v-4"/></svg>
+      </button>
+
+      <div class="hint" id="hint" role="status" hidden></div>
+
+      <div class="card" id="card" role="dialog" aria-labelledby="cn" hidden>
+        <h3 id="cn"></h3>
+        <p class="meta" id="cm"></p>
+        <div class="acts">
+          <button type="button" class="btn pri" id="cFrom">Itinéraire depuis ici</button>
+          <button type="button" class="btn" id="cTo" hidden>Itinéraire jusqu’ici</button>
+          <button type="button" class="btn" id="cClose">Fermer</button>
+        </div>
+        <p class="tipk">Raccourci : Maj + clic sur un système pour en faire l’arrivée.</p>
+      </div>
+
+      <div class="bar" id="bar" hidden>
+        <div class="bar-h">
+          <button type="button" class="btn tgl" id="tgl" aria-expanded="false" aria-controls="bb" aria-label="Afficher les étapes">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M3 10l5-5 5 5"/></svg>
+          </button>
+          <p class="bar-t" id="bsum" aria-live="polite"></p>
+          <span id="bcta"></span>
+          <button type="button" class="btn" id="bclr" aria-label="Effacer l’itinéraire" title="Effacer">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 2l10 10M12 2 2 12"/></svg>
+          </button>
+        </div>
+        <div class="bar-b" id="bb" hidden></div>
+      </div>
+    </div>
+
+    <section class="tc" aria-label="Console du temps">
+      <div class="yr"><small>ANNÉE</small><output id="yr" for="rng">2956</output></div>
+      <div class="row">
+        <button type="button" class="btn" id="ym" aria-label="Année précédente">−</button>
+        <input type="range" id="rng" min="2400" max="2956" step="1" value="2956" aria-label="Année affichée">
+        <button type="button" class="btn" id="yp" aria-label="Année suivante">+</button>
+      </div>
+    </section>
+    <details class="lg" id="legend"></details>
+  </main>
+</div>
+
+<script>
+/* ===== Noyau commun (identique dans les 3 maquettes, sauf TAGS) ===== */
+const TAGS=true;
+const $=s=>document.querySelector(s);
+const S={sol:["Sol",70,170],davien:["Davien",130,112],cano:["Cano",195,84],pyro:["Pyro",252,136],stanton:["Stanton",335,98],hadrian:["Hadrian",256,214],kiel:["Kiel",192,252],baker:["Baker",125,262],hadur:["Hadur",58,252],croshaw:["Croshaw",40,100],terra:["Terra",340,190],virgo:["Virgo",352,36]};
+const DISC={pyro:2493,stanton:2903,terra:2516};          /* années réelles */
+const NOJ=["virgo"];                                     /* sans point de saut publié */
+/* [de, vers, ouverture, déduite] : liaisons et années illustratives, sauf découvertes ci-dessus */
+const L=[["sol","davien",2438,0],["davien","cano",2460,0],["cano","pyro",2493,0],["pyro","stanton",2903,0],["pyro","hadrian",2510,0],["hadrian","kiel",2600,1],["kiel","baker",2620,0],["baker","hadur",2640,0],["sol","croshaw",2438,0],["pyro","terra",2516,1]];
+const st={y:2956,a:"sol",b:"stanton"},hooks={};
+const nm=id=>S[id][0];
+const known=(id,y)=>y>=(DISC[id]||0);
+const act=(l,y)=>y>=l[2]&&(!l[4]||y<l[4])&&known(l[0],y)&&known(l[1],y);
+const plural=n=>n+" saut"+(n>1?"s":"");
+function route(a,b,y){
+  if(a===b)return{err:"same"};
+  for(const id of [a,b]){if(!known(id,y))return{err:"undisc",id};if(NOJ.includes(id))return{err:"nojump",id};}
+  const adj={};
+  L.forEach((l,i)=>{if(act(l,y)){(adj[l[0]]=adj[l[0]]||[]).push([l[1],i]);(adj[l[1]]=adj[l[1]]||[]).push([l[0],i]);}});
+  const prev={[a]:null},q=[a];
+  while(q.length){const c=q.shift();if(c===b)break;for(const [n,i] of adj[c]||[])if(!(n in prev)){prev[n]=[c,i];q.push(n);}}
+  if(!(b in prev))return{err:"none"};
+  const hops=[];let c=b;
+  while(prev[c]){const [p,i]=prev[c];hops.unshift({a:p,b:c,open:L[i][2],ded:!!L[i][3]});c=p;}
+  return{hops};
+}
+function errText(r){
+  if(r.err==="undisc")return{t:"Aucune route en "+st.y,d:nm(r.id)+" n’est découvert qu’en "+DISC[r.id]+".",cta:st.y<2956};
+  if(r.err==="nojump")return{t:"Aucune route",d:nm(r.id)+" n’a aucun point de saut publié."};
+  if(r.err==="same")return{t:"Départ et arrivée identiques",d:"Choisissez deux systèmes différents."};
+  return{t:"Aucune route en "+st.y,d:"Aucune suite de liaisons actives ne relie ces deux systèmes à cette année.",cta:st.y<2956};
+}
+const ctaHTML='<button type="button" class="btn pri" data-act="y2956">Voir en 2956</button>';
+const NOTE='<p class="note">Taille des points de saut : donnée non disponible</p>';
+function stepsHTML(r){
+  return '<ol class="steps" aria-label="Étapes de l’itinéraire">'+r.hops.map((h,i)=>
+    '<li><button type="button" class="stp" data-hop="'+i+'" aria-label="Étape '+(i+1)+' : '+nm(h.a)+' vers '+nm(h.b)+(h.ded?', liaison déduite':'')+'. Centrer la carte."><b aria-hidden="true">'+(i+1)+'</b><span>'+nm(h.a)+' → '+nm(h.b)+'</span>'+(h.ded?'<em class="ded">déduite</em>':'')+'</button></li>').join("")+'</ol>';
+}
+const svg=$("#map");let cur="sol",last=null;
+let view={x:0,y:0,w:400,h:300};
+const rm=matchMedia("(prefers-reduced-motion:reduce)");
+const setVB=()=>svg.setAttribute("viewBox",view.x+" "+view.y+" "+view.w+" "+view.h);
+function go(t){
+  if(rm.matches){view=t;setVB();return;}
+  const f={...view},t0=performance.now();
+  (function s(n){const k=Math.min(1,(n-t0)/350),e=1-Math.pow(1-k,3);
+    view={x:f.x+(t.x-f.x)*e,y:f.y+(t.y-f.y)*e,w:f.w+(t.w-f.w)*e,h:f.h+(t.h-f.h)*e};setVB();
+    if(k<1)requestAnimationFrame(s);})(t0);
+}
+function focusOn(x,y,z){z=z||1.8;const w=400/z,h=300/z;go({x:x-w/2,y:y-h/2,w:w,h:h});}
+const resetView=()=>go({x:0,y:0,w:400,h:300});
+function tagG(x,y,t){return '<g class="tg" transform="translate('+x+' '+y+')"><rect x="-24" y="-28" width="48" height="13" rx="2"/><text y="-21">'+t+'</text></g>';}
+function draw(r){
+  const y=st.y;let e="",rt="",n="",bd="";const on=new Set();
+  L.forEach(l=>{if(act(l,y)){const a=S[l[0]],b=S[l[1]];e+='<line class="eg'+(l[3]?' d':'')+'" x1="'+a[1]+'" y1="'+a[2]+'" x2="'+b[1]+'" y2="'+b[2]+'"/>';}});
+  ((r&&r.hops)||[]).forEach((h,i)=>{
+    const a=S[h.a],b=S[h.b];on.add(h.a);on.add(h.b);
+    const p='x1="'+a[1]+'" y1="'+a[2]+'" x2="'+b[1]+'" y2="'+b[2]+'"';
+    rt+='<line class="rh" '+p+'/><line class="rt'+(h.ded?' d':'')+'" '+p+'/>';
+    bd+='<g class="bd" transform="translate('+(a[1]+b[1])/2+' '+(a[2]+b[2])/2+')"><circle r="8.5"/><text>'+(i+1)+'</text></g>';
+  });
+  for(const id in S){
+    if(!known(id,y))continue;
+    const c=S[id],cl=["nd"];
+    if(NOJ.includes(id))cl.push("no");if(on.has(id))cl.push("on");if(id===st.a||id===st.b)cl.push("end");if(id===cur)cl.push("cur");
+    n+='<g class="'+cl.join(" ")+'" id="n-'+id+'" data-id="'+id+'" role="button" aria-label="'+c[0]+'" transform="translate('+c[1]+' '+c[2]+')"><circle class="hit" r="15"/><circle class="ring" r="11"/><circle class="sh" r="5.5"/><text y="19">'+c[0]+'</text></g>';
+    if(TAGS){if(id===st.a)bd+=tagG(c[1],c[2],"Départ");if(id===st.b)bd+=tagG(c[1],c[2],"Arrivée");}
+  }
+  svg.innerHTML=e+rt+n+bd;
+  svg.setAttribute("aria-activedescendant","n-"+cur);
+}
+function mark(){
+  svg.querySelectorAll(".cur").forEach(x=>x.classList.remove("cur"));
+  const g=$("#n-"+cur);if(g)g.classList.add("cur");
+  svg.setAttribute("aria-activedescendant","n-"+cur);
+}
+svg.addEventListener("click",e=>{const g=e.target.closest(".nd");if(g){cur=g.dataset.id;mark();hooks.pick&&hooks.pick(cur,e);}});
+svg.addEventListener("keydown",e=>{
+  const D={ArrowRight:[1,0],ArrowLeft:[-1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+  if(D[e.key]){
+    e.preventDefault();const d=D[e.key],c=S[cur];let best=null,bs=1e9;
+    for(const id in S){
+      if(id===cur||!known(id,st.y))continue;
+      const dx=S[id][1]-c[1],dy=S[id][2]-c[2],dot=dx*d[0]+dy*d[1];if(dot<=0)continue;
+      const dist=Math.hypot(dx,dy),sc=dist*(1+(1-dot/dist)*2);if(sc<bs){bs=sc;best=id;}
+    }
+    if(best){cur=best;mark();}
+  }else if(e.key==="Enter"||e.key===" "){e.preventDefault();hooks.pick&&hooks.pick(cur,e);}
+  else if(e.key==="0")resetView();
+});
+$("#fit").onclick=resetView;
+function setYear(v){st.y=Math.max(2400,Math.min(2956,v|0));update();}
+$("#ym").onclick=()=>setYear(st.y-1);$("#yp").onclick=()=>setYear(st.y+1);
+$("#rng").oninput=e=>setYear(+e.target.value);
+document.addEventListener("keydown",e=>{
+  if(/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return;
+  if(e.key==="["||e.key==="PageDown")setYear(st.y-1);else if(e.key==="]"||e.key==="PageUp")setYear(st.y+1);
+});
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-act],[data-hop],[data-sys],[data-demo]");if(!t)return;
+  if(t.dataset.act==="y2956")setYear(2956);
+  if(t.dataset.hop!=null&&last&&last.hops){const h=last.hops[+t.dataset.hop],a=S[h.a],b=S[h.b];focusOn((a[1]+b[1])/2,(a[2]+b[2])/2,2);}
+  if(t.dataset.sys){const c=S[t.dataset.sys];focusOn(c[1],c[2],2);}
+  if(t.dataset.demo){
+    const k=t.dataset.demo;
+    if(k==="found"){st.y=2956;st.a="sol";st.b="stanton";}
+    if(k==="none"){st.y=2900;st.a="sol";st.b="stanton";}
+    if(k==="nojump"){st.y=2956;st.a="sol";st.b="virgo";}
+    if(k==="empty"){st.y=2956;st.a=null;st.b=null;}
+    resetView();hooks.demo&&hooks.demo(k);update();
+  }
+});
+function update(){
+  if(!known(cur,st.y))cur="sol";
+  last=(st.a&&st.b)?route(st.a,st.b,st.y):null;
+  draw(last);
+  $("#yr").textContent=st.y;$("#rng").value=st.y;
+  hooks.render&&hooks.render(last);
+}
+(function(){
+  const sh={r:'<circle cx="7" cy="7" r="5"/>',u:'<path d="M7 2 12 11H2z"/>',d:'<path d="M2 3h10L7 12z"/>',s:'<rect x="2.5" y="2.5" width="9" height="9"/>',l:'<path d="M7 1 13 7 7 13 1 7z"/>'};
+  const ic=k=>'<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">'+sh[k]+'</svg>';
+  const ln=(a,w,c,d)=>'<svg width="26" height="10" viewBox="0 0 26 10" aria-hidden="true"><line x1="2" y1="5" x2="24" y2="5" stroke="'+c+'" stroke-width="'+w+'"'+(d?' stroke-dasharray="'+d+'"':'')+' stroke-linecap="round"/></svg>';
+  $("#legend").innerHTML='<summary>Légende</summary><ul>'
+   +'<li>'+ln(0,1.2,"#5d6b62")+'Liaison active</li>'
+   +'<li>'+ln(0,1.2,"#5d6b62","3 4")+'Liaison déduite</li>'
+   +'<li>'+ln(0,4,"#b8d9a6")+'Itinéraire</li>'
+   +'<li><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.5" fill="#0b0d0c" stroke="#b8d9a6"/><text x="9" y="9" fill="#b8d9a6" font-size="9" font-family="monospace" text-anchor="middle" dominant-baseline="central">1</text></svg>Numéro du saut</li>'
+   +'<li><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="#7b857e" stroke-dasharray="2 2"/></svg>Sans point de saut publié</li></ul>'
+   +'<ul aria-label="Formes par camp"><li>'+ic("r")+'Humanité</li><li>'+ic("u")+'Xi’an</li><li>'+ic("d")+'Banu</li><li>'+ic("s")+'Tevarin</li><li>'+ic("l")+'Vanduul</li></ul>'
+   +'<p>Mini-carte schématique : positions et liaisons illustratives ; années d’ouverture des liaisons de maquette (réelles : Pyro 2493, Terra 2516, Stanton 2903).</p>';
+  if(matchMedia("(min-width:1000px)").matches)$("#legend").open=true;
+})();
+/* ===== Fin du noyau ===== */
+
+/* ===== Option B : carte d'abord, barre flottante ===== */
+let pending=false,expanded=true,sel=null;
+const card=$("#card"),bar=$("#bar"),hint=$("#hint"),bb=$("#bb"),tgl=$("#tgl");
+function openCard(id){
+  sel=id;
+  const n=L.filter(l=>act(l,st.y)&&(l[0]===id||l[1]===id)).length;
+  $("#cn").textContent=nm(id);
+  $("#cm").textContent=NOJ.includes(id)?"Aucun point de saut publié":n+" liaison"+(n>1?"s":"")+" active"+(n>1?"s":"")+" en "+st.y;
+  $("#cFrom").disabled=NOJ.includes(id)&&false;
+  $("#cTo").hidden=!(st.a&&st.a!==id);
+  hint.hidden=true;card.hidden=false;
+  $("#cFrom").focus();
+}
+function closeCard(back){card.hidden=true;sel=null;if(back)svg.focus();}
+function cancelPending(){pending=false;update();}
+hooks.pick=(id,e)=>{
+  if(pending){if(id===st.a)return;st.b=id;pending=false;closeCard();update();return;}
+  if(e&&e.shiftKey&&st.a&&id!==st.a){st.b=id;closeCard();update();return;}
+  openCard(id);
+};
+$("#cFrom").onclick=()=>{st.a=sel;st.b=null;pending=true;closeCard(true);update();};
+$("#cTo").onclick=()=>{st.b=sel;pending=false;closeCard(true);update();};
+$("#cClose").onclick=()=>closeCard(true);
+$("#bclr").onclick=()=>{st.a=null;st.b=null;pending=false;update();svg.focus();};
+tgl.onclick=()=>{expanded=!expanded;update();};
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  if(!card.hidden){e.preventDefault();closeCard(true);}
+  else if(pending){e.preventDefault();pending=false;st.a=null;update();svg.focus();}
+});
+hooks.demo=k=>{pending=false;closeCard();expanded=true;};
+hooks.render=r=>{
+  hint.hidden=!(pending&&st.a)||!card.hidden;
+  if(pending&&st.a)hint.innerHTML='<b>Départ : '+nm(st.a)+'</b> · choisissez l’arrivée<small>Clic, toucher ou Entrée sur un système · Échap annule</small>';
+  const show=!!(st.a&&st.b);
+  bar.hidden=!show;
+  if(!show)return;
+  tgl.setAttribute("aria-expanded",expanded);
+  tgl.setAttribute("aria-label",expanded?"Masquer les étapes":"Afficher les étapes");
+  bb.hidden=!expanded;
+  const pair=nm(st.a)+' → '+nm(st.b);
+  if(r.hops){
+    $("#bsum").innerHTML=pair+' · <b>'+plural(r.hops.length)+'</b>';
+    $("#bcta").innerHTML="";
+    bb.innerHTML=stepsHTML(r)+NOTE;
+  }else{
+    const m=errText(r);
+    $("#bsum").innerHTML=pair+' · '+(r.err==="nojump"?'aucun point de saut publié':r.err==="same"?'identiques':'aucune route en '+st.y);
+    $("#bcta").innerHTML=m.cta?ctaHTML:"";
+    bb.innerHTML='<p class="errd"><b>'+m.t+'.</b> '+m.d+'</p>';
+  }
+};
+update();
+</script>
+</body>
+</html>

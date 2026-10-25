@@ -1,6 +1,6 @@
 {
   "name": "orbital-services",
-  "version": "1.28.1",
+  "version": "1.28.2",
   "private": true,
   "description": "Carnet de bord, chronologie et carte du temps pour Star Citizen",
   "scripts": {
