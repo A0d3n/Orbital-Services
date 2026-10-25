@@ -84,7 +84,7 @@ async function waitUp(port) {
     await go("cl");
     await page.waitForSelector("#clGrid .cl-card");
     const nCl = await page.evaluate(() => window.COMMLINKS.rows.length);
-    check("comm-links : la liste est chargée et affichée par pages", nCl > 1000 && (await page.locator("#clGrid .cl-card").count()) === 60, String(nCl));
+    check("comm-links : la liste est chargée et affichée par pages de 12", nCl > 1000 && (await page.locator("#clGrid .cl-card").count()) === 12, String(nCl));
     check("comm-links : liens sortants vers RSI", await page.evaluate(() => [...document.querySelectorAll("#clGrid .cl-card")].every(a => a.href.indexOf("https://robertsspaceindustries.com/comm-link/") === 0 && a.rel.indexOf("noopener") >= 0)));
     await page.fill("#clQ", "vanduul");
     await page.waitForTimeout(400);

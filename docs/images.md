@@ -33,9 +33,15 @@
 
 Chaque page source se trouve sur `https://images.nasa.gov/details/<identifiant>`.
 
+## Versions `-800` (chronologie)
+
+Les fichiers `evt-<époque>-<n>-800.webp` (800 × 286, 7 à 29 Ko) sont **générés** par `node scripts/make-event-images.js` à partir des originaux 1600 × 571 (jamais modifiés) : ne pas les éditer à la main. Après avoir ajouté ou remplacé une image `evt-*.webp`, relancer le script (`--force` pour tout régénérer). `timeline.js` les charge via `srcset` ; `tests/perf-images.js` vérifie qu'il y en a une par image.
+
 ## Comm-Links
 
 L’onglet Lore › Comm-Links affiche `public/commlinks.js`, généré par `node scripts/commlinks.js` (liste, titres, dates, extraits et vignettes viennent de robertsspaceindustries.com ; les images ne sont pas copiées, elles sont chargées depuis le site de RSI). Relancez la commande pour actualiser la liste.
+
+La liste s'affiche par pages (12 cartes, puis « Voir plus » : +18). Les cartes demandent la variante « slideshow » (648 × 366, environ 40 % du poids) à la place de `channel_item_full` (1119 × 600) : remplacement de `channel_item_full` par `slideshow` dans l'URL, vérifié le 25 octobre 2026 sur les 4 041 URL d'images distinctes de `commlinks.js` (toutes répondent 200). L'original reste dans le `srcset` pour les écrans denses et sert de repli si la vignette échoue. Les autres noms essayés (`channel_item_small`, `thumb`, `thumbnail`, `post_section_small`, `slider_thumb`, `monitor_small`) n'existent pas ; `subscribers_vault_thumbnail` (216 × 133) et `heap_thumb` (61 × 61) existent mais sont trop petits pour des cartes de 376 px.
 
 ## Remplacements du 25 octobre 2026
 

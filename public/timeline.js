@@ -48,12 +48,20 @@ function scene(g,seed){
   s+='</g><circle cx="'+cx.toFixed(0)+'" cy="'+cy.toFixed(0)+'" r="'+rad.toFixed(0)+'" fill="url(#'+id+'p)"/><circle cx="'+cx.toFixed(0)+'" cy="'+cy.toFixed(0)+'" r="'+rad.toFixed(0)+'" fill="none" stroke="'+c[2]+'" stroke-opacity=".5" stroke-width="2"/></svg>';
   return s;
 }
+/* photo d'une carte : version 800 px (générée par scripts/make-event-images.js) ou original 1600 px selon l'écran.
+   sizes = largeur réelle de l'image, mesurée : <=860 px colonne unique (100vw - 30 px) ; 861-905 px jusqu'à ~610 px ;
+   906-1239 px jusqu'à ~455 px ; au-delà jusqu'à ~400 px (376 px à 1440). */
+var PHOTO_SIZES='(max-width:860px) calc(100vw - 30px), (max-width:905px) 610px, (max-width:1239px) 455px, 400px';
+function photo(k){
+  var f='evt-'+k.replace('.','-');
+  return '<img class="ev-photo" src="'+f+'.webp" srcset="'+f+'-800.webp 800w, '+f+'.webp 1600w" sizes="'+PHOTO_SIZES+'" width="800" height="286" alt="" loading="lazy" decoding="async" onerror="this.remove()">';
+}
 var cardN=0;
 function card(e,era,flat){
   var n=++cardN,long=e.d.length>130;
   return '<article class="ev'+(e.m?' major':'')+'"'+(flat?'':' id="ev-'+e.id+'" tabindex="-1"')+' data-id="'+e.id+'" data-g="'+e.g+'" data-y="'+esc(e.y)+'" style="--tc:var(--c-'+e.g+')">'+
     '<div class="ev-img">'+(window.__orbVisual?window.__orbVisual(e._k,e.g,n):scene(e.g,n))+
-    '<img class="ev-photo" src="evt-'+e._k.replace('.','-')+'.webp" alt="" loading="lazy" decoding="async" onerror="this.remove()">'+
+    photo(e._k)+
     '<span class="ev-lab">'+e.y+'</span></div>'+
     '<div class="body"><div class="ev-top"><div class="ev-ti"><h3>'+e.t+'</h3><div class="ev-sub">'+era.n+' · '+TAGS[e.g]+'</div></div><span class="ev-y">'+e.y+'</span></div>'+
     '<p class="ev-desc">'+e.d+'</p>'+(long?'<button type="button" class="ev-more" aria-expanded="false">Lire la suite</button>':'')+

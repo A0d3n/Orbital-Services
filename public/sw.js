@@ -1,5 +1,5 @@
 /* Service worker : l'app s'ouvre même sans réseau (page et scripts gardés en cache). */
-var VERSION = "orbital-1.24.0"; /* écrit par scripts/version.js : "orbital-" + version de package.json */
+var VERSION = "orbital-1.25.0"; /* écrit par scripts/version.js : "orbital-" + version de package.json */
 var MAX_RUNTIME = 150; /* plafond d’entrées du cache (les plus anciennes sont supprimées) */
 var CORE = ["./", "style.css", "data.js", "visuals.js", "timeline.js", "comm.js", "map.js", "carnet.js", "versions.js", "home.js", "search.js", "search.css", "terra-1000.webp", "geist-latin.woff2", "geist-latin-ext.woff2", "geist-mono-latin.woff2", "geist-mono-latin-ext.woff2", "favicon.svg", "site.webmanifest"];
 
