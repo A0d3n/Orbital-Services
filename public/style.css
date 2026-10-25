@@ -124,6 +124,8 @@ a{color:var(--holo)}
 .nd text{font-family:var(--f-display);font-weight:500;font-size:var(--fs,12px);letter-spacing:.05em;text-transform:uppercase;fill:var(--mk);paint-order:stroke;stroke:#05070b;stroke-width:calc(var(--fs,12px)*.3);stroke-linejoin:round;text-anchor:middle;pointer-events:none}
 .nd text.mn{display:none}
 #mapsvg.all .nd text.mn{display:block}
+.nd.lbl text{display:block}
+.nd.nolbl text{display:none}
 .nd.sel .c{stroke:#fff;stroke-width:3px}
 .nd:focus-visible{outline:none}
 .nd:focus-visible .c{stroke:#fff;stroke-width:3px}
@@ -555,6 +557,39 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
   .vw-card>.in{border-radius:13px}
   .vw-console{order:-1}
   .vw-side>.in{max-height:none;overflow:visible}
+}
+
+/* Star Viewer sur téléphone (jusqu’à 700 px) : carte quasi plein écran, panneaux repliables, console compacte */
+.vw-tabs{display:none}
+@media (max-width:700px){
+  .page-pad.vw{padding-inline:0;padding-top:8px}
+  .vw .mnote{margin:12px 14px 0}
+  .vw-stage{position:relative;display:block;overflow:hidden;height:calc(100vh - 56px - 62px - 20px - env(safe-area-inset-bottom,0px));height:calc(100dvh - 56px - 62px - 20px - env(safe-area-inset-bottom,0px));min-height:420px;border:1px solid var(--line);border-width:1px 0;border-radius:0;background:#0a0c0b}
+  .vw-stage .mapbox{position:absolute;inset:0;height:auto;border:0;border-radius:0;--vpl:0px;--vpr:0px;--vpt:56px;--vpb:118px}
+  .vw-tabs{display:flex;position:absolute;left:8px;top:8px;gap:6px;z-index:4;max-width:calc(100% - 16px)}
+  .vw-tabs .btn{height:44px;min-width:44px;padding:0 14px;background:rgba(14,18,16,.92);border-color:#2a332d;border-radius:12px;font-size:13px}
+  .vw-tabs .btn[aria-expanded="true"]{border-color:var(--sage);color:var(--sage)}
+  .vw-tabs .btn span{max-width:7.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .vw-stage .zoom{left:auto;right:8px;top:8px;bottom:auto;transform:none;flex-direction:column;gap:6px;z-index:3}
+  .vw-stage .zoom .btn{min-width:44px;height:44px;border-radius:12px}
+  .vw-stage .m-era{display:none}
+  .vw-rail,.vw-side{display:none;position:absolute;left:8px;right:60px;top:60px;width:auto;max-height:calc(100% - 60px - 126px);z-index:5;flex-direction:column}
+  .vw-stage.o-rail .vw-rail,.vw-stage.o-side .vw-side{display:flex}
+  .vw-rail>.in,.vw-side>.in{min-height:0;flex:1;overflow-y:auto;max-height:none;padding:14px;border-radius:13px}
+  .vw-rail input{height:44px;font-size:16px}
+  .vw-rail .chips{flex-direction:row;flex-wrap:wrap}
+  .vw-rail .chip{min-height:40px;padding:0 12px;font-size:13px;display:inline-flex;align-items:center}
+  .vw-rail .btn,.vw-side .btn{min-height:44px}
+  .vw-side .lk button,.vw-side .x,.feed button{min-height:40px}
+  .vw-console{position:absolute;order:0;left:8px;right:8px;bottom:8px;top:auto;z-index:4}
+  .vw-console>.in{padding:8px 12px 6px;gap:2px;border-radius:13px}
+  .vw-console .tb-row{flex-wrap:nowrap;justify-content:space-between;gap:8px}
+  .vw-console .yearbig{font-size:28px;min-width:0;display:flex;align-items:baseline;gap:6px}
+  .vw-console .yearbig small{font-size:9px}
+  .vw-console .ctl{display:flex;gap:6px}
+  .vw-console .ctl .btn{min-width:44px;height:44px}
+  .vw-console .spd,.vw-console .tcount,.vw-console .keys{display:none}
+  .vw-console #mRange{height:40px}
 }
 
 /* mêmes couleurs de camp sur la carte, les filtres, la légende et la fiche (xi’an vert, banu jaune, tevarin violet) */

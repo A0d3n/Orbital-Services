@@ -151,6 +151,26 @@ async function waitUp(port) {
     check("carnet : une entrée est enregistrée et le gain par heure est calculé", /121\s?000/.test(stats) && /80\s?667/.test(stats), stats);
     check("carnet : graphique sur 30 jours", (await page.evaluate(() => document.querySelectorAll("#lgDays i").length)) === 30);
 
+    /* Star Viewer sur téléphone (400 px) */
+    const mctx = await browser.newContext({ viewport: { width: 400, height: 800 }, hasTouch: true, isMobile: true });
+    const mp = await mctx.newPage();
+    mp.on("pageerror", e => errors.push("mobile : " + e.message));
+    mp.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push("mobile : " + m.text()); });
+    await mp.goto(base + "/#carte/2956/stanton");
+    await mp.waitForSelector("#mapbox", { state: "visible" });
+    await mp.waitForTimeout(500);
+    const mm = await mp.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: innerWidth, mh: document.getElementById("mapbox").getBoundingClientRect().height, vh: innerHeight, tab: document.getElementById("vwTabRail").getBoundingClientRect().height }));
+    check("Star Viewer mobile : pas de défilement horizontal, carte > 55 % de la hauteur", mm.sw <= mm.cw && mm.mh > mm.vh * 0.55 && mm.tab >= 40, JSON.stringify(mm));
+    await mp.click("#vwTabRail");
+    const railOpen = await mp.isVisible("#mFac");
+    await mp.click("#vwTabRail");
+    check("Star Viewer mobile : le panneau des filtres se replie et se déplie", railOpen && !(await mp.isVisible("#mFac")));
+    const lab = await mp.evaluate(() => [...document.querySelectorAll(".nd.lbl text")].map(t => { const r = t.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; }));
+    let over = 0;
+    for (let i = 0; i < lab.length; i++) for (let j = i + 1; j < lab.length; j++) { const a = lab[i], b = lab[j]; if (a[0] < b[2] - 2 && a[2] > b[0] + 2 && a[1] < b[3] - 2 && a[3] > b[1] + 2) over++; }
+    check("Star Viewer : les noms affichés ne se superposent pas, la sélection garde le sien", over === 0 && (await mp.isVisible(".nd.sel text")), over + " superpositions");
+    await mctx.close();
+
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
     check("exécution du test", false, e && e.stack || String(e));
