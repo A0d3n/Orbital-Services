@@ -7,6 +7,7 @@ const DATA = process.env.DATA_DIR || path.join(__dirname, "data");
 const FILE = path.join(DATA, "entries.json");
 const BACKUPS = path.join(DATA, "backups");
 const KEEP_BACKUPS = Math.max(1, +process.env.KEEP_BACKUPS || 14);
+const AUTH_USER_SET = !!process.env.AUTH_USER;
 const AUTH_USER = process.env.AUTH_USER || "orbital";
 const AUTH_PASSWORD = process.env.AUTH_PASSWORD || "";
 const MAX_BODY = 64 * 1024, MAX_ENTRIES = 20000;
@@ -26,8 +27,8 @@ const startup = pageStatus();
 if (!startup.ok) console.error("ATTENTION : " + startup.hint);
 
 fs.mkdirSync(DATA, { recursive: true });
-let entries = {};
-try { entries = JSON.parse(fs.readFileSync(FILE, "utf8")) || {}; } catch (e) { entries = {}; }
+let entries = Object.create(null); // sans prototype : "__proto__", "constructor"... sont de simples ids
+try { const o = JSON.parse(fs.readFileSync(FILE, "utf8")); if (o && typeof o === "object") for (const k of Object.keys(o)) entries[k] = o[k]; } catch (e) {}
 
 /* ── sauvegardes : une copie par jour, les plus anciennes sont supprimées ── */
 let lastBackupDay = "";
@@ -46,14 +47,14 @@ function backupDaily() {
 backupDaily();
 
 let timer = null;
+function writeNow() { // écriture atomique : .tmp puis rename
+  const tmp = FILE + ".tmp";
+  try { fs.writeFileSync(tmp, JSON.stringify(entries)); fs.renameSync(tmp, FILE); }
+  catch (e) { console.error("écriture impossible :", e.message); }
+}
 function persist() {
   clearTimeout(timer);
-  timer = setTimeout(() => {
-    backupDaily();
-    const tmp = FILE + ".tmp";
-    try { fs.writeFileSync(tmp, JSON.stringify(entries)); fs.renameSync(tmp, FILE); }
-    catch (e) { console.error("écriture impossible :", e.message); }
-  }, 150);
+  timer = setTimeout(() => { backupDaily(); writeNow(); }, 150);
 }
 
 const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8",
@@ -74,9 +75,9 @@ function clean(d) {
 }
 function body(req) {
   return new Promise((ok, ko) => {
-    let n = 0; const ch = [];
-    req.on("data", c => { n += c.length; if (n > MAX_BODY) { ko(new Error("trop gros")); req.destroy(); } else ch.push(c); });
-    req.on("end", () => { try { ok(JSON.parse(Buffer.concat(ch).toString("utf8"))); } catch (e) { ko(e); } });
+    let n = 0, big = false; const ch = [];
+    req.on("data", c => { n += c.length; if (big) return; if (n > MAX_BODY) { big = true; ch.length = 0; const e = new Error("trop gros"); e.status = 413; ko(e); } else ch.push(c); });
+    req.on("end", () => { if (big) return; try { ok(JSON.parse(Buffer.concat(ch).toString("utf8"))); } catch (e) { ko(e); } });
     req.on("error", ko);
   });
 }
@@ -90,17 +91,49 @@ function authorized(req) {
   if (!m) return false;
   let given = "";
   try { given = Buffer.from(m[1], "base64").toString("utf8"); } catch (e) { return false; }
-  return crypto.timingSafeEqual(digest(given), WANT);
+  const ok = crypto.timingSafeEqual(digest(given), WANT);
+  if (!ok) fail(req.socket.remoteAddress || "?");
+  return ok;
+}
+if (AUTH_USER_SET && !AUTH_PASSWORD) console.error("ATTENTION : AUTH_USER est défini mais AUTH_PASSWORD est vide : l'accès n'est PAS protégé.");
+/* limitation des essais : 5 échecs en 1 minute pour une même IP → 429 pendant 60 s */
+const FAILS = new Map(), FAIL_MAX = 5, FAIL_WINDOW = 60000, BLOCK_MS = 60000; // ip -> { n, t0, until }
+setInterval(() => { const now = Date.now(); for (const [ip, f] of FAILS) if (now > f.until && now - f.t0 > FAIL_WINDOW) FAILS.delete(ip); }, 30000).unref();
+const blockedFor = ip => { const f = FAILS.get(ip); return f && f.until > Date.now() ? Math.ceil((f.until - Date.now()) / 1000) : 0; };
+function fail(ip) {
+  const now = Date.now(); let f = FAILS.get(ip);
+  if (!f || now - f.t0 > FAIL_WINDOW) f = { n: 0, t0: now, until: 0 };
+  if (++f.n >= FAIL_MAX) f.until = now + BLOCK_MS;
+  FAILS.set(ip, f);
 }
 
-const server = http.createServer(async (req, res) => {
+/* fichiers statiques : tampon + version gzip gardés en mémoire (par fichier + mtime) */
+const CACHE = new Map();
+async function loadFile(file) {
+  const st = await fs.promises.stat(file);
+  if (!st.isFile()) throw new Error("pas un fichier");
+  let c = CACHE.get(file);
+  if (!c || c.mtime !== st.mtimeMs || c.size !== st.size) {
+    const buf = await fs.promises.readFile(file);
+    c = { mtime: st.mtimeMs, size: st.size, buf, gz: null, etag: '"' + st.size.toString(16) + "-" + Math.floor(st.mtimeMs).toString(16) + '"' };
+    CACHE.set(file, c);
+  }
+  return c;
+}
+
+async function handle(req, res) {
   let p;
   try { p = decodeURIComponent(new URL(req.url, "http://x").pathname); }
   catch (e) { return send(res, 400, "requête invalide", "text/plain; charset=utf-8"); }
+  if (p.includes("\0")) return send(res, 400, "requête invalide", "text/plain; charset=utf-8");
 
   const page = pageStatus();
   if (p === "/healthz") return json(res, page.ok ? 200 : 503, { ok: page.ok, page: page.ok, entries: Object.keys(entries).length, auth: !!AUTH_PASSWORD, hint: page.ok ? undefined : page.hint });
 
+  if (AUTH_PASSWORD) {
+    const wait = blockedFor(req.socket.remoteAddress || "?");
+    if (wait) return send(res, 429, "trop d'essais, réessayez plus tard", "text/plain; charset=utf-8", { "Retry-After": String(wait) });
+  }
   if (!authorized(req)) return send(res, 401, "authentification requise", "text/plain; charset=utf-8", { "WWW-Authenticate": 'Basic realm="Orbital Services", charset="UTF-8"' });
 
   if (p === "/api/entries" && req.method === "GET")
@@ -109,13 +142,22 @@ const server = http.createServer(async (req, res) => {
   if (m) {
     const id = m[1];
     if (!ID.test(id)) return json(res, 400, { error: "id invalide" });
+    if (req.method === "PUT" || req.method === "DELETE") {
+      const o = req.headers.origin;
+      if (o !== undefined) { let h = ""; try { h = new URL(o).host; } catch (e) {} if (h !== req.headers.host) return json(res, 403, { error: "origine refusée" }); }
+    }
     if (req.method === "PUT") {
+      if (!/^application\/json\s*(;|$)/i.test(req.headers["content-type"] || "")) return json(res, 415, { error: "application/json requis" });
+      if (+req.headers["content-length"] > MAX_BODY) return send(res, 413, JSON.stringify({ error: "corps trop gros" }), null, { Connection: "close" });
       try {
         const d = await body(req);
         if (!d || typeof d !== "object" || Array.isArray(d)) return json(res, 400, { error: "objet attendu" });
         if (!entries[id] && Object.keys(entries).length >= MAX_ENTRIES) return json(res, 507, { error: "carnet plein" });
         entries[id] = clean(d); persist(); return json(res, 200, { ok: true });
-      } catch (e) { return json(res, 400, { error: "corps invalide" }); }
+      } catch (e) {
+        if (e.status === 413) return send(res, 413, JSON.stringify({ error: "corps trop gros" }), null, { Connection: "close" });
+        return json(res, 400, { error: "corps invalide" });
+      }
     }
     if (req.method === "DELETE") { delete entries[id]; persist(); return json(res, 200, { ok: true }); }
     return json(res, 405, { error: "méthode non permise" });
@@ -125,17 +167,31 @@ const server = http.createServer(async (req, res) => {
   const name = p === "/" ? "index.html" : p.replace(/^\/+/, "");
   if (/[\\/]|\.\./.test(name)) return send(res, 404, "introuvable", "text/plain");
   const file = path.join(PUB, name);
-  fs.readFile(file, (err, buf) => {
-    if (err) return send(res, 404, "introuvable", "text/plain; charset=utf-8");
-    const noCache = /\.(html|css|js|webmanifest)$/.test(name);
-    const extra = { "Cache-Control": noCache ? "no-cache" : "public, max-age=86400" };
-    let out = buf;
-    if (buf.length > 1024 && /\.(html|css|js|svg|webmanifest)$/.test(name) && /\bgzip\b/.test(req.headers["accept-encoding"] || "")) {
-      out = zlib.gzipSync(buf); extra["Content-Encoding"] = "gzip"; extra.Vary = "Accept-Encoding";
-    }
-    send(res, 200, req.method === "HEAD" ? "" : out, MIME[path.extname(file)] || "application/octet-stream", extra);
-  });
+  let c;
+  try { c = await loadFile(file); } catch (e) { return send(res, 404, "introuvable", "text/plain; charset=utf-8"); }
+  const noCache = /\.(html|css|js|webmanifest)$/.test(name);
+  const extra = { "Cache-Control": noCache ? "no-cache" : "public, max-age=86400", ETag: c.etag };
+  const type = MIME[path.extname(file)] || "application/octet-stream";
+  const gzOk = c.buf.length > 1024 && /\.(html|css|js|svg|webmanifest)$/.test(name);
+  if (gzOk) extra.Vary = "Accept-Encoding";
+  if ((req.headers["if-none-match"] || "").split(",").some(t => t.trim().replace(/^W\//, "") === c.etag)) return send(res, 304, "", type, extra);
+  let out = c.buf;
+  if (gzOk && /\bgzip\b/.test(req.headers["accept-encoding"] || "")) {
+    if (!c.gz) c.gz = zlib.gzipSync(c.buf);
+    out = c.gz; extra["Content-Encoding"] = "gzip";
+  }
+  send(res, 200, req.method === "HEAD" ? "" : out, type, extra);
+}
+const server = http.createServer(async (req, res) => {
+  try { await handle(req, res); }
+  catch (e) {
+    console.error("erreur de requête :", (e && e.stack) || e);
+    try { if (!res.headersSent) send(res, 500, JSON.stringify({ error: "erreur interne" })); else res.end(); } catch (e2) {}
+  }
 });
-const bye = () => { clearTimeout(timer); try { fs.writeFileSync(FILE, JSON.stringify(entries)); } catch (e) {} process.exit(0); };
+server.requestTimeout = 30000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
+process.on("uncaughtException", e => console.error("exception non gérée :", (e && e.stack) || e));
+process.on("unhandledRejection", e => console.error("rejet non géré :", (e && e.stack) || e));
+const bye = () => { clearTimeout(timer); writeNow(); process.exit(0); };
 process.on("SIGTERM", bye); process.on("SIGINT", bye);
 server.listen(PORT, () => console.log("Orbital Services en écoute sur :" + PORT + " — données : " + FILE + (AUTH_PASSWORD ? " — accès protégé" : "")));
