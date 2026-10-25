@@ -43,3 +43,7 @@ Les sauvegardes sont dans `data/backups/entries-AAAA-MM-JJ.json`. Pour restaurer
 - **Limitation des essais.** Après 5 échecs en 1 minute depuis la même adresse IP, le serveur répond `429 Too Many Requests` avec un en-tête `Retry-After` pendant 60 secondes (même avec le bon mot de passe). `/healthz` n'est jamais concerné. Derrière un reverse proxy, le serveur voit l'adresse du proxy : tous les visiteurs partagent alors le même compteur.
 - **Avertissement au démarrage.** Si `AUTH_USER` est défini sans `AUTH_PASSWORD` (ou avec un mot de passe vide), l'accès n'est pas protégé et le journal affiche un avertissement.
 - **API du carnet.** Les écritures (`PUT`) exigent `Content-Type: application/json` (sinon 415), sont limitées à 64 Ko (413) et refusées (403) si l'en-tête `Origin` ne correspond pas à l'hôte demandé.
+
+## Cache hors ligne
+
+Le service worker nomme son cache `orbital-<version>` (la version de `package.json`, écrite dans `public/sw.js` par `npm run version`). À chaque nouvelle version, l'ancien cache est supprimé et le nouveau se remplit au premier chargement. Le cache d'exécution est plafonné à 150 entrées, et `commlinks.js` (1,3 Mo) n'est pas précaché : il est gardé après la première visite de l'onglet Comm-Links.

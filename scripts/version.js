@@ -27,6 +27,15 @@ function setPackageVersion(v) {
   }
 }
 
+/* Le nom du cache du service worker suit la version : un nouveau commit de version invalide l’ancien cache. */
+function setCacheName(v) {
+  const p = path.join(ROOT, "public", "sw.js");
+  if (!fs.existsSync(p)) return;
+  const src = fs.readFileSync(p, "utf8"), RXV = /var VERSION = "orbital-[^"]*";/;
+  if (!RXV.test(src)) throw new Error("public/sw.js : constante VERSION introuvable");
+  fs.writeFileSync(p, src.replace(RXV, () => 'var VERSION = "orbital-' + v + '";'));
+}
+
 const [kind, title, note] = process.argv.slice(2);
 const { src, list } = read();
 
@@ -45,7 +54,7 @@ if (kind === "sync") {
   const v = kind === "major" ? [a + 1, 0, 0] : kind === "minor" ? [a, b + 1, 0] : [a, b, c + 1];
   const next = v.join(".");
   list.unshift({ v: next, d: new Date().toISOString().slice(0, 10), c: "", t: title, n: note });
-  write(src, list); setPackageVersion(next);
+  write(src, list); setPackageVersion(next); setCacheName(next);
   console.log("version " + next + " ajoutée");
 } else {
   console.error('Usage : node scripts/version.js <major|minor|patch> "Titre" "Commentaire"   |   node scripts/version.js sync');
