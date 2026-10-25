@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Maquette B · Panneau latéral — Orbital Services</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0d0c;--bg-2:#111412;--line:#232826;--line-2:#2e3531;--ink:#e7ebe8;--ink-2:#9ca59e;--dim:#6a736c;--sage:#b8d9a6;
+--f:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;--m:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--f);-webkit-text-size-adjust:100%}
+:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:2px}
+button{font:inherit;color:inherit}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.app{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr)}
+.side{display:none}
+.main{padding:1rem 16px 6rem}
+.top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-bottom:1.4rem}
+.brand{font:700 1rem var(--f);letter-spacing:.14em;text-transform:uppercase}
+.brand small{display:block;font:400 .7rem var(--m);letter-spacing:.14em;color:var(--ink-2)}
+.trigger{display:inline-flex;align-items:center;gap:.6rem;height:2.75rem;padding:0 .9rem;background:transparent;border:1px solid var(--line-2);border-radius:2px;color:var(--ink-2);cursor:pointer}
+.trigger:hover{border-color:var(--sage);color:var(--ink)}
+.trigger svg{width:1.1rem;height:1.1rem}
+.k{font:400 .75rem/1 var(--m);border:1px solid var(--line-2);border-radius:3px;padding:.25rem .4rem;color:var(--ink-2);background:rgba(255,255,255,.03)}
+.trigger .lbl{display:none}
+.main h1{font:700 clamp(1.8rem,5vw,3rem)/1.05 var(--f);text-transform:uppercase;margin:0 0 .6rem}
+.main p{color:var(--ink-2);max-width:60ch;margin:0 0 1rem}
+.ghost{border:1px solid var(--line);background:linear-gradient(180deg,rgba(184,217,166,.06),transparent);height:9rem;margin-top:1.4rem}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--bg-2);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs span{flex:1;text-align:center;font:500 .72rem var(--f);color:var(--ink-2);padding:.8rem 0}
+.tabs span:first-child{color:var(--sage)}
+@media(min-width:900px){
+ .app{grid-template-columns:15rem minmax(0,1fr)}
+ .side{display:block;border-right:1px solid var(--line);padding:1.4rem 1rem;background:var(--bg-2)}
+ .side ul{list-style:none;margin:1.6rem 0 0;padding:0;display:grid;gap:.2rem}
+ .side li{padding:.5rem .7rem;color:var(--ink-2);border-left:2px solid transparent}
+ .side li:first-child{color:var(--sage);border-color:var(--sage)}
+ .tabs{display:none}.main{padding:1.6rem 3rem}.trigger .lbl{display:inline}
+}
+
+/* panneau */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(5,7,6,.6);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.scrim.on{opacity:1;visibility:visible}
+.panel{position:fixed;top:0;right:0;bottom:0;z-index:50;width:min(100%,32rem);background:var(--bg-2);border-left:1px solid var(--line-2);display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;transition:transform .28s cubic-bezier(.2,.8,.2,1),visibility .28s;box-shadow:-20px 0 60px rgba(0,0,0,.5);padding-top:env(safe-area-inset-top)}
+.panel.on{transform:none;visibility:visible}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem .2rem}
+.ph h2{margin:0;font:400 .78rem var(--m);letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+.x{height:2.5rem;min-width:2.5rem;padding:0 .7rem;background:transparent;border:1px solid var(--line-2);border-radius:2px;cursor:pointer;color:var(--ink-2)}
+.x:hover{color:var(--ink);border-color:var(--sage)}
+.q{margin:.4rem 1rem 0;display:flex;align-items:center;gap:.6rem;border:1px solid var(--line-2);padding:0 .8rem;background:rgba(0,0,0,.3)}
+.q svg{width:1.1rem;height:1.1rem;color:var(--sage);flex:none}
+.q input{flex:1;min-width:0;height:3rem;background:transparent;border:0;color:var(--ink);font:400 1rem var(--f);outline:0}
+.q input::placeholder{color:var(--dim)}
+.q:focus-within{border-color:var(--sage);box-shadow:0 0 0 1px var(--sage)}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;padding:.8rem 1rem .6rem;margin:0}
+.chip{font:500 .85rem/1 var(--f);color:var(--ink-2);background:transparent;border:1px solid var(--line-2);border-radius:2px;padding:.6rem .8rem;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;min-height:2.5rem}
+.chip i{width:.55rem;height:.55rem;border-radius:50%;background:var(--tc)}
+.chip em{font:400 .75rem var(--m);font-style:normal;color:var(--dim)}
+.chip:hover{color:var(--ink)}
+.chip[aria-pressed="true"]{color:var(--ink);border-color:var(--tc);background:color-mix(in srgb,var(--tc) 16%,transparent)}
+.cnt{padding:0 1rem .4rem;font:400 .8rem var(--m);color:var(--ink-2)}
+.list{list-style:none;margin:0;padding:0;overflow:auto;overscroll-behavior:contain;border-top:1px solid var(--line);flex:1 1 40%;min-height:7rem}
+.opt{display:flex;gap:.8rem;align-items:flex-start;padding:.7rem 1rem;cursor:pointer;border-left:2px solid transparent;border-bottom:1px solid var(--line)}
+.opt .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--tc);margin-top:.5rem;flex:none}
+.opt[aria-selected="true"]{background:color-mix(in srgb,var(--sage) 11%,transparent);border-left-color:var(--sage)}
+.opt:hover{background:rgba(255,255,255,.04)}
+.ot{flex:1;min-width:0}
+.ot b{display:block;font-weight:500;line-height:1.35}
+.ot span{display:block;font:400 .75rem var(--m);color:var(--ink-2);letter-spacing:.06em;text-transform:uppercase}
+mark{background:transparent;color:var(--sage);font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+.empty{padding:2.2rem 1.2rem;text-align:center;color:var(--ink-2)}
+.empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:.3rem;overflow-wrap:anywhere}
+.prev{border-top:1px solid var(--line-2);padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(184,217,166,.06),transparent);flex:0 0 auto;max-height:46%;overflow:auto}
+.prev .ty{font:400 .72rem var(--m);letter-spacing:.16em;text-transform:uppercase;color:var(--tc,var(--sage));display:flex;gap:.6rem;align-items:center}
+.prev h3{margin:.2rem 0 .3rem;font:700 1.35rem/1.15 var(--f)}
+.prev p{margin:0 0 .9rem;color:var(--ink-2);font-size:.92rem}
+.prev .act{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.45rem;height:2.6rem;padding:0 .9rem;background:transparent;border:1px solid var(--line-2);border-radius:2px;cursor:pointer;font:500 .85rem var(--f)}
+.btn:hover{border-color:var(--sage);color:var(--sage)}
+.btn.pri{background:var(--sage);color:var(--bg);border-color:var(--sage)}
+.btn.pri:hover{filter:brightness(1.1);color:var(--bg)}
+.btn svg{width:1rem;height:1rem}
+.toast{position:fixed;left:50%;bottom:1.2rem;transform:translateX(-50%);background:var(--sage);color:var(--bg);font:500 .85rem var(--f);padding:.55rem .9rem;border-radius:2px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:70;max-width:90vw}
+.toast.on{opacity:1}
+@media(prefers-reduced-motion:reduce){.panel,.scrim,.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+ <aside class="side" aria-hidden="true"><div class="brand">Orbital Services<small>fan app non officielle</small></div>
+  <ul><li>Accueil</li><li>Chronologie</li><li>Carte</li><li>Comm-Links</li><li>Versions</li></ul></aside>
+ <main class="main">
+  <div class="top">
+   <div class="brand">Orbital Services<small>non officiel</small></div>
+   <button class="trigger" id="open" type="button" aria-haspopup="dialog" aria-expanded="false" aria-keyshortcuts="/">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+    <span class="lbl">Rechercher</span><span class="sr">Rechercher dans l’application</span><kbd class="k" aria-hidden="true">/</kbd>
+   </button>
+  </div>
+  <h1>Chronologie</h1>
+  <p>Écran de fond de la maquette. « / » ou la loupe ouvre le panneau ; « Échap » le ferme.</p>
+  <p id="landed" role="status" style="color:var(--sage)"></p>
+  <div class="ghost"></div>
+ </main>
+</div>
+<nav class="tabs" aria-hidden="true"><span>Accueil</span><span>Temps</span><span>Carte</span><span>Comm-Links</span></nav>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-label="Recherche globale">
+ <div class="ph"><h2>Recherche</h2><button class="x" id="close" type="button" aria-label="Fermer la recherche">Fermer</button></div>
+ <div class="q">
+  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+  <input id="q" type="text" role="combobox" aria-expanded="true" aria-controls="lb" aria-autocomplete="list" aria-activedescendant="" aria-label="Rechercher dans l’application" placeholder="Stanton, Croshaw, Terra…" autocomplete="off" spellcheck="false" enterkeyhint="search">
+ </div>
+ <div class="chips" id="chips" role="group" aria-label="Filtrer par type"></div>
+ <div class="cnt" id="count" aria-live="polite"></div>
+ <ul class="list" id="lb" role="listbox" aria-label="Résultats"></ul>
+ <div class="prev" id="prev" aria-live="polite"></div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var TYPES={ev:{n:"Événements",c:"#e8895a",tab:"Chronologie",one:"Événement"},sys:{n:"Systèmes",c:"#6fa6d6",tab:"Carte",one:"Système"},cl:{n:"Comm-Links",c:"#6fcf93",tab:"Comm-Links",one:"Comm-Link"}};
+/* pl (planètes) est regroupé sous la puce « Systèmes » */
+var DATA=[
+ {t:"ev",id:"ouverture-de-stanton",ti:"Ouverture de Stanton",sub:"Le premier point de saut vers le système Stanton est découvert. Hurston Dynamics acquiert Stanton I et ses lunes en 2904, et la ville de Lorville est fondée en 2912.",tag:"2903"},
+ {t:"ev",id:"naissance-de-rsi",ti:"Naissance de Roberts Space Industries",sub:"Chris Roberts fonde RSI, l’entreprise à l’origine des premiers moteurs et des premiers vaisseaux commerciaux.",tag:"2038"},
+ {t:"ev",id:"croshaw-ouvre-la-voie",ti:"Nick Croshaw ouvre la voie",sub:"Après presque dix ans d’étude, Nick Croshaw découvre le premier point de saut, dans le Triangle de Neso.",tag:"2271"},
+ {t:"ev",id:"comite-croshaw",ti:"Le comité d’expansion de Croshaw",sub:"Un comité nommé par le Sommet mondial prend le contrôle de l’expansion vers le système Croshaw.",tag:"2281"},
+ {t:"ev",id:"naissance-une",ti:"Naissance des Nations unies de la Terre",sub:"En avril, le Sommet mondial annonce la création de l’UNE. Croshaw est terraformé.",tag:"2380"},
+ {t:"sys",id:"stanton",ti:"Stanton",sub:"Premier point de saut découvert en 2903. Quatre planètes : Hurston, Crusader, ArcCorp, microTech.",tag:"Système · 2903"},
+ {t:"sys",id:"croshaw",ti:"Croshaw",sub:"Nick Croshaw, depuis le Triangle de Neso. Premier système atteint par un humain.",tag:"Système · 2271"},
+ {t:"sys",id:"terra",ti:"Terra",sub:"Projet FarStar (système 342A). Colonie établie sur la troisième planète en 2516.",tag:"Système · 2516"},
+ {t:"sys",id:"stanton-hurston",ti:"Hurston (Stanton I)",sub:"Hurston Dynamics acquiert la planète et ses lunes ; fondation de Lorville.",tag:"Planète · Stanton"},
+ {t:"sys",id:"stanton-microtech",ti:"microTech (Stanton IV)",sub:"Découverte dès 2851, la planète devient accessible avec l’ouverture du système.",tag:"Planète · Stanton"},
+ {t:"sys",id:"terra-nova-kyiv",ti:"Nova Kyiv (Terra III)",sub:"Anvil Aerospace y est fondée par J. Harris Arnold.",tag:"Planète · Terra"},
+ {t:"cl",id:"transmission/21373",ti:"Star Citizen Monthly Report: September 2026",sub:"Welcome to September’s PU Monthly Report, featuring the latest updates from all the various disciplines working on Star Citizen.",tag:"Transmission · 7 oct. 2026"},
+ {t:"cl",id:"transmission/21353",ti:"Roadmap Roundup - October 9, 2026",sub:"With the Roadmap just updated, here is a brief explanatory note on the decisions behind any changes.",tag:"Transmission · 9 oct. 2026"},
+ {t:"cl",id:"transmission/21352",ti:"This Week in Star Citizen - October 5, 2026",sub:"Stay up to date with everything going on in the ‘verse.",tag:"Transmission · 5 oct. 2026"}
+];
+var DIA=new RegExp("[\\u0300-\\u036f]","g");
+function norm(s){return s.normalize("NFD").replace(DIA,"").toLowerCase()}
+function esc(s){return s.replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function hl(s,q){if(!q)return esc(s);var n=norm(s),i=n.indexOf(q);if(i<0||n.length!==s.length)return esc(s);
+ return esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+q.length))+"</mark>"+esc(s.slice(i+q.length))}
+var $=function(s){return document.querySelector(s)},inp=$("#q"),lb=$("#lb"),panel=$("#panel"),flat=[],cur=0,lastFocus=null,active={ev:true,sys:true,cl:true};
+function match(){var q=norm(inp.value.trim());return DATA.filter(function(d){return !q||norm(d.ti+" "+d.sub).indexOf(q)>=0})}
+function chips(items){var h="";Object.keys(TYPES).forEach(function(k){var n=items.filter(function(d){return d.t===k}).length;
+ h+='<button type="button" class="chip" data-k="'+k+'" aria-pressed="'+active[k]+'" style="--tc:'+TYPES[k].c+'"><i></i>'+TYPES[k].n+' <em>'+n+'</em></button>'});$("#chips").innerHTML=h}
+function render(){
+ var q=norm(inp.value.trim()),all=match();chips(all);
+ flat=all.filter(function(d){return active[d.t]});var h="";
+ if(!flat.length){
+  lb.innerHTML='<li role="presentation" class="empty"><b>Aucun résultat pour « '+esc(inp.value.trim())+' »</b>Essayez un nom de système, une année ou réactivez un type.</li>';
+  inp.removeAttribute("aria-activedescendant");$("#count").textContent="Aucun résultat";$("#prev").innerHTML="";return}
+ flat.forEach(function(d,i){h+='<li class="opt" role="option" id="o'+i+'" data-i="'+i+'" aria-selected="false" style="--tc:'+TYPES[d.t].c+'"><span class="dot"></span><span class="ot"><b>'+hl(d.ti,q)+'</b><span>'+esc(d.tag)+'</span></span></li>'});
+ lb.innerHTML=h;$("#count").textContent=flat.length+" résultat"+(flat.length>1?"s":"");sel(0,false)}
+function sel(i,scroll){cur=(i+flat.length)%flat.length;var d=flat[cur],q=norm(inp.value.trim());
+ [].forEach.call(lb.querySelectorAll(".opt"),function(o){o.setAttribute("aria-selected",o.dataset.i==cur?"true":"false")});
+ inp.setAttribute("aria-activedescendant","o"+cur);var o=$("#o"+cur);if(scroll!==false&&o)o.scrollIntoView({block:"nearest"});
+ $("#prev").style.setProperty("--tc",TYPES[d.t].c);
+ $("#prev").innerHTML='<div class="ty">'+TYPES[d.t].one+' · '+esc(d.tag)+'</div><h3>'+hl(d.ti,q)+'</h3><p>'+hl(d.sub,q)+'</p><div class="act"><button class="btn pri" id="go" type="button">Ouvrir dans « '+TYPES[d.t].tab+' »</button><button class="btn" id="copy" type="button"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>Copier le lien</button></div>'}
+function link(d){return location.href.split("#")[0]+"#/"+d.t+"/"+d.id}
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.h);toast.h=setTimeout(function(){t.classList.remove("on")},1800)}
+function copy(){var d=flat[cur];if(!d)return;var u=link(d),done=function(){toast("Lien copié : "+d.ti)};
+ if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(u).then(done,done);
+ else{var a=document.createElement("textarea");a.value=u;document.body.appendChild(a);a.select();try{document.execCommand("copy")}catch(e){}a.remove();done()}}
+function go(d){close_();$("#landed").textContent="Onglet « "+TYPES[d.t].tab+" » ouvert sur : "+d.ti}
+function open_(){lastFocus=document.activeElement;panel.classList.add("on");$("#scrim").classList.add("on");$("#open").setAttribute("aria-expanded","true");render();inp.focus();inp.select()}
+function close_(){panel.classList.remove("on");$("#scrim").classList.remove("on");$("#open").setAttribute("aria-expanded","false");if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+$("#open").onclick=open_;$("#close").onclick=close_;$("#scrim").onclick=close_;
+inp.addEventListener("input",render);
+$("#chips").addEventListener("click",function(e){var b=e.target.closest(".chip");if(!b)return;var k=b.dataset.k;active[k]=!active[k];
+ render();var n=$('.chip[data-k="'+k+'"]');if(n)n.focus()});
+lb.addEventListener("click",function(e){var o=e.target.closest(".opt");if(o){sel(+o.dataset.i,false)}});
+lb.addEventListener("dblclick",function(e){var o=e.target.closest(".opt");if(o)go(flat[o.dataset.i])});
+$("#prev").addEventListener("click",function(e){if(e.target.closest("#copy"))copy();else if(e.target.closest("#go"))go(flat[cur])});
+document.addEventListener("keydown",function(e){
+ var isOpen=panel.classList.contains("on"),tag=(document.activeElement||{}).tagName;
+ if(!isOpen){if(e.key==="/"&&tag!=="INPUT"&&tag!=="TEXTAREA"){e.preventDefault();open_()}return}
+ if(e.key==="Escape"){e.preventDefault();close_();return}
+ if(e.target===inp){
+  if(e.key==="ArrowDown"&&flat.length){e.preventDefault();sel(cur+1)}
+  else if(e.key==="ArrowUp"&&flat.length){e.preventDefault();sel(cur-1)}
+  else if(e.key==="Enter"&&flat.length){e.preventDefault();(e.ctrlKey||e.metaKey)?copy():go(flat[cur])}}
+ if(e.key==="Tab"){var f=[].slice.call(panel.querySelectorAll("button,input")),i=f.indexOf(document.activeElement);
+  if(e.shiftKey&&i<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&i===f.length-1){e.preventDefault();f[0].focus()}}});
+inp.value=(location.hash.match(/q=([^&]*)/)||[])[1]?decodeURIComponent(RegExp.$1):"croshaw";open_();
+</script>
+</body>
+</html>
