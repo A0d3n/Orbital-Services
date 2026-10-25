@@ -620,3 +620,39 @@ main:focus{outline:none}
 .m-nomatch{margin:0;font-size:12.5px;color:var(--ink-2)}
 .m-nomatch:not(:empty){margin-top:8px}
 h3.fl.lg-sub{margin-top:.2rem}
+
+/* Star Viewer : accessibilité de la carte (focus, noms lisibles, aide clavier, astuce du pincement, fiche en volet bas) */
+.mapbox.hit:not(.drag){cursor:pointer}
+.vw-stage .nd text{stroke:#0a0c0b;stroke-opacity:.95;stroke-width:calc(var(--fs,12px)*.42);stroke-linejoin:round;paint-order:stroke}
+.vw-stage .nd:focus-visible .halo{opacity:1;stroke:#fff;stroke-width:1.6px;stroke-dasharray:none;transform:scale(2.6)}
+.vw-stage .nd:focus-visible .c{stroke:#fff;stroke-width:2.4px}
+.vw-side h3:focus{outline:none}
+.vw-help{margin-top:14px;font-size:12px;color:var(--ink-2)}
+.vw-help summary{cursor:pointer;font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage);padding:6px 0;min-height:24px}
+.vw-help summary:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:4px}
+.vw-help dl{margin:6px 0 0;display:grid;grid-template-columns:auto 1fr;gap:5px 10px;align-items:baseline}
+.vw-help dt,.vw-help dd{margin:0}
+.vw-help kbd{font:500 11px var(--f-mono);color:var(--ink);background:#1a211c;border:1px solid #2a332d;border-radius:5px;padding:1px 5px;white-space:nowrap}
+.vw-help p{margin:8px 0 0}
+.vw-hint{position:absolute;left:8px;right:62px;bottom:124px;z-index:3;display:flex;align-items:center;gap:8px;padding:6px 6px 6px 14px;border-radius:12px;background:rgba(14,18,16,.96);border:1px solid #2a332d;color:var(--ink);font-size:13px;line-height:1.35}
+.vw-hint span{flex:1}
+.vw-hint button{flex:none;width:40px;height:40px;border:0;border-radius:10px;background:none;color:var(--sage);font:400 22px/1 var(--f-body);cursor:pointer}
+.vw-hint button:focus-visible{outline:2px solid var(--sage);outline-offset:-2px}
+@media (max-width:700px){
+  /* la colonne des commandes (zoom, cadre) est réservée : la carte s'arrête avant, aucun nom ni symbole n'est masqué dessous */
+  .vw-stage #mapsvg{width:calc(100% - 56px)}
+  .vw-stage .zoom{right:6px}
+  /* fiche du système : volet bas, 45 % de la hauteur au plus, fermable (bouton Fermer, Échap, tap sur la carte) */
+  .vw-stage .vw-side{left:8px;right:8px;top:auto;bottom:8px;max-height:45%;z-index:6}
+  .vw-side>.in{padding:6px 14px 14px;box-shadow:0 -8px 24px rgba(0,0,0,.45)}
+  .vw-side>.in::before{content:"";display:block;width:36px;height:4px;border-radius:2px;background:#2a332d;margin:2px auto 6px}
+  .vw-side .dh{position:sticky;top:-6px;z-index:1;background:rgba(14,18,16,.98);padding:4px 0 6px}
+  .vw-hint{right:62px}
+}
+
+/* Chronologie sur téléphone : les époques passent sur une 2e ligne au lieu d'être écrasées derrière le titre */
+@media (max-width:640px){
+  .bar[data-view="time"]{height:auto;flex-wrap:wrap;padding:8px 12px;row-gap:6px}
+  .bar[data-view="time"] .tb-right{margin-left:auto}
+  .bar[data-view="time"] .ecs{order:9;flex:1 0 100%}
+}

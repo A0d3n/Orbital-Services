@@ -227,6 +227,123 @@ async function waitUp(port) {
     check("Star Viewer : les noms affichés ne se superposent pas, la sélection garde le sien", over === 0 && (await mp.isVisible(".nd.sel text")), over + " superpositions");
     await mctx.close();
 
+    /* Star Viewer : clavier, tactile, noms et symboles (audit A11 à A14) */
+    await page.goto(base + "/#carte/2956/stanton");
+    await page.waitForSelector(".nd.on", { state: "attached" });
+    await page.waitForTimeout(400);
+    const stops = await page.evaluate(() => ({ zero: document.querySelectorAll('#mapsvg .nd[tabindex="0"]').length, all: document.querySelectorAll("#mapsvg .nd").length, other: document.querySelectorAll('#mapsvg [tabindex="0"]:not(.nd)').length }));
+    check("Star Viewer clavier : un seul arrêt de Tab sur la carte (tabindex itinérant)", stops.zero === 1 && stops.all >= 90 && stops.other === 0, JSON.stringify(stops));
+    await page.focus('#mapsvg .nd[tabindex="0"]');
+    await page.keyboard.press("Tab");
+    check("Star Viewer clavier : Tab quitte la carte après un seul arrêt", await page.evaluate(() => !document.activeElement.closest("#mapsvg")));
+    await page.focus('#mapsvg .nd[tabindex="0"]');
+    const vbOf = () => page.evaluate(() => document.getElementById("mapsvg").getAttribute("viewBox").split(" ").map(Number));
+    const px0 = await page.evaluate(() => POS[document.querySelector(".nd.sel").dataset.i][0]);
+    await page.keyboard.press("ArrowRight");
+    const ar = await page.evaluate(() => { const s = document.querySelector(".nd.sel"); return { id: s.dataset.i, x: POS[s.dataset.i][0], focus: document.activeElement === s, fv: document.activeElement.matches(":focus-visible"), stops: document.querySelectorAll('#mapsvg .nd[tabindex="0"]').length }; });
+    check("Star Viewer clavier : la flèche droite sélectionne le système voisin à droite et le focus le suit", ar.id !== "stanton" && ar.x > px0 && ar.focus && ar.stops === 1, JSON.stringify(ar));
+    check("Star Viewer clavier : focus visible sur le système (anneau)", ar.fv && (await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector(".nd.sel .halo")).opacity))) > 0.5);
+    await page.waitForTimeout(500);
+    check("Star Viewer clavier : le changement de sélection est annoncé (role=status conservé)", await page.evaluate(() => /sélectionné, année/.test(document.getElementById("mAnnounce").textContent) && document.getElementById("mAnnounce").getAttribute("role") === "status"));
+    const v0 = await vbOf();
+    await page.keyboard.press("+");
+    const v1 = await vbOf();
+    await page.keyboard.press("-"); await page.keyboard.press("-");
+    const v2 = await vbOf();
+    check("Star Viewer clavier : + réduit le viewBox, − l'agrandit", v1[2] < v0[2] - 1 && v2[2] > v1[2] + 1, [v0[2], v1[2], v2[2]].join(" / "));
+    await page.keyboard.press("Shift+ArrowLeft");
+    const v3 = await vbOf();
+    check("Star Viewer clavier : Maj + flèche déplace la carte sans changer la sélection", v3[0] < v2[0] - 1 && v3[2] === v2[2] && (await page.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === ar.id);
+    await page.keyboard.press("0");
+    const v4 = await vbOf();
+    check("Star Viewer clavier : 0 revient à la vue d'ensemble", Math.abs(v4[2] - v0[2]) < 1.5, v4.join(" ") + " / " + v0.join(" "));
+    await page.keyboard.press("Enter");
+    check("Star Viewer clavier : Entrée ouvre la fiche (focus dans la fiche, titre du système)", await page.evaluate(() => { const id = document.querySelector(".nd.sel").dataset.i; return !!document.activeElement.closest("#mDetail") && document.querySelector("#mDetail h3").textContent === SYS.find(s => s.i === id).n; }));
+    const yA = await page.textContent("#mYear");
+    await page.keyboard.press("[");
+    check("Star Viewer clavier : [ change d'année (← → restent à la navigation sur la carte)", (await page.textContent("#mYear")) !== yA);
+    check("Star Viewer clavier : le curseur Année reste utilisable au clavier", await (async () => { await page.focus("#mRange"); const a = await page.textContent("#mYear"); await page.keyboard.press("ArrowLeft"); return (await page.textContent("#mYear")) !== a; })());
+    await page.focus('#mapsvg .nd[tabindex="0"]');
+    await page.keyboard.press("Escape");
+    check("Star Viewer clavier : Échap ferme la fiche (plus de système sélectionné)", (await page.locator(".nd.sel").count()) === 0 && /Cliquez sur un système/.test(await page.textContent("#mDetail")));
+    check("Star Viewer clavier : « ? Aide clavier » dans les filtres et texte masqué pour lecteurs d'écran", await page.evaluate(() => { const d = document.querySelector("#vwRail details.vw-help"), p = document.getElementById("mapKeys"); return !!d && /Aide clavier/.test(d.querySelector("summary").textContent) && !!p && p.classList.contains("sr") && document.getElementById("mapsvg").getAttribute("aria-describedby") === "mapKeys"; }));
+    /* bureau : survol et clic à la souris non dégradés */
+    const cpos = await page.evaluate(() => { const r = document.querySelector('.nd[data-i="sol"] .c').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    await page.mouse.move(cpos[0] + 30, cpos[1] + 30);
+    await page.mouse.move(cpos[0], cpos[1]);
+    await page.waitForTimeout(200);
+    const hv = await page.evaluate(() => ({ tip: !document.getElementById("mTip").hidden && /Sol/i.test(document.getElementById("mTip").textContent), lbl: document.querySelector('.nd[data-i="sol"]').classList.contains("lbl") }));
+    await page.mouse.click(cpos[0], cpos[1]);
+    check("Star Viewer bureau : survol (infobulle, nom) et clic souris sélectionnent le bon système", hv.tip && hv.lbl && (await page.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === "sol", JSON.stringify(hv));
+
+    /* Star Viewer tactile 390 x 844 */
+    const tctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const tp = await tctx.newPage();
+    tp.on("pageerror", e => errors.push("tactile : " + e.message));
+    tp.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push("tactile : " + m.text()); });
+    await tp.goto(base + "/#carte/2956/stanton");
+    await tp.waitForSelector("#mapbox", { state: "visible" });
+    await tp.waitForTimeout(700);
+    const hint1 = await tp.evaluate(() => { const h = document.getElementById("vwHint"); return h ? h.textContent : null; });
+    check("Star Viewer tactile : l'astuce « Pincez pour zoomer, glissez pour déplacer » s'affiche", /Pincez pour zoomer, glissez pour déplacer/.test(hint1 || ""), String(hint1));
+    await tp.reload(); await tp.waitForSelector("#mapbox", { state: "visible" }); await tp.waitForTimeout(500);
+    check("Star Viewer tactile : l'astuce ne revient pas (affichée une seule fois)", (await tp.locator("#vwHint").count()) === 0);
+    const occ = await tp.evaluate(() => { const bx = document.getElementById("mapbox").getBoundingClientRect(); let a = 1e9, b = -1e9; document.querySelectorAll(".nd.on .c").forEach(c => { const r = c.getBoundingClientRect(); a = Math.min(a, r.top); b = Math.max(b, r.bottom); }); return { ratio: (b - a) / bx.height, bh: bx.height }; });
+    check("Star Viewer tactile : la vue d'ensemble occupe plus de 60 % de la hauteur de la carte", occ.ratio > 0.6, JSON.stringify(occ));
+    const overlap = () => tp.evaluate(() => {
+      const syms = [...document.querySelectorAll(".nd.on")].map(g => ({ i: g.dataset.i, r: g.querySelector(".c").getBoundingClientRect() }));
+      let n = 0, shown = 0;
+      document.querySelectorAll(".nd.lbl").forEach(g => { shown++; const t = g.querySelector("text").getBoundingClientRect(); syms.forEach(s => { if (s.i === g.dataset.i) return; if (t.left < s.r.right - 1 && t.right > s.r.left + 1 && t.top < s.r.bottom - 1 && t.bottom > s.r.top + 1) n++; }); });
+      return { n, shown };
+    });
+    const o1 = await overlap();
+    check("Star Viewer tactile : aucun nom ne recouvre le symbole d'un autre système (vue d'ensemble)", o1.n === 0 && o1.shown > 3, JSON.stringify(o1));
+    const tcl = await tp.evaluate(() => ({ svgRight: document.querySelector("#mapsvg").getBoundingClientRect().right, zoomLeft: document.querySelector(".zoom").getBoundingClientRect().left }));
+    check("Star Viewer tactile : les commandes de zoom ne recouvrent pas la carte (marge réservée)", tcl.svgRight <= tcl.zoomLeft + 0.5, JSON.stringify(tcl));
+    await tp.tap("#zIn"); await tp.tap("#zIn"); await tp.waitForTimeout(500);
+    const o2 = await overlap();
+    check("Star Viewer tactile : aucun chevauchement nom-symbole en zoom", o2.n === 0, JSON.stringify(o2));
+    await tp.tap("#zFit"); await tp.waitForTimeout(300);
+    /* tap : le système touché ouvre la fiche en volet bas */
+    const tpos = await tp.evaluate(() => { const r = document.querySelector('.nd[data-i="terra"] .c').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    await tp.touchscreen.tap(tpos[0], tpos[1]);
+    await tp.waitForTimeout(400);
+    const sh = await tp.evaluate(() => { const s = document.getElementById("vwSide").getBoundingClientRect(), st = document.querySelector(".vw-stage").getBoundingClientRect(); return { vis: s.height > 0, ratio: s.height / st.height, sel: document.querySelector(".nd.sel").dataset.i, title: document.querySelector("#mDetail h3").textContent, open: document.querySelector(".vw-stage").classList.contains("o-side") }; });
+    check("Star Viewer tactile : un tap sur un système ouvre la fiche en volet bas (45 % de la hauteur au plus)", sh.vis && sh.open && sh.sel === "terra" && /Terra/.test(sh.title) && sh.ratio <= 0.46, JSON.stringify(sh));
+    const shVis = await tp.evaluate(() => { const r = document.querySelector('.nd[data-i="terra"] .c').getBoundingClientRect(), s = document.getElementById("vwSide").getBoundingClientRect(); return r.bottom < s.top; });
+    check("Star Viewer tactile : le système touché reste visible au-dessus du volet", shVis);
+    await tp.tap("#vwSide .x"); await tp.waitForTimeout(200);
+    check("Star Viewer tactile : le volet se ferme avec le bouton Fermer", !(await tp.isVisible("#vwSide")));
+    const tpos2 = await tp.evaluate(() => { const r = document.querySelector('.nd[data-i="terra"] .c').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    await tp.touchscreen.tap(tpos2[0], tpos2[1]); await tp.waitForTimeout(300);
+    await tp.keyboard.press("Escape");
+    check("Star Viewer tactile : le volet se ferme avec Échap", !(await tp.isVisible("#vwSide")));
+    const tpos3 = await tp.evaluate(() => { const r = document.querySelector('.nd[data-i="terra"] .c').getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; });
+    await tp.touchscreen.tap(tpos3[0], tpos3[1]); await tp.waitForTimeout(300);
+    const empty = await tp.evaluate(() => { const bx = document.getElementById("mapsvg").getBoundingClientRect(), pts = [...document.querySelectorAll(".nd.on .c")].map(c => { const r = c.getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }); let best = null, bd = 0; for (let x = bx.left + 10; x < bx.right - 10; x += 12) for (let y = bx.top + 70; y < bx.top + 300; y += 12) { const d = Math.min(...pts.map(p => Math.hypot(p[0] - x, p[1] - y))); if (d > bd) { bd = d; best = [x, y]; } } return { p: best, d: Math.round(bd) }; });
+    await tp.touchscreen.tap(empty.p[0], empty.p[1]); await tp.waitForTimeout(300);
+    check("Star Viewer tactile : un tap sur la carte (hors système) ferme le volet", !(await tp.isVisible("#vwSide")) && (await tp.locator(".nd.sel").count()) === 0, JSON.stringify(empty));
+    /* zone de tap élargie et résolution vers le système le plus proche */
+    const near = await tp.evaluate(() => {
+      const pts = [...document.querySelectorAll(".nd.on")].map(g => { const r = g.querySelector(".c").getBoundingClientRect(); return { i: g.dataset.i, x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+      const ib = document.getElementById("mapsvg").getBoundingClientRect();
+      const ok = pts.filter(p => p.x > ib.left + 30 && p.x < ib.right - 30 && p.y > ib.top + 80 && p.y < ib.top + 330);
+      let best = null, bd = 0; ok.forEach(p => { const d = Math.min(...pts.filter(q => q !== p).map(q => Math.hypot(q.x - p.x, q.y - p.y))); if (d > bd) { bd = d; best = p; } });
+      return { id: best.i, x: best.x, y: best.y, gap: Math.round(bd) };
+    });
+    await tp.touchscreen.tap(near.x + 15, near.y + 10);
+    await tp.waitForTimeout(300);
+    check("Star Viewer tactile : un tap à ~18 px du symbole sélectionne le système (zone de tap élargie)", (await tp.evaluate(() => { const s = document.querySelector(".nd.sel"); return s && s.dataset.i; })) === near.id, JSON.stringify(near));
+    const dense = await tp.evaluate(() => {
+      const ib = document.getElementById("mapsvg").getBoundingClientRect();
+      const pts = [...document.querySelectorAll(".nd.on")].map(g => { const r = g.querySelector(".c").getBoundingClientRect(); return { i: g.dataset.i, x: r.x + r.width / 2, y: r.y + r.height / 2 }; }).filter(p => p.x > ib.left + 20 && p.x < ib.right - 20 && p.y > ib.top + 80 && p.y < ib.top + 330);
+      let best = null, bd = 1e9; pts.forEach(p => pts.forEach(q => { if (p === q) return; const d = Math.hypot(p.x - q.x, p.y - q.y); if (d < bd && d > 8) { bd = d; best = [p, q]; } }));
+      return { a: best[0], b: best[1], d: bd };
+    });
+    await tp.touchscreen.tap(dense.a.x + (dense.b.x - dense.a.x) * 0.25, dense.a.y + (dense.b.y - dense.a.y) * 0.25); await tp.waitForTimeout(300);
+    check("Star Viewer tactile : deux zones qui se recouvrent, le tap va au système le plus proche", (await tp.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === dense.a.i, JSON.stringify({ a: dense.a.i, b: dense.b.i, d: Math.round(dense.d) }));
+    await tctx.close();
+
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
     check("exécution du test", false, e && e.stack || String(e));

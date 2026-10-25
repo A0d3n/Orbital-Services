@@ -54,3 +54,9 @@ Résultat : **aucune date officielle** n'a été trouvée. La StarMap et la Gala
 | Viking | wiki : « connu » en 2686, « visité » en 2883 (les deux valeurs se contredisent) | garder « non précisée » |
 
 À faire si tu veux aller plus loin : ouvrir la Galactapedia de RSI dans un navigateur (le champ « Discovered in » se charge dynamiquement) pour Bacchus et Vanguard.
+
+## Mobile et clavier (octobre 2026)
+
+- **Mobile** : un tap sur un système ouvre la fiche en volet bas (45 % de la hauteur au plus) ; un tap est résolu vers le système le plus proche (24 px au doigt, 14 px à la souris) ; le pincement zoome (astuce affichée une fois) ; la vue de départ est cadrée sur le cœur de la carte, « cadre » montre toute la carte.
+- **Clavier** : un seul arrêt de Tab sur la carte ; flèches = système voisin le plus proche ; Entrée/Espace = fiche ; `+` `-` `=` = zoom ; `0` = vue d’ensemble ; Maj + flèches = déplacer ; Échap = fermer la fiche ; `[` `]` ou PageUp/PageDown = changer d’année. Rappel dans « ? Aide clavier » (panneau Filtres).
+- **Noms** : l’anti-collision compte aussi les symboles et les obstacles (panneaux, commandes) ; priorité sélection > survol > grands systèmes > nombre de liaisons.
