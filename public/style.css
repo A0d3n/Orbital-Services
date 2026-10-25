@@ -105,6 +105,8 @@ a{color:var(--holo)}
 .m-key ul{list-style:none;margin:0;padding:0}
 .m-key li{display:flex;align-items:center;gap:.4rem;margin:.18rem 0;white-space:nowrap}
 .m-key svg{width:.85rem;height:.85rem;flex:none;overflow:visible}
+.m-key .ic{fill:var(--oc);stroke:rgba(255,255,255,.85);stroke-width:1.2}
+.m-key .icd{display:none}
 .m-key .sw{width:1.5rem;height:.55rem;background:var(--oc);opacity:.75;flex:none}
 @container (max-width:960px){.m-log{display:none}.m-key{font-size:.6rem;padding:.4rem .5rem}.m-key .jp{margin-bottom:.3rem}.m-era{font-size:.85rem;padding:.4rem .7rem;max-width:44%}.m-year{font-size:2.2rem}}
 
@@ -508,7 +510,7 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 .vw-stage{position:relative;height:clamp(620px,calc(100vh - 150px),940px);border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#0a0c0b}
 .vw-stage .mapbox{position:absolute;inset:0;height:auto;border:0;border-radius:0;
   --vpl:0px;--vpr:0px;--vpt:0px;--vpb:0px;--mbg:#0a0c0b;--mline:#b8d9a6;--mk:#9bb08f;--mk-2:#7d8f75;
-  background:radial-gradient(60% 60% at 52% 48%,rgba(184,217,166,.05),transparent),radial-gradient(circle at 1px 1px,#222a25 1px,transparent 1.4px) 0 0/28px 28px,#0a0c0b}
+  background:radial-gradient(60% 60% at 52% 48%,rgba(184,217,166,.05),transparent),linear-gradient(rgba(184,217,166,.16) 1px,transparent 1px) 0 0/100px 100px,linear-gradient(90deg,rgba(184,217,166,.16) 1px,transparent 1px) 0 0/100px 100px,linear-gradient(rgba(184,217,166,.06) 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,rgba(184,217,166,.06) 1px,transparent 1px) 0 0/20px 20px,#0a0c0b}
 .vw-card{padding:1px;background:#2a332d;--cut:16px;clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)))}
 .vw-card>.in{background:rgba(14,18,16,.95);clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,var(--cut) 100%,0 calc(100% - var(--cut)));padding:16px;box-sizing:border-box}
 .vw-card h4{font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage);margin:14px 0 8px}
@@ -538,15 +540,24 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 .vw-stage .zoom .btn{min-width:2.2rem;height:2.2rem}
 .vw-stage .m-era{left:calc(var(--vpl) + (100% - var(--vpl) - var(--vpr)) / 2);transform:translateX(-50%);top:16px;font:500 12px var(--f-mono);letter-spacing:.14em;color:var(--sage);background:none;border:0;padding:0}
 .vw-stage .m-year,.vw-stage .m-log{display:none}
-.vw-stage .nd .c{fill:#0a0c0b;stroke:var(--oc);stroke-width:2px}
+.vw-stage .nd .c{fill:#0a0c0b;stroke:var(--oc);stroke-width:1.2px}
 .vw-stage .nd .c.ring{stroke-dasharray:3 3}
 .vw-stage .nd .dot{fill:var(--oc);pointer-events:none}
-.vw-stage .nd.sel .c{stroke:#fff}
+.vw-stage .nd.sel .c{stroke:#fff;stroke-width:1.4px}
 .vw-stage .nd text{font-family:var(--f-mono);font-weight:500;letter-spacing:.1em;fill:#9bb08f}
 .vw-stage .nd.sel text{fill:#e7ebe8}
-.vw-stage .edge{stroke:var(--sage);stroke-width:1px}
-.vw-stage .edge.on{opacity:.34}
-.vw-stage .edge.hl{stroke:#fff;opacity:.9}
+.vw-stage .edge{stroke:var(--sage);stroke-width:.8px}
+.vw-stage .edge.on{opacity:.3}
+.vw-stage .edge.hl{stroke:var(--sage);stroke-width:1px;opacity:.85}
+/* halo : seulement sur le système sélectionné */
+.vw-stage .nd .halo{opacity:0;animation:none;stroke:var(--sage);stroke-width:.8px;stroke-dasharray:2 3}
+.vw-stage .nd.sel .halo{opacity:.85;transform:scale(2.3)}
+.vw-stage .infg{opacity:.11}
+.vw-stage .mapbox.lite .infg{opacity:.05}
+/* légende : mêmes formes creuses que sur la carte */
+.vw-stage .m-key .ic{fill:#0a0c0b;stroke:var(--oc);stroke-width:1.2}
+.vw-stage .m-key .ic.ring{stroke-dasharray:2 2}
+.vw-stage .m-key .icd{display:block;fill:var(--oc)}
 @media (min-width:1100px){.vw-stage .mapbox{--vpl:254px;--vpr:350px;--vpt:88px;--vpb:150px}}
 @media (max-width:1099px){
   .vw-stage{height:auto;overflow:visible;border:0;background:none;display:grid;gap:12px}
@@ -593,4 +604,5 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 }
 
 /* mêmes couleurs de camp sur la carte, les filtres, la légende et la fiche (xi’an vert, banu jaune, tevarin violet) */
-.vw-stage{--c-hum:#38a8d4;--c-xian:#62b53c;--c-banu:#e3c63a;--c-tev:#9a5fd8;--c-van:#e03c3c;--c-myst:#f08a2a;--c-tech:#dca545;--c-corp:#8b919b}
+.vw-stage{--c-hum:#5fbfe8;--c-xian:#7ccf5e;--c-banu:#ecd25a;--c-tev:#b48ae8;--c-van:#f0645a;--c-myst:#f59a40;--c-tech:#e6b35a;--c-corp:#9aa1ab}
+.vw-stage .mapbox{--c-hum:inherit;--c-xian:inherit;--c-banu:inherit;--c-tev:inherit;--c-van:inherit;--c-myst:inherit;--c-tech:inherit;--c-corp:inherit}

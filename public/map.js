@@ -22,18 +22,19 @@ var svg=$("#mapsvg"),box=$("#mapbox"),detail=$("#mDetail"),feed=$("#mFeed");
 var yEl=$("#mYear"),range=$("#mRange"),cEl=$("#mCount");
 
 /* construction du SVG */
-var SH={hum:"o",xian:"u",banu:"d",tev:"q",van:"v",out:"o",con:"r",none:"o"},INF={hum:1,xian:1,banu:1,tev:1,van:1};
+var SH={hum:"o",xian:"u",banu:"d",tev:"q",van:"v",out:"h",con:"o",none:"o"},INF={hum:1,xian:1,banu:1,tev:1,van:1};
 function shapeD(k,x,y,r){
   if(k==="u")return"M"+x+","+(y-r*1.2)+"L"+(x+r*1.1)+","+(y+r*.8)+"L"+(x-r*1.1)+","+(y+r*.8)+"Z";
   if(k==="d")return"M"+x+","+(y+r*1.2)+"L"+(x+r*1.1)+","+(y-r*.8)+"L"+(x-r*1.1)+","+(y-r*.8)+"Z";
   if(k==="v")return"M"+x+","+(y-r*1.25)+"L"+(x+r*1.25)+","+y+"L"+x+","+(y+r*1.25)+"L"+(x-r*1.25)+","+y+"Z";
   if(k==="q")return"M"+(x-r*.9)+","+(y-r*.9)+"h"+(r*1.8)+"v"+(r*1.8)+"h"+(-r*1.8)+"Z";
+  if(k==="h"){var a=r*1.15,b=a*.866,p=function(i,j){return(x+i)+","+(y+j)};return"M"+p(a,0)+"L"+p(a/2,b)+"L"+p(-a/2,b)+"L"+p(-a,0)+"L"+p(-a/2,-b)+"L"+p(a/2,-b)+"Z"}
   return"M"+(x-r)+","+y+"a"+r+","+r+" 0 1,0 "+(2*r)+",0a"+r+","+r+" 0 1,0 "+(-2*r)+",0Z";
 }
 var defs=document.createElementNS(NS,"defs");
 defs.innerHTML='<filter id="mblur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="24"/><feComponentTransfer><feFuncA type="linear" slope="2.4" intercept="-.2"/></feComponentTransfer></filter>';
 var gI=document.createElementNS(NS,"g"),gE=document.createElementNS(NS,"g"),gN=document.createElementNS(NS,"g");
-gI.setAttribute("filter","url(#mblur)");gI.setAttribute("opacity",".5");gI.setAttribute("pointer-events","none");
+gI.setAttribute("class","infg");gI.setAttribute("filter","url(#mblur)");gI.setAttribute("opacity",".5");gI.setAttribute("pointer-events","none");
 svg.appendChild(defs);svg.appendChild(gI);svg.appendChild(gE);svg.appendChild(gN);
 EDG.forEach(function(e){
   var l=document.createElementNS(NS,"line");
@@ -55,7 +56,7 @@ SYS.forEach(function(s){
 
 /* légende et dates clés */
 var OK=["hum","xian","banu","tev","van","out","con","none"];
-function icon(k){return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><path d="'+shapeD(SH[k],0,0,5.5)+'" style="fill:var('+OW[k][1]+');stroke:rgba(255,255,255,.85);stroke-width:1.2"/></svg>'}
+function icon(k){return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><path class="ic'+(k==="con"?' ring':'')+'" style="--oc:var('+OW[k][1]+')" d="'+shapeD(SH[k],0,0,5.5)+'"/><circle class="icd" style="--oc:var('+OW[k][1]+')" r="1.7"/></svg>'}
 $("#mLegend").innerHTML='<h5>Légende</h5><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><div class="cols"><div><h5>Gouvernance</h5><ul>'+
   OK.map(function(k){return '<li>'+icon(k)+OW[k][0]+'</li>'}).join("")+'</ul></div></div><p class="jp" style="margin:.5rem 0 0"><span class="sw" style="--oc:var(--c-hum)"></span>Zone d’influence</p>';
 /* époques affichées en bandeau (années de début tirées des périodes de la chronologie) */
