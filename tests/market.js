@@ -100,10 +100,10 @@ async function startServer(env) {
       const tabs = await page.evaluate(() => [...document.querySelectorAll("#cmTabs [role=tab]")].map(b => ({ t: b.textContent.replace(/\s+/g, " ").trim(), sel: b.getAttribute("aria-selected"), dis: b.getAttribute("aria-disabled"), ti: b.tabIndex, href: b.getAttribute("href"), ctl: b.getAttribute("aria-controls") })));
       check("barre role=tablist « Modules du Commerce » : six onglets dans l'ordre", tabs.map(t => t.t.replace(" bientôt", "")).join() === "Simulateur & journal,Prix,Routes,Raffineries,Carburant,Vaisseaux" && (await page.getAttribute("#cmTabs", "role")) === "tablist" && !!(await page.getAttribute("#cmTabs", "aria-label")), JSON.stringify(tabs.map(t => t.t)));
       check("#commerce : « Simulateur & journal » sélectionné (tabindex 0), les autres en tabindex -1, panneau Prix masqué", tabs[0].sel === "true" && tabs[0].ti === 0 && tabs.slice(1).every(t => t.sel === "false" && t.ti === -1) && (await page.isHidden("#cmPanel-prix")) && (await page.isVisible("#cmPanel-sim")));
-      check("quatre modules « bientôt » : aria-disabled, texte « bientôt », aucun lien (href)", tabs.slice(2).every(t => t.dis === "true" && /bientôt/.test(t.t) && t.href === null && t.ctl === null) && tabs[1].dis === null);
+      check("trois modules « bientôt » (Raffineries, Carburant, Vaisseaux) : aria-disabled, texte « bientôt », aucun lien (href) ; Prix et Routes actifs", tabs.slice(3).every(t => t.dis === "true" && /bientôt/.test(t.t) && t.href === null && t.ctl === null) && tabs[1].dis === null && tabs[2].dis === null);
       check("panneaux : role=tabpanel avec aria-labelledby vers l'onglet", (await page.getAttribute("#cmPanel-sim", "role")) === "tabpanel" && (await page.getAttribute("#cmPanel-prix", "aria-labelledby")) === "cmTab-prix" && tabs[1].ctl === "cmPanel-prix");
       check("page par défaut : aucune requête sur les données de prix (seule /api/uex/status)", reqs.every(r => r === "status"), reqs.join());
-      await page.click("#cmTab-routes", { force: true });
+      await page.click("#cmTab-raffineries", { force: true });
       check("clic sur un onglet « bientôt » : rien ne change (adresse, onglet actif)", (await page.evaluate(() => location.hash)) === "#commerce" && (await page.getAttribute("#cmTab-sim", "aria-selected")) === "true");
       await page.click("#cmTab-prix"); await ready(page);
       check("clic sur « Prix » : adresse #commerce/prix, onglet sélectionné, panneau Prix visible, panneau Simulateur masqué, sans rechargement", (await page.evaluate(() => location.hash)) === "#commerce/prix" && (await page.getAttribute("#cmTab-prix", "aria-selected")) === "true" && (await page.isVisible("#cmPanel-prix")) && (await page.isHidden("#cmPanel-sim")));
@@ -111,15 +111,16 @@ async function startServer(env) {
       await page.keyboard.press("ArrowLeft"); await page.waitForTimeout(150);
       check("flèche gauche : retour au Simulateur (focus et sélection)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-sim" && (await page.getAttribute("#cmTab-sim", "aria-selected")) === "true" && (await page.evaluate(() => location.hash)) === "#commerce");
       await page.keyboard.press("ArrowRight"); await page.waitForTimeout(100);
-      check("flèche droite : Prix ; flèche droite encore : les onglets « bientôt » sont sautés (retour au premier)", (await page.getAttribute("#cmTab-prix", "aria-selected")) === "true");
-      await page.keyboard.press("ArrowRight"); await page.waitForTimeout(100);
+      check("flèche droite : Prix ; encore : Routes ; encore : les onglets « bientôt » sont sautés (retour au premier)", (await page.getAttribute("#cmTab-prix", "aria-selected")) === "true");
+      await page.keyboard.press("ArrowRight"); await page.waitForTimeout(150); await page.keyboard.press("ArrowRight"); await page.waitForTimeout(150);
       check("… boucle sur « Simulateur & journal »", (await page.evaluate(() => document.activeElement.id)) === "cmTab-sim");
-      await page.keyboard.press("End"); await page.waitForTimeout(100);
-      check("Fin : dernier onglet disponible (Prix)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-prix");
+      await page.keyboard.press("End"); await page.waitForTimeout(150);
+      check("Fin : dernier onglet disponible (Routes)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-routes");
       await page.keyboard.press("Home"); await page.waitForTimeout(100);
       check("Début : « Simulateur & journal »", (await page.evaluate(() => document.activeElement.id)) === "cmTab-sim");
       await page.goBack(); await page.waitForTimeout(150);
-      check("bouton Retour du navigateur : revient d'un sous-onglet à l'autre sans recharger", (await page.evaluate(() => location.hash)) === "#commerce/prix" && (await page.getAttribute("#cmTab-prix", "aria-selected")) === "true");
+      check("bouton Retour du navigateur : revient d'un sous-onglet à l'autre (ici Routes) sans recharger", (await page.evaluate(() => location.hash)) === "#commerce/routes" && (await page.getAttribute("#cmTab-routes", "aria-selected")) === "true");
+      await page.click("#cmTab-prix"); await ready(page);
       // état conservé : sélection et filtres de Prix survivent à un aller-retour
       await pick(page, "alphium"); await page.selectOption("#mkSys", "Système Y");
       await page.click("#cmTab-sim"); await page.waitForTimeout(100); await page.click("#cmTab-prix"); await page.waitForTimeout(250);
@@ -127,11 +128,11 @@ async function startServer(env) {
       // carte du tableau de bord
       await page.click("#cmTab-sim");
       const link = page.locator('#cmPanel-sim a[href="#commerce/prix"]');
-      check("carte « Prix » du tableau de bord : lien vers #commerce/prix ; les quatre autres cartes « bientôt » sans élément interactif", (await link.count()) === 1 && (await page.locator("#cmPanel-sim .cm-tool.off").count()) === 4 && (await page.locator("#cmPanel-sim .cm-tool.off a,#cmPanel-sim .cm-tool.off button").count()) === 0);
+      check("carte « Prix » du tableau de bord : lien vers #commerce/prix ; les trois autres cartes « bientôt » sans élément interactif", (await link.count()) === 1 && (await page.locator("#cmPanel-sim .cm-tool.off").count()) === 3 && (await page.locator("#cmPanel-sim .cm-tool.off a,#cmPanel-sim .cm-tool.off button").count()) === 0);
       await link.click(); await ready(page);
       check("clic sur la carte : sous-onglet Prix ouvert, focus sur le titre du module", (await page.getAttribute("#cmTab-prix", "aria-selected")) === "true" && (await page.evaluate(() => document.activeElement.id)) === "mkTitle");
       // hash direct, inconnu, non livré
-      for (const [h, label] of [["#commerce/inconnu", "inconnu"], ["#commerce/routes", "non livré (Routes)"], ["#commerce/prix/extra", "mal formé"]]) {
+      for (const [h, label] of [["#commerce/inconnu", "inconnu"], ["#commerce/raffineries", "non livré (Raffineries)"], ["#commerce/prix/extra", "mal formé"]]) {
         await page.goto(on.base + "/" + h); await page.waitForSelector("#v-commerce", { state: "visible" }); await page.waitForTimeout(150);
         check("hash " + label + " : retour au défaut sans erreur, adresse ramenée à #commerce", (await page.evaluate(() => location.hash)) === "#commerce" && (await page.getAttribute("#cmTab-sim", "aria-selected")) === "true" && (await page.isVisible("#cmPanel-sim")));
       }

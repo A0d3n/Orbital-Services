@@ -164,14 +164,17 @@ function Banner(host) {
 }
 
 /* ───────────────────────── tableau (cartes sous 700 px) ─────────────────────────
-   o : { id, title, note(rows), columns:[{k, h, type:"n"|"t", n, first, val(row), cell(row)→Node|string}], def:[clé, 1|-1], empty(ctx)→{title,text,reset}, onReset }
+   o : { id, title, note(rows), limit, columns:[{k, h, type:"n"|"t", n, first, nl, hsr, tip, val(row), cell(row)→Node|string}], def:[clé, 1|-1], empty(ctx)→{title,text,reset}, onReset }
+   limit : nombre de lignes affichées d'abord (défaut cfg.limit) ; tip : formule en info-bulle de l'en-tête (survol, focus clavier, description pour lecteurs d'écran) ;
+   nl : pas d'étiquette en mode cartes ; hsr : texte d'en-tête réservé aux lecteurs d'écran.
    Un vrai <table> (rôles posés pour rester lisible une fois affiché en cartes), en-têtes de colonne triables (boutons + aria-sort),
    sélecteur « Trier par » (téléphone), « Voir plus » au-delà de cfg.limit lignes. */
 function Table(o) {
-  var T = { el: el("div", "mk-tw"), rows: [], ctx: {}, key: o.def[0], dir: o.def[1], shown: cfg.limit };
+  function LIM() { return o.limit || cfg.limit; }
+  var T = { el: el("div", "mk-tw"), rows: [], ctx: {}, key: o.def[0], dir: o.def[1], shown: LIM() };
   function col(k) { for (var i = 0; i < o.columns.length; i++) if (o.columns[i].k === k) return o.columns[i]; return null; }
   T.sorted = function () { var c = col(T.key); return c ? sortRows(T.rows, c.val, c.type, T.dir) : T.rows.slice(); };
-  T.set = function (rows, ctx) { T.rows = rows; T.ctx = ctx || {}; T.shown = cfg.limit; T.draw(); };
+  T.set = function (rows, ctx) { T.rows = rows; T.ctx = ctx || {}; T.shown = LIM(); T.draw(); };
   T.draw = function (focus) {
     var host = T.el, rows = T.sorted(), head = el("div", "mk-tbh"), h = el("h3", null, o.title);
     host.textContent = ""; h.id = o.id + "-h"; head.appendChild(h);
@@ -187,7 +190,7 @@ function Table(o) {
     sortable.forEach(function (c) { [1, -1].forEach(function (d) {
       var op = el("option", null, c.h + " (" + (d > 0 ? "croissant" : "décroissant") + ")"); op.value = c.k + ":" + d; if (T.key === c.k && T.dir === d) op.selected = true; sel.appendChild(op);
     }); });
-    sel.addEventListener("change", function () { var p = sel.value.split(":"); T.key = p[0]; T.dir = +p[1]; T.shown = Math.max(T.shown, cfg.limit); T.draw("sel"); });
+    sel.addEventListener("change", function () { var p = sel.value.split(":"); T.key = p[0]; T.dir = +p[1]; T.shown = Math.max(T.shown, LIM()); T.draw("sel"); });
     sl.appendChild(sel); host.appendChild(sl);
     var t = at(el("table", "mk-t"), { role: "table", "aria-labelledby": h.id }), th = at(el("thead"), { role: "rowgroup" }), hr = at(el("tr"), { role: "row" });
     o.columns.forEach(function (c) {
@@ -197,8 +200,11 @@ function Table(o) {
         var b = el("button", "mk-sb"); b.type = "button"; b.setAttribute("data-k", c.k); b.appendChild(document.createTextNode(c.h));
         b.appendChild(at(el("span", null, on ? (T.dir > 0 ? "↑" : "↓") : "↕"), { "aria-hidden": "true" }));
         b.addEventListener("click", function () { if (T.key === c.k) T.dir = -T.dir; else { T.key = c.k; T.dir = 1; } T.draw("sort:" + c.k); });
-        x.appendChild(b);
-      } else x.textContent = c.h;
+        if (c.tip) { /* formule : info-bulle au survol et au focus (data-x), description lue par les lecteurs d'écran (élément masqué référencé) */
+          var tid = o.id + "-tip-" + c.k, d = el("span", null, "Formule : " + c.tip); d.id = tid; d.hidden = true;
+          b.setAttribute("data-x", c.tip); b.setAttribute("aria-describedby", tid); b.appendChild(at(el("span", "mk-i", "i"), { "aria-hidden": "true" })); x.appendChild(b); x.appendChild(d);
+        } else x.appendChild(b);
+      } else if (c.hsr) x.appendChild(el("span", "sr", c.h)); else x.textContent = c.h;
       hr.appendChild(x);
     });
     th.appendChild(hr); t.appendChild(th);
@@ -206,7 +212,7 @@ function Table(o) {
     vis.forEach(function (r) {
       var tr = at(el("tr"), { role: "row" });
       o.columns.forEach(function (c) {
-        var td = c.first ? at(el("th"), { scope: "row", role: "rowheader" }) : at(el("td", c.n ? "n" : ""), { role: "cell", "data-l": c.h });
+        var td = c.first ? at(el("th"), { scope: "row", role: "rowheader" }) : at(el("td", c.n ? "n" : ""), { role: "cell", "data-l": c.nl ? "" : c.h });
         var v = c.cell(r); if (typeof v === "string") td.textContent = v; else td.appendChild(v);
         tr.appendChild(td);
       });
@@ -214,8 +220,8 @@ function Table(o) {
     });
     t.appendChild(tb); host.appendChild(t);
     if (rows.length > vis.length) {
-      var more = el("p", "mk-more"), mb = el("button", "btn", "Voir plus (" + (rows.length - vis.length) + NB + "restantes)"); mb.type = "button";
-      mb.addEventListener("click", function () { var was = T.shown; T.shown += cfg.limit; T.draw("more:" + was); });
+      var more = el("p", "mk-more"), mb = el("button", "btn", "Voir plus (" + nf(rows.length - vis.length) + NB + "restantes)"); mb.type = "button";
+      mb.addEventListener("click", function () { var was = T.shown; T.shown += LIM(); T.draw("more:" + was); });
       more.appendChild(mb); host.appendChild(more);
     }
     if (focus) {
@@ -227,6 +233,16 @@ function Table(o) {
   };
   return T;
 }
+
+/* info-bulles (valeurs abrégées, formules) : Échap les masque tant que le pointeur ou le focus reste dessus (WCAG 1.4.13) */
+document.addEventListener("keydown", function (e) {
+  if (e.key !== "Escape") return;
+  [].forEach.call(document.querySelectorAll(".mk-num:hover,.mk-num:focus,.mk-sb[data-x]:hover,.mk-sb[data-x]:focus"), function (n) {
+    n.setAttribute("data-hide", "1");
+    var off = function () { n.removeAttribute("data-hide"); n.removeEventListener("blur", off); n.removeEventListener("mouseleave", off); };
+    n.addEventListener("blur", off); n.addEventListener("mouseleave", off);
+  });
+});
 
 /* ───────────────────────── module Prix ───────────────────────── */
 var PRES = ["commodities_prices_all", "commodities", "terminals", "star_systems"];
@@ -460,5 +476,7 @@ var prix = {
 };
 
 window.OrbMarket = { nf: nf, short: short, num: num, ageLabel: ageLabel, fresh: fresh, sortRows: sortRows, csv: csv, csvTxt: csvTxt, download: download,
-  get: fetchRes, open: openSession, Banner: Banner, Table: Table, cfg: cfg, TTL: TTL, mem: mem, prix: prix };
+  get: fetchRes, open: openSession, Banner: Banner, Table: Table, cfg: cfg, TTL: TTL, mem: mem, prix: prix,
+  /* aides partagées avec les autres modules (routes.js) */
+  h: { el: el, at: at, plural: plural, dash: dash, pill: pill, isStale: isStale, ageNow: ageNow, coll: COLL, nrm: nrm } };
 })();

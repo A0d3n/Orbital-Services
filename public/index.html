@@ -128,7 +128,7 @@
         <div class="cm-tabs" role="tablist" aria-label="Modules du Commerce" id="cmTabs">
           <button type="button" role="tab" class="cm-tab" id="cmTab-sim" data-mod="sim" aria-selected="true" aria-controls="cmPanel-sim">Simulateur &amp; journal</button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-prix" data-mod="prix" aria-selected="false" aria-controls="cmPanel-prix" tabindex="-1">Prix</button>
-          <button type="button" role="tab" class="cm-tab" id="cmTab-routes" data-mod="routes" aria-selected="false" aria-disabled="true" tabindex="-1">Routes <small class="cm-soon">bientôt</small></button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-routes" data-mod="routes" aria-selected="false" aria-controls="cmPanel-routes" tabindex="-1">Routes</button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-raffineries" data-mod="raffineries" aria-selected="false" aria-disabled="true" tabindex="-1">Raffineries <small class="cm-soon">bientôt</small></button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-carburant" data-mod="carburant" aria-selected="false" aria-disabled="true" tabindex="-1">Carburant <small class="cm-soon">bientôt</small></button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-vaisseaux" data-mod="vaisseaux" aria-selected="false" aria-disabled="true" tabindex="-1">Vaisseaux <small class="cm-soon">bientôt</small></button>
@@ -136,7 +136,7 @@
       </div>
       <div id="cmPanel-sim" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-sim" tabindex="-1">
       <div class="cm-intro">
-        <p class="lead">Vos outils de commerce, regroupés en modules : choisissez un onglet ci-dessus. Le simulateur de trade et les prix des marchandises sont disponibles ; les autres modules s’ajouteront ici.</p>
+        <p class="lead">Vos outils de commerce, regroupés en modules : choisissez un onglet ci-dessus. Le simulateur de trade, les prix des marchandises et les routes commerciales sont disponibles ; les autres modules s’ajouteront ici.</p>
         <button type="button" class="btn play cm-main" id="cmOpen" aria-haspopup="dialog">Calculer un trade</button>
       </div>
       <p class="cm-flash" id="cmStatus" role="status"></p>
@@ -155,11 +155,11 @@
           <p>Consulter les prix par marchandise : où l’acheter, où la vendre (données communautaires UEX).</p>
           <a class="btn cm-card-btn" href="#commerce/prix">Ouvrir les prix</a>
         </li>
-        <li class="cm-tool off">
-          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6"/></svg></span><span class="pill s">bientôt</span></div>
+        <li class="cm-tool on">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6"/></svg></span></div>
           <h3>Routes</h3>
-          <p>Comparer des itinéraires de trade entre deux lieux.</p>
-          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+          <p>Trouver les routes de trade les plus rentables, calculées à partir des prix communautaires UEX.</p>
+          <a class="btn cm-card-btn" href="#commerce/routes">Ouvrir les routes</a>
         </li>
         <li class="cm-tool off">
           <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span><span class="pill s">bientôt</span></div>
@@ -211,6 +211,15 @@
         <div id="mkWrap" aria-busy="false">
           <div id="mkState" hidden></div>
           <div id="mkMain" hidden></div>
+        </div>
+      </div>
+      <div id="cmPanel-routes" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-routes" tabindex="-1" hidden>
+        <h2 class="mk-h2" id="rcTitle" tabindex="-1">Routes commerciales</h2>
+        <p class="lead">Routes calculées localement à partir des prix du marché, triées par bénéfice total. Renseignez votre soute et, si vous le souhaitez, votre budget.</p>
+        <div id="rcBanner"></div>
+        <div id="rcWrap" aria-busy="false">
+          <div id="rcState" hidden></div>
+          <div id="rcMain" class="mk-stack" hidden></div>
         </div>
       </div>
     </section>
@@ -534,6 +543,7 @@
 <script src="trade.js"></script>
 <script src="carnet.js"></script>
 <script src="market.js"></script>
+<script src="routes.js"></script>
 <script src="commerce.js"></script>
 
 <script src="versions.js"></script>

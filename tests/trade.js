@@ -364,6 +364,26 @@ function parseCsv(txt) {
       await ctx.close();
     });
 
+    /* ───────── 6 bis. option de préremplissage du tiroir (open({prefill})) : non-régression ───────── */
+    await section("préremplissage", async () => {
+      await api.clear();
+      const { ctx, page } = await newPage(); await openLog(page);
+      const txt = (pg, sel) => pg.locator(sel).first().innerText().then(x => x.split(/\s+/).join(" ").trim());
+      const vals = () => page.evaluate(() => ["Cm", "Scu", "Fees", "Buy", "Sell", "From", "To", "Dur"].map(k => document.getElementById("tr" + k).value).join("|"));
+      await page.click("#trOpen"); await page.fill("#trCm", "Brouillon"); await page.fill("#trFees", "12"); await page.keyboard.press("Escape");
+      check("brouillon conservé à la fermeture (comportement existant)", (await page.evaluate(() => document.getElementById("trOv").hidden)));
+      await page.evaluate(() => window.OrbTrade.drawer.open({ opener: document.getElementById("trOpen"), prefill: { cm: "Alpha", scu: 10, buy: "100", sell: 130, from: "A (X)", to: "B (Y)" }, note: "Note de test" }));
+      check("prefill : champs remplis (nombres convertis), frais et durée vides, les anciens champs sont remplacés", (await vals()) === "Alpha|10||100|130|A (X)|B (Y)|", await vals());
+      check("prefill : note d'aide remplaçante, résultat en direct +300 aUEC", (await txt(page, "#trDrD")) === "Note de test" && /\+300/.test(await txt(page, ".tr-net")));
+      await page.keyboard.press("Escape");
+      check("prefill annulé : brouillon d'avant restauré, aide d'origine rétablie", (await vals()) === "Brouillon||12|||||" && /Tout vient de votre saisie/.test(await txt(page, "#trDrD")), await vals());
+      await page.evaluate(() => window.OrbTrade.drawer.open({ opener: document.getElementById("trOpen"), values: { cm: "V", scu: "5", buy: "1", sell: "2" } }));
+      check("option `values` inchangée (remplace le brouillon, aide d'origine)", (await vals()) === "V|5||1|2|||" && /Tout vient de votre saisie/.test(await txt(page, "#trDrD")), await vals());
+      await page.keyboard.press("Escape");
+      await page.evaluate(() => window.OrbTrade.drawer.set({}));
+      await ctx.close();
+    });
+
     /* ───────── 7. Console et CSP ───────── */
     check("aucune violation CSP ni erreur console pendant toute la série", errors.length === 0, errors.slice(0, 5).join(" | "));
   } catch (e) {

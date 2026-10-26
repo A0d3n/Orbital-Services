@@ -136,6 +136,7 @@ function resHTML(c) {
 
 var curAdd = null, subBtn = null, SUB = "Ajouter au carnet";
 var ov = null, box = null, form = null, resEl = null, resBox = null, msg = null, inp = {}, err = {}, attempt = false, last = null, opener = null, inerts = [];
+var saved = null, helpEl = null, helpDef = "";
 var api = { onAdd: null };
 
 function put(k, m) {
@@ -178,14 +179,19 @@ function onKey(e) {
 }
 function isOpen() { return !!ov && !ov.hidden; }
 /* o.opener : élément qui reprend le focus ; o.values : valeurs à charger (sinon le brouillon est conservé) ; o.dur : durée du formulaire ;
-   o.onAdd : action finale propre à cette ouverture (sinon api.onAdd) ; o.submit : libellé du bouton final (sinon « Ajouter au carnet ») */
+   o.onAdd : action finale propre à cette ouverture (sinon api.onAdd) ; o.submit : libellé du bouton final (sinon « Ajouter au carnet ») ;
+   o.prefill : { cm, scu, buy, sell, from, to } préremplit tous les champs (frais et durée vides, tout reste modifiable) SANS écraser définitivement le brouillon :
+   si le volet est fermé sans validation, le brouillon d'avant est restauré ; o.note : texte d'aide remplaçant l'aide habituelle pendant cette ouverture */
 function open(o) {
   if (!ov || isOpen()) return;
   o = o || {};
   opener = o.opener || document.activeElement;
   curAdd = typeof o.onAdd === "function" ? o.onAdd : null;
   if (subBtn) subBtn.textContent = o.submit || SUB;
-  if (o.values) set(o.values);
+  saved = null;
+  if (o.prefill && typeof o.prefill === "object") { saved = vals(); set(o.prefill); }
+  else if (o.values) set(o.values);
+  if (helpEl) { helpDef = helpDef || helpEl.textContent; helpEl.textContent = typeof o.note === "string" && o.note ? o.note : helpDef; }
   if (o.dur != null && String(o.dur) !== "") inp.dur.value = String(o.dur);
   msg.textContent = ""; attempt = false; run();
   inerts = [$("skip"), document.querySelector(".app")].filter(Boolean);
@@ -198,6 +204,8 @@ function open(o) {
 function close() {
   if (!isOpen()) return;
   ov.hidden = true;
+  if (saved) { var sv = saved; saved = null; set(sv); }
+  if (helpEl && helpDef) helpEl.textContent = helpDef;
   inerts.forEach(function (n) { n.inert = false; n.removeAttribute("aria-hidden"); });
   inerts = [];
   document.documentElement.classList.remove("tr-lock");
@@ -213,7 +221,7 @@ function setGoods(list) {
 }
 function init() {
   ov = $("trOv"); if (!ov) return;
-  box = $("trDlg"); form = $("trForm"); resEl = ov.querySelector("[data-res]"); resBox = resEl.closest(".tr-res"); msg = $("trMsg");
+  box = $("trDlg"); form = $("trForm"); resEl = ov.querySelector("[data-res]"); resBox = resEl.closest(".tr-res"); msg = $("trMsg"); helpEl = $("trDrD");
   [].forEach.call(ov.querySelectorAll("[data-f]"), function (i) { inp[i.getAttribute("data-f")] = i; i.addEventListener("input", run); });
   [].forEach.call(ov.querySelectorAll("[data-err]"), function (p) {
     var k = p.getAttribute("data-err"), i = inp[k]; err[k] = p;
@@ -233,6 +241,7 @@ function init() {
     }
     var v = vals(), t = clean({ cm: v.cm, scu: c.r.scu, buy: c.r.buy, sell: c.r.sell, fees: c.r.fees, from: v.from, to: v.to }, "cargo");
     var fn = curAdd || api.onAdd;
+    saved = null; /* validé : le brouillon d'avant n'est plus à restaurer */
     close();
     if (fn) fn({ trade: t, dur: c.r.dur });
   });

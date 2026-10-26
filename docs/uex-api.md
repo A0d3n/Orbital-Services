@@ -124,3 +124,19 @@ Toute autre ressource répond 404. Les TTL sont multipliés par `UEX_TTL_SCALE`.
 - UEX peut changer un nom de champ ou retirer une ressource sans préavis : les futurs modules doivent lire les champs de façon défensive.
 - Le format d'erreur n'est pas uniforme (`not_allowed` pour un 403) : nous ne regardons que `status === "ok"`.
 - `commodities_averages` pourrait être ajoutée plus tard si une clé est fournie ; elle n'est pas dans la liste blanche car aucun module prévu n'en a besoin et nous n'avons pas pu vérifier son format sans clé.
+
+## Routes : stock, demande et formules (module `#commerce/routes`, lot 2)
+
+Routes calculées **localement** (`public/routes.js`) : pour chaque marchandise, toutes les paires (terminal où le joueur achète : `price_buy` > 0) × (terminal où il vend : `price_sell` > 0), terminaux différents, bénéfice par SCU > 0. `commodities_routes` n'est pas appelée. Distance et durée : non fournies par les ressources de la liste blanche, donc absentes.
+
+Formules : bénéfice/SCU = vente − achat ; SCU utilisés = min(SCU saisis, ⌊budget ÷ achat⌋ si budget, stock à l'achat, demande à la vente) ; investissement = achat × SCU ; revenu = vente × SCU ; bénéfice total = revenu − investissement ; ROI = (vente − achat) ÷ achat. Une route à moins d'un SCU utilisable est écartée. Fraîcheur : le plus ancien des deux `date_modified` (≤ 1 h, ≤ 24 h ou tout ; date inconnue = seulement « tout »). Tri par défaut : bénéfice total décroissant, puis nom de marchandise et de terminaux.
+
+**Règle prudente pour le stock (`scu_buy`) et la demande (`scu_sell`)**, car 0 peut signifier « inconnu » ou « épuisé » :
+- quantité > 0 : elle limite les SCU (partie entière) ;
+- quantité 0 et état d'inventaire qui confirme l'absence : `status_buy` = 1 (« Out of Stock ») à l'achat, `status_sell` = 7 (« Maximum Inventory (No Demand) ») à la vente : route **écartée** ;
+- quantité 0 sans cet état (état absent ou autre) : **inconnue**, ne limite pas, et la ligne l'indique (« stock inconnu », « demande inconnue ») ;
+- case « Ignorer le stock et la demande » : aucune limite ni exclusion.
+Source des états : ressource `commodities_status` d'UEX (https://uexcorp.space/api/documentation/id/get_commodities_status/ ; interrogée une fois le 26 octobre 2026, **hors liste blanche**, donc non appelée par l'application) : côté achat 1 = Out of Stock (0-14 %), 2 Very Low, 3 Low, 4 Medium, 5 High, 6 Very High, 7 Maximum (86-100 %) ; côté vente les mêmes niveaux de 1 à 7, le 7 s'appelant « Maximum Inventory (No Demand) ». La documentation de `commodities_prices_all` ne définit pas ces états ; la règle repose donc sur cette ressource.
+Limites : les quantités sont des saisies de joueurs, souvent anciennes ; un stock inconnu peut être réellement vide ; la demande réelle varie à chaque vente ; aucune promesse de précision (avertissement permanent dans l'interface). Le champ `is_illegal` de `commodities` alimente le filtre « légales uniquement » (désactivé s'il n'est pas fourni).
+
+Adresse : `#commerce/routes?b=<budget>&s=<SCU, défaut 100>&m=<slug>&de=<système de départ>&vers=<système d'arrivée>&roi=<marge %>&f=<1h|24h|tout, défaut 24h>&l=1&x=1` (valeurs par défaut omises).

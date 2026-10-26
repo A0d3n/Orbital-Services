@@ -1,7 +1,7 @@
 /* Onglet « Commerce » (#commerce) : outils de trade et résumé du journal.
    Lit les mêmes entrées que le carnet via window.OrbLog (carnet.js) et ouvre le même tiroir de simulation (window.OrbTrade.drawer),
    avec l'action finale « Ajouter au journal » qui enregistre directement une entrée « cargo ». Chargé après carnet.js.
-   Sous-onglets (Simulateur & journal, Prix ; les autres « bientôt ») : voir la fin du fichier. Le module Prix est dans market.js (window.OrbMarket.prix).
+   Sous-onglets (Simulateur & journal, Prix, Routes ; les autres « bientôt ») : voir la fin du fichier. Le module Prix est dans market.js (window.OrbMarket.prix), le module Routes dans routes.js (window.OrbMarket.routes).
    Page par défaut (Simulateur & journal) : une seule requête, GET /api/uex/status (bloc « Données de marché »), à l'affichage du sous-onglet ; aucune requête quand il n'est pas affiché ; le reste lit le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
 (function () {
 "use strict";
@@ -150,20 +150,22 @@ function say(msg) {
   setTimeout(function () { p.textContent = msg; }, 50);
   flashT = setTimeout(function () { p.textContent = ""; }, 9000);
 }
-function openDrawer(opener, note) {
-  OT.drawer.open({ opener: opener, submit: "Ajouter au journal", onAdd: function (r) { onAdd(r, opener); } });
+function openDrawer(opener, note, prefill, done) {
+  OT.drawer.open({ opener: opener, submit: "Ajouter au journal", prefill: prefill, note: prefill ? "Valeurs préremplies depuis la route (estimations communautaires UEX) : toutes sont modifiables, rien n’est enregistré avant « Ajouter au journal »." : "", onAdd: function (r) { onAdd(r, opener, done); } });
   if (note) $("trMsg").textContent = note;
 }
-function onAdd(r, opener) {
+/* module Routes : « Simuler ce trade » ouvre le même tiroir, prérempli ; done(message) annonce l'ajout dans la zone d'état du module */
+window.__orbCommerceSim = function (prefill, opener, done) { openDrawer(opener, "", prefill, done); };
+function onAdd(r, opener, done) {
   LG.addTrade(r.trade, r.dur).then(function () {
     OT.drawer.set({});
     render(true);
-    say("Trade ajouté au journal");
+    if (done) done("Trade ajouté au journal"); else say("Trade ajouté au journal");
     var a = document.activeElement;
     if (!a || a === document.body || !view.contains(a)) $("cm30T").focus({ preventScroll: true });
   }).catch(function (e) {
     say("Le trade n'a pas pu être enregistré (" + (e && e.code || "erreur") + ").");
-    openDrawer(opener, "Impossible d'enregistrer le trade (" + (e && e.code || "erreur") + "). Votre saisie est conservée : réessayez.");
+    openDrawer(opener, "Impossible d'enregistrer le trade (" + (e && e.code || "erreur") + "). Votre saisie est conservée : réessayez.", null, done);
   });
 }
 view.addEventListener("click", function (e) {
@@ -175,11 +177,13 @@ view.addEventListener("click", function (e) {
 
 window.addEventListener("lg:update", function () { if (shown() && cur === "sim") render(); });
 
-/* ── sous-onglets : #commerce (Simulateur & journal, par défaut), #commerce/prix[?m=<marchandise>] ; Routes, Raffineries, Carburant et Vaisseaux sont « bientôt » (aria-disabled, aucun lien).
+/* ── sous-onglets : #commerce (Simulateur & journal, par défaut), #commerce/prix[?m=<marchandise>], #commerce/routes[?b=&s=&m=&de=&vers=&roi=&f=&l=&x=] ; Raffineries, Carburant et Vaisseaux sont « bientôt » (aria-disabled, aucun lien).
    Un hash inconnu ou non livré ramène au défaut sans erreur. Les panneaux restent dans la page (état conservé en revenant). ── */
-var READY = { sim: 1, prix: 1 }, SUB = { sim: "Vos outils de trade et le résumé de votre journal.", prix: "Prix par marchandise : où acheter, où vendre (données communautaires UEX)." };
+var READY = { sim: 1, prix: 1, routes: 1 }, SUB = { sim: "Vos outils de trade et le résumé de votre journal.", prix: "Prix par marchandise : où acheter, où vendre (données communautaires UEX).", routes: "Routes commerciales calculées localement à partir des prix UEX (estimations)." };
 var tabBtns = [].slice.call(view.querySelectorAll("#cmTabs [role=tab]")), cur = null, last = "sim", pendTab = false, pendT = 0;
 function MK() { return window.OrbMarket && window.OrbMarket.prix; }
+function RK() { return window.OrbMarket && window.OrbMarket.routes; }
+function MOD(id) { return id === "prix" ? MK() : id === "routes" ? RK() : null; } /* modules de marché : open(q), set(q), close(), query(), title() */
 function dec(s) { try { return decodeURIComponent(s); } catch (e) { return s; } }
 function parse(h) {
   h = String(h || "");
@@ -189,12 +193,12 @@ function parse(h) {
   var ok = !!m && READY[id] === 1;
   return { mod: ok ? id : "sim", q: ok ? q : {}, bare: !!m && !m[1] && !m[2] };
 }
-function hashOf(mod) { return mod === "prix" ? "#commerce/prix" + (MK() ? MK().query() : "") : "#commerce"; }
+function hashOf(mod) { var m = MOD(mod); return m ? "#commerce/" + mod + m.query() : "#commerce"; }
 function setHash(h) { if (location.hash !== h) { try { history.replaceState(null, "", h); } catch (e) {} } }
 function apply(mod, q, ev) {
   var changed = mod !== cur, from = cur;
   if (changed) {
-    if (from === "prix" && MK()) MK().close();
+    if (MOD(from)) MOD(from).close();
     cur = mod; last = mod;
     tabBtns.forEach(function (b) {
       var on = b.getAttribute("data-mod") === mod;
@@ -204,11 +208,11 @@ function apply(mod, q, ev) {
     var t = $("cmTab-" + mod); if (t && t.scrollIntoView) t.scrollIntoView({ block: "nearest", inline: "nearest" });
   }
   var sub = $("topSub"); if (sub) sub.textContent = SUB[mod] || "";
-  if (mod === "prix") {
-    var k = MK(); if (k) { if (!ev || changed) k.open(q); else k.set(q); }
+  if (MOD(mod)) {
+    var k = MOD(mod); if (!ev || changed) k.open(q); else k.set(q);
   } else if (changed || !ev) { render(true); LG.sync(); uexLoad(); }
   setHash(hashOf(mod));
-  if (ev && changed && !pendTab) { var tg = mod === "prix" && MK() ? MK().title() : $("cmPanel-" + mod); if (tg) tg.focus({ preventScroll: true }); }
+  if (ev && changed && !pendTab) { var tg = MOD(mod) ? MOD(mod).title() : $("cmPanel-" + mod); if (tg) tg.focus({ preventScroll: true }); }
   pendTab = false;
 }
 /* appelé par map.js : à chaque affichage de l'onglet (ev faux : #commerce seul = dernier module consulté) et à chaque changement d'adresse (ev vrai : adresse prise à la lettre) */

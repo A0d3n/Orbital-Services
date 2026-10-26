@@ -2,8 +2,8 @@
    Même charte que le reste du site (variables de style.css, panneaux .pn, boutons .btn, badge .cm-badge de commerce.css) ; maquette docs/marche/A-sous-onglets.html. */
 .mk-h2{margin:0 0 4px;font:600 20px/1.25 var(--f-display);color:var(--ink)}
 .mk-h2:focus{outline:2px solid var(--sage);outline-offset:3px}
-#cmPanel-prix .lead{margin:0 0 12px}
-#cmPanel-prix [hidden]{display:none!important}
+#cmPanel-prix .lead,#cmPanel-routes .lead{margin:0 0 12px}
+#cmPanel-prix [hidden],#cmPanel-routes [hidden]{display:none!important}
 
 /* bandeau de fraîcheur */
 .mk-bn{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:10px 14px;margin:0 0 12px;border-radius:10px;border:1px solid rgba(184,217,166,.45);background:rgba(184,217,166,.08);color:#e3f2da;font-size:13.5px}
@@ -18,14 +18,14 @@
 .mk-fld select,.mk-fld input{width:100%;min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:0 12px;font:16px var(--f-body);color-scheme:dark}
 .mk-fld select:focus,.mk-fld input:focus{outline:2px solid var(--sage);outline-offset:1px}
 @media(min-width:700px){.mk-fld select,.mk-fld input{font-size:14px}}
-#cmPanel-prix .btn{min-height:44px;height:auto;padding:0 18px}
+#cmPanel-prix .btn,#cmPanel-routes .btn{min-height:44px;height:auto;padding:0 18px}
 
 /* disposition */
 .mk-stack{display:grid;gap:12px;min-width:0}
 .mk-split{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
 @media(min-width:1000px){.mk-split{grid-template-columns:17rem minmax(0,1fr)}}
 .mk-flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10.5rem),1fr));gap:12px;align-items:end}
-#cmPanel-prix .pn{padding:16px;border-radius:14px}
+#cmPanel-prix .pn,#cmPanel-routes .pn{padding:16px;border-radius:14px}
 .mk-sum{margin:0;min-height:1.5em;color:var(--ink-2);font-size:13.5px}
 .mk-msg{margin:0;color:var(--sage);font-size:13px}
 .mk-msg:empty{display:none}
@@ -77,6 +77,15 @@
 .mk-num{position:relative;display:inline-block;padding:10px 4px;margin:-10px -4px;cursor:help;border-radius:6px;border-bottom:1px dotted var(--dim)}
 .mk-num:hover::after,.mk-num:focus::after{content:attr(data-x);position:absolute;z-index:30;bottom:calc(100% - 6px);right:0;width:max-content;max-width:17rem;white-space:normal;text-align:left;background:#1b211d;color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;font:400 12px/1.5 var(--f-mono);letter-spacing:0;pointer-events:none}
 .mk-num:focus-visible{outline:2px solid var(--sage);outline-offset:1px}
+.mk-num[data-hide]::after{display:none!important}
+
+/* en-tête avec formule : le bouton de tri porte l'info-bulle (survol et focus) ; une pastille « i » signale qu'une formule existe */
+.mk-sb[data-x]{position:relative}
+.mk-i{width:15px;height:15px;border:1px solid var(--dim);border-radius:50%;display:inline-grid;place-items:center;font:600 10px/1 var(--f-mono);text-transform:none;letter-spacing:0;color:var(--dim)}
+.mk-sb[data-x]:hover::after,.mk-sb[data-x]:focus::after{content:attr(data-x);position:absolute;z-index:30;top:calc(100% - 4px);left:0;width:max-content;max-width:17rem;white-space:normal;text-align:left;background:#1b211d;color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;font:400 12px/1.5 var(--f-mono);letter-spacing:0;text-transform:none;pointer-events:none}
+.mk-t th.n .mk-sb[data-x]:hover::after,.mk-t th.n .mk-sb[data-x]:focus::after{left:auto;right:0}
+.mk-sb[data-x][data-hide]::after{display:none!important}
+.mk-sb:focus-visible{outline:2px solid var(--sage);outline-offset:1px;border-radius:6px}
 
 /* sous 700 px : chaque ligne devient une carte (les rôles ARIA gardent la structure de tableau) */
 @media(max-width:699px){
@@ -86,8 +95,46 @@
   .mk-t tr{margin:0 0 8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.015)}
   .mk-t td{height:auto;min-height:32px;padding:4px 0;border:0;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right}
   .mk-t tbody th{padding:0 0 4px;border:0;font-size:15px}
+  .mk-t td[data-l=""]::before{content:none}
   .mk-t td::before{content:attr(data-l);flex:none;text-align:left;font:500 11px/1.6 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
   .mk-t td:last-child{padding-right:0}
   .mk-num:hover::after,.mk-num:focus::after{left:auto;right:0}
 }
 @media(prefers-reduced-motion:reduce){.mk-sk{animation:none}.mk-it,.mk-tab{transition:none}}
+
+
+/* ───────── module Routes (#commerce/routes) ───────── */
+.rc-warn{margin:0 0 12px;padding:10px 14px;border-radius:10px;border:1px solid rgba(232,196,106,.45);background:rgba(232,196,106,.06);color:#f3e2b3;font-size:13.5px}
+.rc-flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11.5rem),1fr));gap:12px;align-items:start}
+.rc-hint{margin:0;font-size:12px;color:var(--dim)}
+.rc-err{margin:0;font-size:12.5px;color:#ff8a8f}
+.rc-err:empty{display:none}
+.mk-fld input[aria-invalid="true"]{border-color:#ff8a8f}
+.rc-chk{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 4px;color:var(--ink);font-size:14px;cursor:pointer}
+.rc-chk input{width:22px;height:22px;min-height:0;flex:none;margin:0;accent-color:var(--sage)}
+.rc-chk:focus-within{outline:2px solid var(--sage);outline-offset:1px;border-radius:8px}
+.rc-chks{display:flex;flex-wrap:wrap;gap:0 24px;grid-column:1/-1}
+.rc-acts{display:flex;flex-wrap:wrap;gap:8px 12px;grid-column:1/-1}
+.rc-fm{margin:12px 0 0;color:var(--ink-2);font-size:13px}
+.rc-fm summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink)}
+.rc-fm summary:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
+.rc-fm ul{margin:0 0 8px;padding-left:18px;display:grid;gap:4px}
+.rc-fm p{margin:6px 0}
+.rc-cm{display:grid;gap:3px}
+.rc-nm{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+.rc-fr{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;font:400 12px var(--f-body)}
+.rc-ill{display:inline-block;padding:0 7px;border:1px solid rgba(255,138,143,.5);border-radius:99px;color:#ff8a8f;font:500 11px/1.6 var(--f-mono)}
+.rc-lim{display:block;color:var(--dim);font-size:11.5px;font-weight:400;line-height:1.35}
+#cmPanel-routes .mk-t td{font-size:13px}
+#cmPanel-routes .mk-t td .btn{min-height:44px;padding:0 12px;font-size:13px}
+#cmPanel-routes .mk-t th.n{padding-right:8px}
+#cmPanel-routes .mk-t td.n{padding-right:8px}
+#cmPanel-routes .mk-stack{grid-template-columns:minmax(0,1fr)}
+/* le tableau défile dans son cadre (jamais la page) ; position:relative contient les textes .sr positionnés en absolu */
+.rc-tw{position:relative}
+@media(min-width:700px){.rc-tw{overflow-x:auto}}
+@media(max-width:699px){
+  #cmPanel-routes .mk-t td .btn{width:100%}
+  #cmPanel-routes .mk-t td[data-l=""]{display:block;text-align:left}
+  .rc-fm summary{width:100%}
+}
