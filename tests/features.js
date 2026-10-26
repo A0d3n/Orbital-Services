@@ -186,8 +186,8 @@ function parseCsv(txt) {
       check("export CSV : fichier « carnet-star-citizen.csv »", dl.suggestedFilename() === "carnet-star-citizen.csv", dl.suggestedFilename());
       check("export CSV : BOM UTF-8 (Excel) et fins de ligne CRLF", csv.charCodeAt(0) === 0xFEFF && /\r\n/.test(csv));
       const rows = parseCsv(csv.slice(1));
-      check("export CSV : en-têtes attendus", rows[0].join("|") === "date|activité|durée_min|aUEC|titre|lieu|vaisseau|notes|source", rows[0].join("|"));
-      check("export CSV : une ligne par entrée, 9 colonnes chacune, ordre chronologique", rows.length === 4 && rows.every(r => r.length === 9) && rows[1][4] === E3.title && rows[2][4] === E1.title && rows[3][4] === "Perte", JSON.stringify(rows.map(r => r.length)));
+      check("export CSV : en-têtes attendus", rows[0].join("|") === "date|activité|durée_min|aUEC|titre|lieu|vaisseau|notes|source|marchandise|scu|achat_par_scu|vente_par_scu|frais|lieu_achat|lieu_vente|roi_pct", rows[0].join("|"));
+      check("export CSV : une ligne par entrée, 17 colonnes chacune (9 d’origine + 8 de trade), ordre chronologique", rows.length === 4 && rows.every(r => r.length === 17) && rows[1][4] === E3.title && rows[2][4] === E1.title && rows[3][4] === "Perte", JSON.stringify(rows.map(r => r.length)));
       const r1 = rows[2];
       check("export CSV : date ISO, activité en français, durée et aUEC", r1[0] === new Date(E1.ts).toISOString() && r1[1] === "Minage" && r1[2] === "90" && r1[3] === "123456" && rows[3][3] === "-5000", r1.slice(0, 4).join("|"));
       check("export CSV : guillemets, points-virgules et sauts de ligne protégés (titre et notes relus à l’identique)", r1[4] === E1.title && r1[7] === E1.notes && r1[5] === E1.place && r1[8] === "manual" && rows[3][8] === "gamelog", JSON.stringify(r1));

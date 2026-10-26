@@ -9,4 +9,8 @@ Maquettes HTML autonomes, 100 % locales, données d'exemple fictives (« Marchan
 - **C-tiroir.html** : formulaire inchangé, bouton « Calculer un trade » qui ouvre un volet (latéral ou bas) et préremplit le formulaire ; badge « Trade » et filtre « Commerce » dans le journal.
   Avantages : formulaire existant presque intact, bon sur mobile, résultat toujours visible. Risques : composant dialogue à écrire (focus piégé, Échap), deux étapes pour enregistrer.
 
-**Recommandation : A**, avec le résumé de résultat gardé visible sur mobile. C'est le chemin le plus court dans le carnet existant (une section et quelques champs dans le même formulaire, mêmes données `trade` dans l'entrée). B peut venir plus tard si les statistiques grossissent.
+**Implémentée le 26 octobre 2026 : option C (tiroir)**, sur décision du propriétaire (carnet de bord gardé tel quel). Code : `public/trade.js`, `public/trade.css`, intégration dans `carnet.js`, validation dans `server.js`, tests dans `tests/trade.js`.
+
+Format stocké dans une entrée `cargo` (facultatif) : `trade: { cm, scu, buy, sell, fees, from, to }`, soit marchandise (≤ 80 car.), SCU (entier 1 à 10 000 000), prix d’achat et de vente par SCU (entiers 0 à 100 000 000 aUEC), frais (entier 0 à 10^12 aUEC, 0 si absent), lieux d’achat et de vente (≤ 80 car.). Le champ `auec` de l’entrée est le net calculé : scu × vente − scu × achat − frais. Un trade invalide ou sur une entrée qui n’est pas du cargo est ignoré (l’entrée est gardée).
+
+**Recommandation initiale : A**, avec le résumé de résultat gardé visible sur mobile. C'est le chemin le plus court dans le carnet existant (une section et quelques champs dans le même formulaire, mêmes données `trade` dans l'entrée). B peut venir plus tard si les statistiques grossissent.

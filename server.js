@@ -88,9 +88,23 @@ const json = (res, code, obj) => send(res, code, JSON.stringify(obj));
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
 const NUM = v => (typeof v === "number" && isFinite(v) ? v : 0);
 const STR = (v, n) => (typeof v === "string" ? v.slice(0, n) : "");
+/* trade facultatif d’une entrée « cargo » : { cm, scu, buy, sell, fees, from, to }. Entiers bornés (scu 1..10 000 000,
+   prix 0..100 000 000, frais 0..10^12) ; sinon le trade est ignoré (l’entrée est gardée sans trade). Voir docs/trades/README.md. */
+const INT = (v, min, max) => (typeof v === "number" && Number.isInteger(v) && v >= min && v <= max ? (v === 0 ? 0 : v) : null);
+const TXT = (v, n) => STR(v, n).trim();
+function cleanTrade(t, type) {
+  if (type !== "cargo" || !t || typeof t !== "object" || Array.isArray(t)) return null;
+  const scu = INT(t.scu, 1, 1e7), buy = INT(t.buy, 0, 1e8), sell = INT(t.sell, 0, 1e8);
+  const fees = t.fees === undefined || t.fees === null ? 0 : INT(t.fees, 0, 1e12);
+  if (scu === null || buy === null || sell === null || fees === null) return null;
+  return { cm: TXT(t.cm, 80), scu, buy, sell, fees, from: TXT(t.from, 80), to: TXT(t.to, 80) };
+}
 function clean(d) {
-  return { type: STR(d.type, 20) || "other", ts: NUM(d.ts) || Date.now(), dur: Math.max(0, NUM(d.dur)), auec: NUM(d.auec),
+  const o = { type: STR(d.type, 20) || "other", ts: NUM(d.ts) || Date.now(), dur: Math.max(0, NUM(d.dur)), auec: NUM(d.auec),
     title: STR(d.title, 120), place: STR(d.place, 80), ship: STR(d.ship, 80), notes: STR(d.notes, 1500), src: STR(d.src, 20) || "manual" };
+  const t = cleanTrade(d.trade, o.type);
+  if (t) { o.trade = t; o.auec = t.scu * t.sell - t.scu * t.buy - t.fees; } // le gain / la perte est le net calculé
+  return o;
 }
 function body(req) {
   return new Promise((ok, ko) => {

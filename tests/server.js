@@ -87,6 +87,45 @@ const JSONH = { "Content-Type": "application/json" };
     check("/api/entries : chaque id apparaît une fois", new Set(get0.map(e => e.id)).size === get0.length);
     check("DELETE __proto__ retire seulement cette entrée", (await raw(A, "DELETE", "/api/entries/__proto__")).status === 200 && JSON.parse((await raw(A, "GET", "/api/entries")).body).length === get0.length - 1);
 
+    /* trade : validation et normalisation (entrées « cargo » seulement) */
+    const getE = async id => JSON.parse((await raw(A, "GET", "/api/entries")).body).find(e => e.id === id);
+    const okT = { cm: "  Marchandise A ", scu: 100, buy: 2000, sell: 2450, fees: 1500, from: "Lieu A", to: "Lieu B" };
+    await put("tr1", JSON.stringify({ type: "cargo", auec: 999, title: "x", trade: okT }), JSONH);
+    const e1 = await getE("tr1");
+    check("trade valide : conservé, texte rogné, fees gardé", e1 && e1.trade && e1.trade.cm === "Marchandise A" && e1.trade.scu === 100 && e1.trade.fees === 1500 && e1.trade.from === "Lieu A" && e1.trade.to === "Lieu B", JSON.stringify(e1));
+    check("trade valide : auec = scu×vente − scu×achat − frais (43 500), même si l'envoi disait 999", e1 && e1.auec === 43500, e1 && e1.auec);
+    await put("tr2", JSON.stringify({ type: "cargo", trade: { cm: "B", scu: 10, buy: 5, sell: 3 } }), JSONH);
+    const e2 = await getE("tr2");
+    check("trade sans frais : fees = 0 et perte calculée (−20)", e2 && e2.trade && e2.trade.fees === 0 && e2.auec === -20, JSON.stringify(e2));
+    await put("tr3", JSON.stringify({ type: "cargo", auec: 5, title: "sans trade" }), JSONH);
+    const e3 = await getE("tr3");
+    check("entrée sans trade : aucune clé trade, auec inchangé", e3 && !("trade" in e3) && e3.auec === 5 && e3.type === "cargo");
+    const bad = {
+      "scu négatif": { scu: -1, buy: 1, sell: 1 }, "scu nul": { scu: 0, buy: 1, sell: 1 }, "scu décimal": { scu: 1.5, buy: 1, sell: 1 },
+      "achat négatif": { scu: 1, buy: -5, sell: 1 }, "vente négative": { scu: 1, buy: 1, sell: -5 }, "frais négatifs": { scu: 1, buy: 1, sell: 1, fees: -1 },
+      "texte à la place d'un nombre": { scu: "abc", buy: 1, sell: 1 }, "nombre en chaîne": { scu: "100", buy: 1, sell: 1 },
+      "scu énorme": { scu: 1e9, buy: 1, sell: 1 }, "prix énorme": { scu: 1, buy: 1e12, sell: 1 }, "frais énormes": { scu: 1, buy: 1, sell: 1, fees: 1e15 },
+      "champ manquant": { scu: 5, buy: 1 }, "null": null, "tableau": [1, 2], "chaîne": "trade", "nombre": 7, "booléen": true,
+      "NaN (null en JSON)": { scu: null, buy: 1, sell: 1 }
+    };
+    let allBad = true, why = "";
+    for (const k of Object.keys(bad)) {
+      const r = await put("trb", JSON.stringify({ type: "cargo", title: "garde-moi", auec: 42, trade: bad[k] }), JSONH), e = await getE("trb");
+      if (r.status !== 200 || !e || "trade" in e || e.title !== "garde-moi" || e.auec !== 42) { allBad = false; why += k + " "; }
+    }
+    check("trade invalide (" + Object.keys(bad).length + " cas) : ignoré, l'entrée est gardée telle quelle, réponse 200", allBad, why);
+    await put("trl", JSON.stringify({ type: "cargo", trade: { cm: "é".repeat(200), scu: 1e7, buy: 1e8, sell: 1e8, fees: 1e12, from: "f".repeat(200), to: "t".repeat(200) } }), JSONH);
+    const el = await getE("trl");
+    check("trade aux bornes maximales accepté ; textes coupés à 80", el && el.trade && el.trade.cm.length === 80 && el.trade.from.length === 80 && el.trade.to.length === 80 && el.trade.scu === 1e7 && el.auec === -1e12, JSON.stringify(el && el.auec));
+    await put("trm", JSON.stringify({ type: "mining", auec: 7, trade: okT }), JSONH);
+    const em = await getE("trm");
+    check("trade sur une entrée qui n'est pas « cargo » : ignoré, auec envoyé conservé", em && !("trade" in em) && em.auec === 7);
+    await put("trx", JSON.stringify({ type: "cargo", trade: Object.assign({ __proto__: null, extra: "x", cm: "C" }, { scu: 1, buy: 0, sell: 0 }), polluted: 1 }), JSONH);
+    const ex = await getE("trx");
+    check("trade : champs inconnus supprimés (seulement cm, scu, buy, sell, fees, from, to)", ex && ex.trade && Object.keys(ex.trade).sort().join(",") === "buy,cm,fees,from,scu,sell,to" && !("polluted" in ex));
+    await put("tr1", JSON.stringify({ type: "cargo", title: "x" }), JSONH);
+    check("réécrire une entrée de trade sans trade retire le trade (PUT remplace l'entrée)", !("trade" in (await getE("tr1"))));
+
     check("id invalide → 400", (await put("a%20b", "{}", JSONH)).status === 400 && (await put("a.b", "{}", JSONH)).status === 400);
     check("méthode interdite sur /api/entries/x → 405", (await raw(A, "POST", "/api/entries/t1", JSONH, "{}")).status === 405);
     check("méthode interdite sur un fichier (POST) → 405", (await raw(A, "POST", "/index.html", {}, "")).status === 405);

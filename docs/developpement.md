@@ -9,7 +9,8 @@
 | `data.js` | Données : époques et événements, systèmes de la carte, liaisons, positions |
 | `timeline.js` | Chronologie et fond étoilé |
 | `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
-| `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
+| `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log, journal, exports CSV/JSON) |
+| `trade.js`, `trade.css` | Journal de trades et simulateur : calculs (investissement, recettes, net, marge, ROI, bénéfice par heure), nettoyage de l’objet `trade`, tiroir « Calculer un trade » (volet latéral ≥ 700 px, volet bas en dessous), statistiques « Commerce » ; chargé avant `carnet.js` |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
 | `util.js` | Utilitaires partagés (`OrbUtil` : `# Développement
 
@@ -46,7 +47,7 @@ npx playwright install chromium
 npm test
 ```
 
-`npm test` lance sept séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) `tests/perf-images.js` (images de la chronologie, Comm-Links) et `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne). Les deux premières n’ouvrent pas de navigateur.
+`npm test` lance sept séries (plus `node tests/trade.js`, à lancer à part tant qu’il n’est pas dans `package.json`) : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) `tests/perf-images.js` (images de la chronologie, Comm-Links) et `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne). `tests/trade.js` couvre le journal de trades : calculs exacts, tiroir (focus piégé, Échap, volet bas à 390 px), ajout au carnet, journal, statistiques Commerce, édition et retrait du lien, exports CSV/JSON, imports, stockage local, CSP. Les deux premières n’ouvrent pas de navigateur.
 
 Le test lance le serveur, ouvre chaque onglet dans Chromium et vérifie la carte, les liens entre onglets, le carnet, l'API et l'authentification. Il échoue s'il y a une erreur dans la console. Avec un Chromium déjà installé : `CHROMIUM_PATH=/chemin/vers/chromium npm test`.
 

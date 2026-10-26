@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="search.css">
 <link rel="stylesheet" href="route.css">
+<link rel="stylesheet" href="trade.css">
 <script src="search.js" defer></script>
 </head>
 <body>
@@ -265,7 +266,15 @@
               <label>Activité<select id="fType" required></select></label>
               <label>Date et heure<input type="datetime-local" id="fWhen" required></label>
               <label>Durée (minutes)<input type="number" id="fDur" min="0" step="1" inputmode="numeric" placeholder="ex. 45"></label>
-              <label>Gain / perte (aUEC)<input type="number" id="fAuec" step="1" inputmode="numeric" placeholder="ex. 120000 ou −5000"></label>
+              <label><span id="fAuecL">Gain / perte (aUEC)</span><input type="number" id="fAuec" aria-labelledby="fAuecL" aria-describedby="trAuecHelp" step="1" inputmode="numeric" placeholder="ex. 120000 ou −5000"><span class="tr-hint" id="trAuecHelp" hidden>Repris du calcul du trade. Retirez le trade pour le modifier.</span></label>
+              <div class="tr-calc w2">
+                <button type="button" class="btn tr-open" id="trOpen" aria-haspopup="dialog">Calculer un trade</button>
+                <span class="tr-help">SCU, prix d’achat et de vente, frais : le résultat se calcule en direct.</span>
+              </div>
+              <div class="tr-linked w2" id="trLinked" role="group" aria-labelledby="trLinkedT" tabindex="-1" hidden>
+                <div><b class="tr-linked-t" id="trLinkedT">Trade lié à cette entrée</b><p id="trLinkedS"></p></div>
+                <div class="lg-row"><button type="button" class="btn" id="trEdit">Modifier le calcul</button><button type="button" class="btn" id="trDel">Retirer le trade</button></div>
+              </div>
               <label class="w2">Titre<input type="text" id="fTitle" maxlength="120" placeholder="ex. Minage de quantanium à Aberdeen"></label>
               <label>Lieu<input type="text" id="fPlace" maxlength="80" placeholder="ex. Stanton · Daymar"></label>
               <label>Vaisseau / véhicule<input type="text" id="fShip" maxlength="80" placeholder="ex. Prospector"></label>
@@ -322,6 +331,10 @@
               <input type="search" id="lgSearch" class="lg-search" placeholder="Rechercher…" aria-label="Rechercher dans le carnet">
             </div>
             <div class="chips" id="lgFilter" role="group" aria-label="Filtrer par activité"></div>
+            <section class="tr-commerce" id="trBox" aria-labelledby="trBoxT" hidden>
+              <h3 id="trBoxT">Commerce</h3>
+              <div class="tr-sbox" id="trStats"></div>
+            </section>
             <div id="lgList" class="lg-list"></div>
           </div>
         </div>
@@ -344,6 +357,45 @@
   </footer>
   </div>
 </div>
+
+<!-- Tiroir « Calculer un trade » : hors de .app pour pouvoir rendre le reste de la page inerte -->
+<div class="tr-ov" id="trOv" hidden>
+  <div class="tr-bg" data-tr-close></div>
+  <div class="tr-box" id="trDlg" role="dialog" aria-modal="true" aria-labelledby="trDrT" aria-describedby="trDrD">
+    <span class="tr-grab" aria-hidden="true"></span>
+    <div class="tr-head">
+      <h2 id="trDrT">Calculer un trade</h2>
+      <button type="button" class="btn" data-tr-close>Fermer</button>
+    </div>
+    <form class="tr-form" id="trForm" novalidate autocomplete="off">
+      <div class="tr-res" data-st="incomplete" role="region" aria-labelledby="trResT" tabindex="-1">
+        <h3 class="tr-res-t" id="trResT">Résultat en direct</h3>
+        <div data-res aria-live="polite" aria-atomic="true"></div>
+      </div>
+      <div class="tr-body">
+        <p class="tr-help" id="trDrD">Tout vient de votre saisie : aucun prix de référence n’est préchargé. Échap ferme le volet.</p>
+        <div class="tr-fields">
+          <div class="tr-fld w2"><label for="trCm">Marchandise</label><input id="trCm" data-f="cm" list="trGoods" maxlength="80" placeholder="ex. Marchandise A"><p class="tr-err" data-err="cm"></p></div>
+          <div class="tr-fld"><label for="trScu">SCU (quantité)</label><input id="trScu" data-f="scu" inputmode="numeric" placeholder="ex. 100" aria-required="true"><p class="tr-err" data-err="scu"></p></div>
+          <div class="tr-fld"><label for="trFees">Frais (aUEC)<span class="tr-opt">optionnel</span></label><input id="trFees" data-f="fees" inputmode="numeric" placeholder="ex. 1 500"><p class="tr-err" data-err="fees"></p></div>
+          <div class="tr-fld"><label for="trBuy">Prix d’achat par SCU (aUEC)</label><input id="trBuy" data-f="buy" inputmode="numeric" placeholder="ex. 2 000" aria-required="true"><p class="tr-err" data-err="buy"></p></div>
+          <div class="tr-fld"><label for="trSell">Prix de vente par SCU (aUEC)</label><input id="trSell" data-f="sell" inputmode="numeric" placeholder="ex. 2 450" aria-required="true"><p class="tr-err" data-err="sell"></p></div>
+          <div class="tr-fld"><label for="trFrom">Lieu d’achat</label><input id="trFrom" data-f="from" maxlength="80" placeholder="ex. Lieu A"></div>
+          <div class="tr-fld"><label for="trTo">Lieu de vente</label><input id="trTo" data-f="to" maxlength="80" placeholder="ex. Lieu B"></div>
+          <div class="tr-fld w2"><label for="trDur">Durée (minutes)<span class="tr-opt">optionnel, pour le bénéfice par heure</span></label><input id="trDur" data-f="dur" inputmode="numeric" placeholder="ex. 50"><p class="tr-err" data-err="dur"></p></div>
+        </div>
+      </div>
+      <div class="tr-foot">
+        <p class="tr-msg" id="trMsg" role="status"></p>
+        <div class="tr-btns">
+          <button type="submit" class="btn play">Ajouter au carnet</button>
+          <button type="button" class="btn" data-tr-close>Annuler</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<datalist id="trGoods"></datalist>
 
 <div class="srch-ov" id="srchOv" hidden>
   <div class="srch" id="srchDlg" role="dialog" aria-modal="true" aria-label="Recherche globale">
@@ -376,6 +428,7 @@
 <script src="route.js"></script>
 <script src="map.js"></script>
 
+<script src="trade.js"></script>
 <script src="carnet.js"></script>
 
 <script src="versions.js"></script>

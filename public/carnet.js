@@ -1,6 +1,6 @@
 (function(){
 "use strict";
-var $=OrbUtil.$;
+var $=OrbUtil.$,OT=window.OrbTrade;
 var TYPES=[
  ["session","Session de jeu","--holo"],["mining","Minage","--c-tev"],["cargo","Commerce / cargo","--c-hum"],
  ["combat","Combat","--c-van"],["explo","Exploration","--c-banu"],["mission","Mission","--c-xian"],
@@ -56,9 +56,12 @@ function setDbStore(db){
   },function(){setLocalStore()});
 }
 function clean(d){
-  return {type:TM[d.type]?d.type:"other",ts:+d.ts||Date.now(),dur:Math.max(0,+d.dur||0),auec:+d.auec||0,
+  var o={type:TM[d.type]?d.type:"other",ts:+d.ts||Date.now(),dur:Math.max(0,+d.dur||0),auec:+d.auec||0,
     title:String(d.title||"").slice(0,120),place:String(d.place||"").slice(0,80),ship:String(d.ship||"").slice(0,80),
     notes:String(d.notes||"").slice(0,1500),src:d.src?String(d.src).slice(0,20):"manual"};
+  /* trade facultatif (cargo seulement) : nettoyé comme côté serveur ; le gain / la perte est alors le net calculé */
+  var tr=OT.clean(d.trade,o.type);if(tr){o.trade=tr;o.auec=OT.net(tr)}
+  return o;
 }
 function newId(){return "e"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
@@ -66,15 +69,36 @@ function newId(){return "e"+Date.now().toString(36)+Math.random().toString(36).s
 var fType=$("#fType"),fWhen=$("#fWhen"),fDur=$("#fDur"),fAuec=$("#fAuec"),fTitle=$("#fTitle"),fPlace=$("#fPlace"),fShip=$("#fShip"),fNotes=$("#fNotes"),fMsg=$("#fMsg"),editing=null;
 TYPES.forEach(function(t){var o=el("option",null,t[1]);o.value=t[0];fType.appendChild(o)});
 fType.value="mining";fWhen.value=localInput(Date.now());
+/* trade lié au formulaire (null si aucun) ; autoTitle = dernier titre généré, remplaçable sans écraser une saisie manuelle */
+var linked=null,autoTitle="",linkBox=$("#trLinked");
+function setLinked(t){
+  linked=t||null;fAuec.readOnly=!!linked;$("#trAuecHelp").hidden=!linked;linkBox.hidden=!linked;
+  if(linked){fAuec.value=String(OT.net(linked));$("#trLinkedS").textContent=OT.summaryText(linked)}
+}
 function resetForm(keepMsg){
-  editing=null;$("#lgForm").reset();fType.value=ls("sclog_lasttype")||"mining";fWhen.value=localInput(Date.now());
+  editing=null;$("#lgForm").reset();setLinked(null);autoTitle="";OT.drawer.set({});fType.value=ls("sclog_lasttype")||"mining";fWhen.value=localInput(Date.now());
   $("#lgFormTitle").textContent="Nouvelle entrée";$("#fSave").textContent="Enregistrer";$("#fReset").hidden=true;
   if(!keepMsg)say(fMsg,"");
 }
 function fillForm(e){
   fType.value=e.type;fWhen.value=localInput(e.ts);fDur.value=e.dur||"";fAuec.value=e.auec||"";
   fTitle.value=e.title||"";fPlace.value=e.place||"";fShip.value=e.ship||"";fNotes.value=e.notes||"";
+  autoTitle="";setLinked(OT.clean(e.trade,e.type));
 }
+/* tiroir « Calculer un trade » */
+function openDrawer(opener){
+  OT.drawer.open({opener:opener,values:linked?{cm:linked.cm,scu:linked.scu,buy:linked.buy,sell:linked.sell,fees:linked.fees||"",from:linked.from,to:linked.to}:null,dur:fDur.value.trim()});
+}
+$("#trOpen").addEventListener("click",function(){openDrawer(this)});
+$("#trEdit").addEventListener("click",function(){openDrawer(this)});
+$("#trDel").addEventListener("click",function(){setLinked(null);say(fMsg,"Trade retiré : le gain / la perte est de nouveau modifiable.");fAuec.focus()});
+fType.addEventListener("change",function(){if(linked&&fType.value!=="cargo"){setLinked(null);say(fMsg,"Le trade lié a été retiré : l’activité n’est plus « Commerce / cargo ».")}});
+OT.drawer.onAdd=function(r){
+  var t=r.trade;setLinked(t);fType.value="cargo";if(r.dur)fDur.value=String(r.dur);
+  var ti=OT.title(t);if(!fTitle.value.trim()||fTitle.value===autoTitle){fTitle.value=ti;autoTitle=ti}
+  var pl=OT.route(t).slice(0,80);if(pl)fPlace.value=pl;
+  say(fMsg,"Formulaire prérempli depuis le calcul. Vérifiez puis enregistrez.");linkBox.focus();
+};
 /* messages de validation en français (à la place des messages natifs du navigateur) */
 function frInvalid(f){
   var v=f.validity;
@@ -94,13 +118,13 @@ $("#lgForm").addEventListener("submit",function(ev){
   ev.preventDefault();say(fMsg,"");
   var ts=new Date(fWhen.value).getTime();
   if(!isFinite(ts)){say(fMsg,"Date invalide.",true);return}
-  var d=clean({type:fType.value,ts:ts,dur:fDur.value,auec:fAuec.value,title:fTitle.value,place:fPlace.value,ship:fShip.value,notes:fNotes.value,src:editing&&entries[editing]?entries[editing].src:"manual"});
+  var d=clean({type:fType.value,ts:ts,dur:fDur.value,auec:fAuec.value,trade:fType.value==="cargo"?linked:null,title:fTitle.value,place:fPlace.value,ship:fShip.value,notes:fNotes.value,src:editing&&entries[editing]?entries[editing].src:"manual"});
   var id=editing||newId(),was=!!editing;
   $("#fSave").disabled=true;var failed=false;
   store.put(id,d).then(function(){
     ls("sclog_lasttype",d.type);
     if(store.mode!=="db")refresh();
-    resetForm(true);say(fMsg,was?"Entrée modifiée.":"Entrée ajoutée au carnet.");
+    resetForm(true);say(fMsg,was?"Entrée modifiée.":"Entrée ajoutée au carnet"+(d.trade?" (trade : "+OT.netTxt(d.auec)+")":"")+".");
   }).catch(function(e){failed=true;say(fMsg,"Impossible d’enregistrer ("+(e&&e.code||"erreur")+").",true)}).then(function(){
     $("#fSave").disabled=false;
     /* le focus ne reste pas sur un bouton désactivé : retour au bouton en cas d’échec, au premier champ sinon */
@@ -142,7 +166,7 @@ $("#lgSearch").addEventListener("input",function(){q=this.value.trim().toLowerCa
 $("#lgGoal").addEventListener("change",function(){var v=Math.max(0,Math.round(+this.value||0));ls("sclog_goal",v?String(v):null);render()});
 var refreshQ=false;
 function refresh(){if(refreshQ)return;refreshQ=true;requestAnimationFrame(function(){refreshQ=false;render()})}
-function all(){return Object.keys(entries).map(function(k){return entries[k]}).sort(function(a,b){return b.ts-a.ts})}
+function all(){return Object.keys(entries).map(function(k){var e=Object.assign({},entries[k]);e.tr=OT.clean(e.trade,e.type);return e}).sort(function(a,b){return b.ts-a.ts})}
 function render(){
   var list=all(),now=Date.now();
   window.__lg={count:list.length,last:list[0]||null};try{window.dispatchEvent(new CustomEvent("lg:update"))}catch(e){}
@@ -175,22 +199,27 @@ function render(){
   /* liste */
   var shown=list.filter(function(e){
     if(fil&&e.type!==fil)return false;
-    if(q&&(e.title+" "+e.place+" "+e.ship+" "+e.notes+" "+tname(e.type)).toLowerCase().indexOf(q)<0)return false;
+    if(q&&(e.title+" "+e.place+" "+e.ship+" "+e.notes+" "+tname(e.type)+(e.tr?" trade "+e.tr.cm+" "+e.tr.from+" "+e.tr.to:"")).toLowerCase().indexOf(q)<0)return false;
     return true});
   $("#lgCount").textContent="Journal · "+shown.length+(shown.length!==list.length?" sur "+list.length:"")+" entrée"+(list.length>1?"s":"");
+  $("#trBox").hidden=fil!=="cargo";
+  var tl=list.filter(function(e){return e.tr}).map(function(e){return {trade:e.tr}});
+  if(fil==="cargo")OT.statsView($("#trStats"),tl);
+  OT.drawer.setGoods(tl);
   var L=$("#lgList");L.textContent="";
   if(!shown.length){L.appendChild(el("div","lg-empty",list.length?"Aucune entrée ne correspond.":"Le carnet est vide. Ajoutez une première activité, ou importez votre Game.log."));return}
   var cur="";
   shown.slice(0,300).forEach(function(e){
     var dk=dayKey(e.ts);if(dk!==cur){cur=dk;L.appendChild(el("div","lg-day",dayLabel(e.ts)))}
     var c=el("article","lg-ent");c.style.setProperty("--tc",tcol(e.type));
-    var top=el("div","lg-top");top.appendChild(el("span","lg-tag",tname(e.type)));top.appendChild(el("span","lg-time",timeLabel(e.ts)));c.appendChild(top);
+    var top=el("div","lg-top");var tg=el("span","tr-tags");tg.appendChild(el("span","lg-tag",tname(e.type)));if(e.tr)tg.appendChild(el("span","tr-bdg","Trade"));top.appendChild(tg);top.appendChild(el("span","lg-time",timeLabel(e.ts)));c.appendChild(top);
     if(e.title)c.appendChild(el("div","lg-ttl",e.title));
+    if(e.tr)c.appendChild(OT.summaryEl(e.tr));
     var meta=el("div","lg-meta");
-    if(e.place)meta.appendChild(el("span",null,"◎ "+e.place));
+    if(e.place&&!(e.tr&&e.place===OT.route(e.tr)))meta.appendChild(el("span",null,"◎ "+e.place));
     if(e.ship)meta.appendChild(el("span",null,"▲ "+e.ship));
     if(e.dur)meta.appendChild(el("span",null,"⏱ "+fmtDur(e.dur)));
-    if(e.auec)meta.appendChild(el("span",e.auec>0?"pos":"neg",(e.auec>0?"+":"")+fmtN(e.auec)+" aUEC"));
+    if(e.auec&&!e.tr)meta.appendChild(el("span",e.auec>0?"pos":"neg",(e.auec>0?"+":"")+fmtN(e.auec)+" aUEC"));
     if(e.src==="gamelog")meta.appendChild(el("span",null,"Game.log"));
     if(meta.childNodes.length)c.appendChild(meta);
     if(e.notes)c.appendChild(el("p","lg-note",e.notes));
@@ -296,11 +325,13 @@ function exp(name,data){
 function csvTxt(v){v=String(v==null?"":v);return /^[=+\-@\t\r]/.test(v)?"'"+v:v}
 function csvCell(v){v=String(v==null?"":v);return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 $("#xCsv").addEventListener("click",function(){
-  var rows=[["date","activité","durée_min","aUEC","titre","lieu","vaisseau","notes","source"]];
-  all().slice().reverse().forEach(function(e){rows.push([new Date(e.ts).toISOString(),csvTxt(tname(e.type)),e.dur||0,e.auec||0,csvTxt(e.title),csvTxt(e.place),csvTxt(e.ship),csvTxt(e.notes),csvTxt(e.src||"manual")])});
+  var rows=[["date","activité","durée_min","aUEC","titre","lieu","vaisseau","notes","source","marchandise","scu","achat_par_scu","vente_par_scu","frais","lieu_achat","lieu_vente","roi_pct"]];
+  all().slice().reverse().forEach(function(e){var t=e.tr,r=t?OT.roi(t):null;
+    rows.push([new Date(e.ts).toISOString(),csvTxt(tname(e.type)),e.dur||0,e.auec||0,csvTxt(e.title),csvTxt(e.place),csvTxt(e.ship),csvTxt(e.notes),csvTxt(e.src||"manual"),
+      t?csvTxt(t.cm):"",t?t.scu:"",t?t.buy:"",t?t.sell:"",t?t.fees:"",t?csvTxt(t.from):"",t?csvTxt(t.to):"",r==null?"":(Math.round(r*10)/10).toFixed(1).replace(".",",")])});
   exp("carnet-star-citizen.csv","﻿"+rows.map(function(r){return r.map(csvCell).join(";")}).join("\r\n"));
 });
-$("#xJson").addEventListener("click",function(){exp("carnet-star-citizen.json",JSON.stringify(all().map(function(e){var o=Object.assign({},e);return o}),null,1))});
+$("#xJson").addEventListener("click",function(){exp("carnet-star-citizen.json",JSON.stringify(all().map(function(e){var o=Object.assign({},e);delete o.tr;return o}),null,1))});
 
 /* ── démarrage ── */
 showTimer();loadLocal();render();
