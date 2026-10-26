@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Maquette B · Marché en pages · Orbital Services</title>
+<style>
+:root{--bg:#0b0d0c;--panel:#111412;--line:#232826;--line-2:#2e3531;--ink:#e7ebe8;--ink-2:#9ca59e;--dim:#858f87;--sage:#b8d9a6;--warn:#e8c46a;--bad:#ff8a8f;--f:"Geist",system-ui,-apple-system,"Segoe UI",sans-serif;--m:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html{color-scheme:dark;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--f);overflow-x:clip}
+:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+h1,h2,h3{margin:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* barre hors maquette */
+.mq{background:#06080a;border-bottom:1px dashed #3a443e;padding:10px 16px}
+.mq-in{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end}
+.mq-t{font:600 13px/1.4 var(--m);color:var(--ink-2);flex:1 1 100%}
+.mq-t small{color:var(--dim);font-weight:400}
+.mq .fld{flex:1 1 11rem}
+/* champs */
+.fld{display:grid;gap:4px;min-width:0}
+.fld>span{font:500 11px/1.4 var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.fld select,.fld input{width:100%;min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:0 12px;font:16px var(--f)}
+.fld input[readonly]{color:var(--ink-2)}
+@media(min-width:700px){.fld select,.fld input{font-size:14px}}
+/* site factice */
+.app{max-width:1180px;margin:0 auto;padding:8px 16px 56px}
+.site{display:flex;flex-wrap:wrap;align-items:center;gap:0 18px;padding:6px 0;font:500 13px var(--m);color:var(--ink-2)}
+.site b{font:600 15px var(--f);color:var(--ink);min-height:44px;display:inline-flex;align-items:center}
+.site span{min-height:44px;display:inline-flex;align-items:center}
+.site .cur{color:var(--sage)}
+.h1{font:600 24px/1.2 var(--f);margin:6px 0 4px}
+.h1:focus{outline:2px solid var(--sage);outline-offset:3px}
+.lead{margin:0 0 12px;max-width:62ch;color:var(--ink-2);font-size:13.5px}
+/* composants */
+.pn{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line-2);background:transparent;color:var(--ink);font:500 13.5px var(--f);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn:hover:not(:disabled){border-color:var(--sage)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pri{background:var(--sage);color:#0b0d0c;border-color:var(--sage);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:1px 9px;border-radius:99px;border:1px solid var(--line-2);font:500 11.5px/1.6 var(--m);color:var(--ink-2);white-space:nowrap}
+.pill.ok{color:var(--sage);border-color:rgba(184,217,166,.45)}
+.pill.warn{color:var(--warn);border-color:rgba(232,196,106,.5)}
+.pill.bad{color:var(--bad);border-color:rgba(255,138,143,.5)}
+.ex{display:inline-block;padding:0 7px;border:1px dashed var(--dim);border-radius:6px;font:500 10.5px/1.7 var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+.ag,.sm{color:var(--dim);font-size:12px}
+.sm{display:block}
+.up{display:inline-block;padding:1px 9px;border:1px solid var(--line-2);border-radius:99px;font:500 12px/1.6 var(--m);color:var(--ink);white-space:nowrap}
+.bn{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:10px 14px;margin:0 0 12px;border-radius:10px;border:1px solid rgba(184,217,166,.45);background:rgba(184,217,166,.08);color:#e3f2da;font-size:13.5px}
+.bn.warn{border-color:rgba(232,196,106,.55);background:rgba(232,196,106,.08);color:#f3e2b3}
+.bn.bad{border-color:rgba(255,138,143,.55);background:rgba(255,138,143,.08);color:#ffd3d5}
+.warnbox{margin:0 0 12px;padding:10px 14px;border-radius:10px;border:1px solid rgba(232,196,106,.45);background:rgba(232,196,106,.06);color:#f3e2b3;font-size:13.5px}
+.mh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 4px}
+.mh h2{font:600 20px/1.25 var(--f)}
+.mh h2:focus{outline:2px solid var(--sage);outline-offset:3px}
+.sum{margin:0;color:var(--ink-2);font-size:13.5px;min-height:1.5em}
+.hint{margin:8px 0 0;color:var(--dim);font-size:12.5px}
+.em{display:grid;gap:8px;justify-items:start}
+.em p{margin:0;color:var(--ink-2)}
+.em-s{padding:8px 4px;color:var(--ink-2)}
+.stack{display:grid;gap:12px;min-width:0}
+.flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10.5rem),1fr));gap:12px;align-items:end}
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
+@media(min-width:1000px){.split.p{grid-template-columns:17rem minmax(0,1fr)}.split.v{grid-template-columns:minmax(0,1fr) 22rem}.split.r{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}}
+.list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.it,.ship{width:100%;min-height:44px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--line-2);background:transparent;color:var(--ink);font:500 14px var(--f);cursor:pointer}
+.it:hover,.ship:hover{border-color:var(--sage)}
+.it[aria-pressed=true],.ship[aria-pressed=true]{border-color:rgba(184,217,166,.7);background:rgba(184,217,166,.1)}
+.ships{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,13rem),1fr));gap:10px}
+.ship{display:grid;gap:6px;align-content:start;padding:14px}
+.ship b{font:600 16px var(--f)}
+.ship .row{display:flex;flex-wrap:wrap;gap:4px 6px}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 16px;margin:12px 0}
+.dl dt{color:var(--dim);font:500 11px/1.8 var(--m);letter-spacing:.08em;text-transform:uppercase}
+.dl dd{margin:0;text-align:right}
+.fiche h3{font:600 18px/1.3 var(--f);display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.fiche h3:focus{outline:2px solid var(--sage);outline-offset:3px}
+.fm{margin-top:12px;color:var(--ink-2);font-size:13px}
+.fm summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink)}
+.fm ul{margin:0;padding-left:18px}
+.lg{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--ink-2)}
+.lg li{display:flex;align-items:center;gap:6px}
+.lg i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.y3{background:rgba(184,217,166,.2)}.y2{background:rgba(232,196,106,.14)}.y1{background:rgba(255,138,143,.13)}
+i.y3,i.y2,i.y1{border:1px solid var(--line-2)}
+.yv{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;font-size:13px}
+.yv b{font-size:15px}
+.bst{display:inline-block;margin-left:6px;font:500 11px var(--m);color:var(--sage)}
+.bars{display:inline-flex;gap:2px;vertical-align:middle;margin-right:6px}
+.bars i{width:8px;height:10px;border-radius:2px;background:var(--line-2)}
+.bars i.on{background:var(--sage)}
+.rk{margin:10px 0 0;padding-left:20px;display:grid;gap:8px}
+.carnet{margin-top:12px}
+/* tableaux */
+.tw{min-width:0}
+.tbh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 8px}
+.tbh h3{font:600 16px/1.3 var(--f)}
+.t{width:100%;border-collapse:collapse;font-size:13.5px}
+.t th{padding:0 10px 8px 0;text-align:left;font:500 11px/1.4 var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line-2);vertical-align:bottom}
+.t td{height:44px;padding:4px 10px 4px 0;vertical-align:middle;border-bottom:1px solid var(--line)}
+.t tbody th{padding:6px 10px 6px 0;font:600 14px var(--f);letter-spacing:0;text-transform:none;color:var(--ink);vertical-align:middle;border-bottom:1px solid var(--line)}
+.t .n{text-align:right;font-variant-numeric:tabular-nums}
+.t th:last-child,.t td:last-child{padding-right:0}
+.t tbody tr:last-child td,.t tbody tr:last-child th{border-bottom:0}
+.t.mx td{padding:6px 12px;border:1px solid var(--bg)}
+.sb{background:none;border:0;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer;min-height:44px;padding:0 4px 0 0;display:inline-flex;align-items:center;gap:4px;text-align:left}
+.sb:hover{color:var(--ink)}
+.t th[aria-sort=ascending],.t th[aria-sort=descending]{color:var(--sage)}
+.ss{display:none}
+.tip{position:relative;background:none;border:0;padding:0;min-width:44px;min-height:44px;color:var(--dim);cursor:help;vertical-align:middle;font:inherit}
+.tip>span{width:18px;height:18px;border:1px solid var(--dim);border-radius:50%;display:inline-grid;place-items:center;font:600 11px var(--m);text-transform:none}
+.num{position:relative;display:inline-block;padding:10px 4px;margin:-10px -4px;cursor:help;border-radius:6px;border-bottom:1px dotted var(--dim)}
+.num:hover::after,.num:focus::after,.tip:hover::after,.tip:focus::after{content:attr(data-x);position:absolute;z-index:30;bottom:calc(100% - 6px);left:50%;transform:translateX(-50%);width:max-content;max-width:17rem;white-space:normal;text-align:left;background:#1b211d;color:var(--ink);border:1px solid var(--line-2);border-radius:8px;padding:6px 10px;font:400 12px/1.5 var(--m);text-transform:none;letter-spacing:0;pointer-events:none}
+.n .num:hover::after,.n .num:focus::after,.t th:nth-last-child(-n+3) .tip:hover::after,.t th:nth-last-child(-n+3) .tip:focus::after{left:auto;right:0;transform:none}
+.sk{height:44px;border-radius:8px;margin:8px 0;background:linear-gradient(90deg,#161a18,#1e2421,#161a18);background-size:200% 100%;animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+/* tiroir (reproduction du tiroir existant) */
+.dw{position:fixed;inset:0;display:none;z-index:50}
+.dw.open{display:block}
+.dw .sc{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.dw aside{position:absolute;right:0;top:0;bottom:0;width:min(26rem,100%);background:var(--panel);border-left:1px solid var(--line-2);padding:18px;overflow:auto}
+.dw h2{font:600 18px var(--f);margin:0 0 4px}
+/* pages (variante B) : fil d'Ariane, cartes */
+.crumb{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin:6px 0 10px}
+.crumb ol{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;align-items:center;font:500 13px var(--m)}
+.crumb li{display:inline-flex;align-items:center;min-height:44px}
+.crumb li+li::before{content:"›";margin:0 8px;color:var(--dim)}
+.crumb a{color:var(--sage);display:inline-flex;align-items:center;min-height:44px}
+.crumb [aria-current]{color:var(--ink)}
+.tools{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,15.5rem),1fr));gap:12px}
+.tool{display:grid;gap:8px;align-content:start;min-width:0;height:100%;padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line);color:inherit;text-decoration:none}
+a.tool:hover{border-color:var(--sage)}
+.tool.on{border-color:rgba(184,217,166,.45)}
+.tool h2{font:600 17px/1.25 var(--f)}
+.tool p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.tool .top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tool .go{font:500 12.5px var(--m);color:var(--sage)}
+.main{padding:16px}
+@media(min-width:700px){.main{padding:20px}}
+/* cartes sous 860 px */
+@media(max-width:859px){
+ .ss{display:grid;margin:0 0 8px}
+ .t thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+ .t,.t tbody,.t tr,.t td,.t tbody th{display:block}
+ .t tr{margin:0 0 8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.015)}
+ .t td{height:auto;min-height:32px;padding:4px 0;border:0;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:right}
+ .t tbody th{padding:0 0 4px;border:0;font-size:15px}
+ .t td::before{content:attr(data-l);flex:none;text-align:left;font:500 11px/1.6 var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+ .t td[data-l=""]::before{content:none}
+ .t td.first{display:block;text-align:left;font-size:15px}
+ .t.mx td{border:0;border-radius:8px;margin:2px 0;padding:6px 10px}
+ .t.mx td::before{color:var(--ink-2)}
+ .num:hover::after,.num:focus::after{left:auto;right:0;transform:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="mq" role="region" aria-label="Contrôles de la maquette (hors maquette)">
+ <div class="mq-in">
+  <div class="mq-t">Maquette B · pages avec fil d'Ariane <small>(barre hors maquette : change d'écran et d'état)</small></div>
+  <label class="fld"><span>Écran</span><select id="mq-v"></select></label>
+  <label class="fld"><span>État des données</span>
+   <select id="mq-s">
+    <option value="ok">Données OK</option>
+    <option value="stale">Données anciennes (périmées)</option>
+    <option value="down">Indisponible (dernière version connue)</option>
+    <option value="off">Désactivé</option>
+    <option value="loading">Chargement</option>
+    <option value="empty">Vide (aucune donnée)</option>
+   </select></label>
+ </div>
+</div>
+
+<div class="app">
+ <div class="site" aria-hidden="true"><b>Orbital Services</b><span>Carte</span><span class="cur">Commerce</span><span>Carnet</span></div>
+ <div id="page"></div>
+</div>
+
+<div class="dw" id="dw">
+ <div class="sc" data-close></div>
+ <aside role="dialog" aria-modal="true" aria-labelledby="dw-h">
+  <h2 id="dw-h">Simuler ce trade</h2>
+  <p class="hint">Maquette du tiroir existant. En vrai : le clic ouvre le tiroir du Simulateur avec ces champs préremplis et modifiables ; rien n'est enregistré tant que l'utilisateur ne valide pas.</p>
+  <div id="dw-body"></div>
+  <p><button type="button" class="btn" id="dw-x" data-close>Fermer</button></p>
+ </aside>
+</div>
+
+<script>
+/* ===== Noyau commun (identique dans les 3 maquettes) ===== */
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const nf=n=>Math.round(n).toLocaleString('fr-FR');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pc=r=>(r*100).toFixed(1).replace('.',',')+' %';
+function short(n){const a=Math.abs(n);let v,u;if(a>=1e9){v=n/1e9;u='Md'}else if(a>=1e6){v=n/1e6;u='M'}else if(a>=1e4){v=n/1e3;u='k'}else return null;return (Math.round(v*10)/10).toString().replace('.',',')+u}
+function money(n,unit='aUEC'){const s=short(n),x=nf(n)+' '+unit;return s?`<span class="num" tabindex="0" data-x="${x}"><span aria-hidden="true">${s}</span><span class="sr">${x}</span></span>`:nf(n)}
+const ageTxt=m=>m<60?'il y a '+m+' min':m<1440?'il y a '+Math.round(m/60)+' h':'il y a '+Math.round(m/1440)+' j';
+const fresh=m=>m<=60?['ok','Frais']:m<=1440?['warn','À vérifier']:['bad','Périmé'];
+const pill=m=>{const f=fresh(m);return `<span class="pill ${f[0]}"><span aria-hidden="true">${f[0]==='ok'?'●':f[0]==='warn'?'◐':'○'}</span>${f[1]}</span>`};
+const agePill=m=>`${pill(m)} <span class="ag">${ageTxt(m)}</span>`;
+let st='ok';
+const OFF={ok:0,stale:4320,down:600,off:0,loading:0,empty:0};
+const A=m=>m+OFF[st],E=()=>st==='empty';
+const lvl=n=>n>=3?'Élevé':n===2?'Moyen':'Faible';
+const bars=n=>`<span class="bars" aria-hidden="true">${[1,2,3].map(i=>`<i${i<=n?' class="on"':''}></i>`).join('')}</span>${lvl(n)}`;
+
+/* données FICTIVES (exemple) */
+const SY=['Système X','Système Y'];
+const SYO=[['','Tous les systèmes'],['0',SY[0]],['1',SY[1]]];
+const STO=[['','Tous les statuts'],['ok','Frais (≤ 1 h)'],['warn','À vérifier (≤ 24 h)'],['bad','Périmé (> 24 h)']];
+const TN={A:['Terminal A',0],B:['Terminal B',0],C:['Terminal C',1]};
+const COMS=[{id:'a',n:'Marchandise A'},{id:'b',n:'Marchandise B'},{id:'c',n:'Marchandise C'}];
+/* b = [dernier, moyen, stock SCU], s = [dernier, moyen, demande SCU], age en minutes */
+const PR={
+ a:{A:{b:[1180,1150,640],age:12},B:{b:[1260,1240,0],s:[1340,1310,900],age:95},C:{s:[1480,1450,1200],age:40}},
+ b:{A:{s:[3150,3100,300],age:15},B:{b:[2620,2600,310],age:130},C:{b:[2700,2660,520],s:[2900,2880,150],age:2000}},
+ c:{A:{b:[410,400,5200],age:20},B:{s:[520,505,4000],age:55},C:{b:[430,425,3000],s:[490,480,1200],age:8}}};
+const ORES=[{id:'a',n:'Minerai A'},{id:'b',n:'Minerai B'},{id:'c',n:'Minerai C'}];
+const REFS=[{n:'Raffinerie A',s:0},{n:'Raffinerie B',s:0},{n:'Raffinerie C',s:1}];
+const YL={a:[72,58,44],b:[51,66,70],c:[63,40,69]};
+const MT=[['Méthode A',3,3,1],['Méthode B',2,2,2],['Méthode C',1,1,3]];
+const FUEL=[['A','Hydrogène',104,100,92,118,10],['A','Quantique',342,338,310,371,14],['B','Hydrogène',111,108,97,125,70],['B','Quantique',355,349,320,380,70],['C','Hydrogène',98,99,90,121,1700],['C','Quantique',330,336,305,368,1700]];
+const SH=[{id:'a',n:'Vaisseau A',role:'Transport',size:'Grand',scu:96,crew:3,mass:420,dim:[40,28,12],h:300,q:90},
+ {id:'b',n:'Vaisseau B',role:'Minage',size:'Moyen',scu:32,crew:2,mass:85,dim:[24,16,7],h:180,q:60},
+ {id:'c',n:'Vaisseau C',role:'Polyvalent',size:'Petit',scu:8,crew:1,mass:22,dim:[14,10,5],h:70,q:40}];
+
+const F0={q:'',sys:'',stt:'',rc:'',from:'',to:'',margin:0,ftype:'',vq:'',vrole:'',vsize:'',vscu:'',vcrew:'',vsort:'n'};
+const F=Object.assign({com:'a',budget:58000000,scu:256,ore:'a',ship:'a',carnet:''},F0);
+const S={};let RT=[];
+const sel=(k,label,opts)=>`<label class="fld"><span>${label}</span><select data-f="${k}">${opts.map(o=>`<option value="${o[0]}"${String(F[k])===String(o[0])?' selected':''}>${o[1]}</option>`).join('')}</select></label>`;
+const inp=(k,label,type,attrs='')=>`<label class="fld"><span>${label}</span><input data-f="${k}" ${type==='number'?'type="number" inputmode="numeric" data-n':'type="'+type+'" autocomplete="off"'} value="${esc(F[k])}" ${attrs}></label>`;
+const hd=(t,lead)=>COMMON?'':`<header class="mh"><h2 tabindex="-1">${t}</h2><span class="ex">exemple</span></header><p class="lead">${lead}</p>`;
+
+function tbl(id,title,note,cols,rows,def,emptyMsg,wide){
+ const s=S[id]||(S[id]={k:def[0],d:def[1]});
+ let h=`<div class="tw"><div class="tbh"><h3 id="${id}-h">${title}</h3><span class="ex">exemple</span>${note?`<span class="ag">${note}</span>`:''}</div>`;
+ if(!rows.length)return h+`<div class="pn em"><b>Aucune ligne</b><p>${emptyMsg}</p>${E()?'':'<button type="button" class="btn" data-reset>Réinitialiser les filtres</button>'}</div></div>`;
+ rows=rows.slice();
+ if(cols.some(c=>c.k===s.k&&c.s))rows.sort((a,b)=>(a[s.k].v>b[s.k].v?1:a[s.k].v<b[s.k].v?-1:0)*s.d);
+ h+=`<label class="fld ss"><span>Trier par</span><select data-sortsel="${id}">${cols.filter(c=>c.s).map(c=>[1,-1].map(d=>`<option value="${c.k}:${d}"${s.k===c.k&&s.d===d?' selected':''}>${c.h} (${d>0?'croissant':'décroissant'})</option>`).join('')).join('')}</select></label>`;
+ h+=`<table class="t" role="table" aria-labelledby="${id}-h"><thead role="rowgroup"><tr role="row">`+cols.map(c=>{
+  const on=s.k===c.k,as=c.s?` aria-sort="${on?(s.d>0?'ascending':'descending'):'none'}"`:'';
+  const lab=c.hh||c.h;
+  return `<th role="columnheader" scope="col"${as}${c.n?' class="n"':''}>${c.s?`<button type="button" class="sb" data-sort="${id}|${c.k}">${lab}<span aria-hidden="true">${on?(s.d>0?'↑':'↓'):'↕'}</span></button>`:lab}${c.tip?`<button type="button" class="tip" data-x="${esc(c.tip)}" aria-label="Formule : ${esc(c.tip)}"><span aria-hidden="true">i</span></button>`:''}</th>`}).join('')+`</tr></thead><tbody role="rowgroup">`;
+ rows.forEach(r=>{h+=`<tr role="row">`+cols.map(c=>`<td role="cell" data-l="${c.first||c.nl?'':esc(c.h)}" class="${c.n?'n':''}${c.first?' first':''}">${r[c.k].h}</td>`).join('')+`</tr>`});
+ return h+`</tbody></table></div>`;
+}
+const cell=(h,v)=>({h,v:v===undefined?h:v});
+
+/* ----- données dérivées ----- */
+function pRows(){
+ if(E()||!PR[F.com])return [];
+ const p=PR[F.com],out=[];
+ for(const t in p){const a=A(p[t].age);
+  if(F.sys!==''&&TN[t][1]!=F.sys)continue;
+  if(F.stt&&fresh(a)[0]!==F.stt)continue;
+  ['b','s'].forEach(k=>{if(p[t][k])out.push({side:k,t,last:p[t][k][0],avg:p[t][k][1],qty:p[t][k][2],age:a})});}
+ return out;
+}
+const rcom=()=>COMMON?F.com:F.rc;
+function routes(){
+ if(E())return [];
+ const out=[],from=COMMON?F.sys:F.from,bud=+F.budget||0,cap=+F.scu||0,mx=(+F.margin||0)/100;
+ COMS.filter(c=>!rcom()||c.id===rcom()).forEach(c=>{const p=PR[c.id];
+  for(const tb in p){const B=p[tb].b;if(!B||!B[2])continue;if(from!==''&&TN[tb][1]!=from)continue;
+   for(const ts in p){if(ts===tb)continue;const Sl=p[ts].s;if(!Sl)continue;if(F.to!==''&&TN[ts][1]!=F.to)continue;
+    const pps=Sl[0]-B[0];if(pps<=0)continue;
+    const scu=Math.min(cap,B[2],Sl[2],Math.floor(bud/B[0]));if(scu<=0)continue;
+    const roi=pps/B[0];if(roi<mx)continue;
+    out.push({c,tb,ts,B,Sl,scu,pps,roi,inv:scu*B[0],rev:scu*Sl[0],age:Math.max(A(p[tb].age),A(p[ts].age))});}}});
+ return out;
+}
+const tnode=t=>`${TN[t][0]}<span class="sm">${SY[TN[t][1]]}</span>`;
+
+/* ----- modules ----- */
+const M={};
+M.prix={
+ shell(){return `<div data-ready="prix">${hd('Prix des marchandises','Choisissez une marchandise pour voir où l’acheter et où la vendre.')}
+ <div class="split p"><div class="pn"><label class="fld"><span>Rechercher une marchandise</span><input type="search" data-f="q" value="${esc(F.q)}" autocomplete="off"></label><ul class="list" id="p-list" aria-label="Marchandises"></ul></div>
+ <div class="stack"><div class="pn"><div class="flt">${COMMON?'':sel('sys','Système',SYO)}${sel('stt','Statut de la donnée',STO)}<div class="fld"><span>Export</span><button type="button" class="btn" id="p-csv" data-csv>Exporter en CSV</button></div></div></div>
+ <p class="sum" id="p-sum" aria-live="polite"></p><div id="p-res" class="stack"></div></div></div></div>`},
+ upd(){
+  const L=$('#p-list');if(!L)return;
+  const q=F.q.trim().toLowerCase(),ls=E()?[]:COMS.filter(c=>c.n.toLowerCase().includes(q));
+  L.innerHTML=ls.length?ls.map(c=>`<li><button type="button" class="it" data-com="${c.id}" aria-pressed="${c.id===F.com}"><span>${c.n}</span><span class="ex">exemple</span></button></li>`).join(''):`<li class="em-s">${E()?'Aucune marchandise pour le moment.':'Aucune marchandise ne correspond à « '+esc(F.q)+' ».'}</li>`;
+  const com=COMS.find(c=>c.id===F.com),rows=pRows(),R=$('#p-res');
+  $('#p-csv').disabled=!rows.length;
+  if(!com){$('#p-sum').textContent='Aucune marchandise sélectionnée.';R.innerHTML=`<div class="pn em"><b>Choisissez une marchandise</b><p>Sélectionnez-en une dans la liste pour afficher les terminaux.</p></div>`;return}
+  const b=rows.filter(r=>r.side==='b'),s=rows.filter(r=>r.side==='s');
+  $('#p-sum').textContent=`${com.n} : ${b.length} terminal(aux) où acheter, ${s.length} où vendre.`;
+  const mk=(qh)=>[{k:'t',h:'Terminal',s:1,first:1},{k:'sy',h:'Système',s:1},{k:'last',h:'Dernier',s:1,n:1},{k:'avg',h:'Moyen',s:1,n:1},{k:'q',h:qh,s:1,n:1},{k:'ag',h:'Ancienneté',s:1}];
+  const rw=a=>a.map(r=>({t:cell(TN[r.t][0]),sy:cell(SY[TN[r.t][1]]),last:cell(nf(r.last),r.last),avg:cell(nf(r.avg),r.avg),q:cell(r.qty===0?'0 <span class="ag">épuisé</span>':nf(r.qty),r.qty),ag:cell(agePill(r.age),r.age)}));
+  const em=E()?'Aucune donnée disponible pour le moment.':'Aucun terminal ne correspond aux filtres.';
+  R.innerHTML=tbl('p-b','Où acheter','Prix en aUEC par SCU',mk('Stock (SCU)'),rw(b),['last',1],em)+tbl('p-s','Où vendre','Prix en aUEC par SCU',mk('Demande (SCU)'),rw(s),['last',-1],em);
+ }};
+function csv(){
+ const c=COMS.find(x=>x.id===F.com);if(!c)return;
+ const rows=[['Type','Marchandise (exemple)','Terminal','Système','Dernier aUEC/SCU','Moyen aUEC/SCU','SCU','Ancienneté min','Statut']];
+ pRows().forEach(r=>rows.push([r.side==='b'?'Achat':'Vente',c.n,TN[r.t][0],SY[TN[r.t][1]],r.last,r.avg,r.qty,r.age,fresh(r.age)[1]]));
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+rows.map(r=>r.join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='prix-exemple.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+M.routes={
+ shell(){return `<div data-ready="routes">${hd('Routes commerciales','Routes calculées localement à partir des prix du marché, triées selon votre choix.')}
+ <div class="warnbox" role="note"><b>Les prix sont des estimations communautaires.</b> Routes calculées localement, sans promesse de précision : stock, demande et prix changent en jeu.</div>
+ <div class="stack"><div class="pn"><div class="flt">${inp('budget','Budget (aUEC)','number','min="0" step="1000"')}${inp('scu','SCU disponibles','number','min="1" step="1"')}${COMMON?'':sel('rc','Marchandise',[['','Toutes'],...COMS.map(c=>[c.id,c.n])])}${COMMON?'':sel('from','Système de départ',SYO)}${sel('to','Système d’arrivée',SYO)}${inp('margin','Marge minimale (ROI %)','number','min="0" step="1"')}</div>${COMMON?'<p class="hint">Le système de départ et la marchandise sont ceux de la barre commune.</p>':''}</div>
+ <p class="sum" id="r-sum" aria-live="polite"></p><div id="r-res"></div></div>
+ <details class="fm"><summary>Formules utilisées</summary><ul><li>Bénéfice par SCU = prix de vente − prix d’achat</li><li>Revenu = bénéfice par SCU × SCU utilisés</li><li>ROI = (vente − achat) ÷ achat</li><li>SCU utilisés = minimum entre vos SCU, le stock à l’achat, la demande à la vente et budget ÷ prix d’achat</li><li>Investissement = prix d’achat × SCU utilisés</li></ul></details></div>`},
+ upd(){
+  const R=$('#r-res');if(!R)return;
+  RT=routes();
+  const cols=[{k:'c',h:'Marchandise',s:1,first:1},{k:'f',h:'Achat à',s:1},{k:'t',h:'Vente à',s:1},{k:'scu',h:'SCU utilisés',s:1,n:1,tip:'SCU = min(vos SCU, stock à l’achat, demande à la vente, budget ÷ prix d’achat)'},{k:'inv',h:'Investissement',s:1,n:1,tip:'investissement = prix d’achat × SCU utilisés'},{k:'rev',h:'Revenu',s:1,n:1,tip:'revenu = bénéfice par SCU × SCU utilisés'},{k:'pps',h:'Bénéfice / SCU',s:1,n:1,tip:'bénéfice par SCU = prix de vente − prix d’achat'},{k:'roi',h:'ROI',s:1,n:1,tip:'ROI = (vente − achat) ÷ achat'},{k:'a',h:'Action',hh:'<span class="sr">Action</span>',nl:1}];
+  const rows=RT.map((r,i)=>({c:cell(`<b>${r.c.n}</b> ${pill(r.age)}`,r.c.n),f:cell(tnode(r.tb),TN[r.tb][0]),t:cell(tnode(r.ts),TN[r.ts][0]),scu:cell(nf(r.scu),r.scu),inv:cell(money(r.inv),r.inv),rev:cell(money(r.rev),r.rev),pps:cell(money(r.pps),r.pps),roi:cell(pc(r.roi),r.roi),a:cell(`<button type="button" class="btn" data-sim="${i}">Simuler ce trade<span class="sr"> : ${r.c.n}, de ${TN[r.tb][0]} vers ${TN[r.ts][0]}</span></button>`)}));
+  const best=RT.reduce((m,r)=>Math.max(m,r.roi),0);
+  $('#r-sum').textContent=E()?'Aucune donnée de prix : aucune route calculable.':`${RT.length} route(s) pour un budget de ${nf(+F.budget||0)} aUEC et ${nf(+F.scu||0)} SCU${RT.length?' · meilleur ROI '+pc(best):''}.`;
+  R.innerHTML=tbl('routes','Routes proposées','Estimations, tri modifiable',cols,rows,['roi',-1],E()?'Aucune donnée de prix disponible pour calculer des routes.':'Aucune route ne correspond à vos filtres. Essayez de baisser la marge minimale ou d’élargir les systèmes.',1);
+ }};
+function openSim(i){
+ const r=RT[i];if(!r)return;
+ window.__lastBtn=document.activeElement;
+ $('#dw-body').innerHTML=`<dl class="dl"><dt>Marchandise</dt><dd>${r.c.n}</dd><dt>Achat à</dt><dd>${TN[r.tb][0]}</dd><dt>Vente à</dt><dd>${TN[r.ts][0]}</dd><dt>SCU</dt><dd>${nf(r.scu)}</dd><dt>Prix d’achat / SCU</dt><dd>${nf(r.B[0])} aUEC</dd><dt>Prix de vente / SCU</dt><dd>${nf(r.Sl[0])} aUEC</dd><dt>Bénéfice estimé</dt><dd>${money(r.pps*r.scu)}</dd></dl>`;
+ $('#dw').classList.add('open');$('#dw-x').focus();
+}
+function closeSim(){$('#dw').classList.remove('open');if(window.__lastBtn)window.__lastBtn.focus()}
+
+M.raffineries={
+ shell(){return `<div data-ready="raffineries">${hd('Raffineries','Rendement du raffinage par minerai et par raffinerie.')}
+ <div class="stack">${COMMON?'':`<div class="pn"><div class="flt">${sel('sys','Système',SYO)}</div></div>`}
+ <div class="split r"><div class="pn" id="f-mat"></div>
+ <div class="pn"><h3 id="f-bh" style="font:600 16px var(--f)">Meilleure raffinerie pour…</h3><div class="flt" style="margin-top:10px">${sel('ore','Minerai',ORES.map(o=>[o.id,o.n]))}</div><p class="sum" id="f-best" aria-live="polite" style="margin-top:10px"></p><ol class="rk" id="f-rk" aria-labelledby="f-bh"></ol></div></div>
+ <div id="f-met"></div></div></div>`},
+ upd(){
+  const X=$('#f-mat');if(!X)return;
+  const refs=E()?[]:REFS.map((r,i)=>({...r,i})).filter(r=>F.sys===''||r.s==F.sys);
+  const lv=v=>v>=65?3:v>=50?2:1,sym=['','▼','●','▲'];
+  const ycell=(v,best,name)=>{const l=lv(v);return `<td role="cell" class="y${l}" data-l="${name}"><span class="yv"><b>${v} %</b><span><span aria-hidden="true">${sym[l]}</span> ${lvl(l)}</span>${best?'<span class="bst">★ Meilleure</span>':''}</span></td>`};
+  if(!refs.length){X.innerHTML=`<h3 id="f-mh" style="font:600 16px var(--f)">Rendement par minerai et raffinerie</h3><div class="em" style="margin-top:10px"><b>Aucune raffinerie</b><p>${E()?'Aucune donnée de raffinage pour le moment.':'Aucune raffinerie dans ce système.'}</p>${E()?'':'<button type="button" class="btn" data-reset>Réinitialiser les filtres</button>'}</div>`}
+  else{
+   X.innerHTML=`<div class="tbh"><h3 id="f-mh" style="font:600 16px var(--f)">Rendement par minerai et raffinerie</h3><span class="ex">exemple</span></div>
+   <ul class="lg" aria-label="Échelle de rendement"><li><i class="y3"></i>▲ Élevé : 65 % et plus</li><li><i class="y2"></i>● Moyen : 50 à 64 %</li><li><i class="y1"></i>▼ Faible : moins de 50 %</li></ul>
+   <table class="t mx" role="table" aria-labelledby="f-mh"><thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">Minerai</th>${refs.map(r=>`<th role="columnheader" scope="col">${r.n}<span class="sm">${SY[r.s]}</span></th>`).join('')}</tr></thead><tbody role="rowgroup">${ORES.map(o=>{const best=Math.max(...refs.map(r=>YL[o.id][r.i]));return `<tr role="row"><th role="rowheader" scope="row">${o.n}</th>${refs.map(r=>ycell(YL[o.id][r.i],YL[o.id][r.i]===best,r.n)).join('')}</tr>`}).join('')}</tbody></table>
+   <p class="hint">Le rendement indique la part de minerai récupérée, pas le profit.</p>`;
+  }
+  const o=ORES.find(x=>x.id===F.ore),rk=refs.map(r=>({r,v:YL[F.ore][r.i]})).sort((a,b)=>b.v-a.v);
+  $('#f-rk').innerHTML=rk.map((x,i)=>`<li><b>${x.r.n}</b> <span class="sm" style="display:inline">${SY[x.r.s]}</span> : ${x.v} % <span aria-hidden="true">${sym[lv(x.v)]}</span> ${lvl(lv(x.v))}${i===0?' <span class="bst">★ Meilleure</span>':''}</li>`).join('');
+  $('#f-best').textContent=rk.length?`Pour ${o.n} : ${rk[0].r.n} (${rk[0].v} %, ${lvl(lv(rk[0].v)).toLowerCase()}).`:'Aucune raffinerie à comparer.';
+  const cols=[{k:'m',h:'Méthode',s:1,first:1},{k:'r',h:'Rendement',s:1},{k:'c',h:'Coût',s:1},{k:'v',h:'Vitesse',s:1}];
+  $('#f-met').innerHTML=tbl('meth','Méthodes de raffinage','Niveaux relatifs (texte et barres)',cols,E()?[]:MT.map(m=>({m:cell(`<b>${m[0]}</b>`,m[0]),r:cell(bars(m[1]),m[1]),c:cell(bars(m[2]),m[2]),v:cell(bars(m[3]),m[3])})),['m',1],'Aucune méthode de raffinage pour le moment.');
+ }};
+
+M.carburant={
+ shell(){return `<div data-ready="carburant">${hd('Carburant','Prix par SCU de l’hydrogène et du carburant quantique, par terminal.')}
+ <div class="stack"><div class="pn"><div class="flt">${COMMON?'':sel('sys','Système',SYO)}${sel('ftype','Carburant',[['','Les deux'],['Hydrogène','Hydrogène'],['Quantique','Quantique']])}</div></div>
+ <p class="sum" id="c-sum" aria-live="polite"></p><div id="c-res"></div></div></div>`},
+ upd(){
+  const R=$('#c-res');if(!R)return;
+  const rows=E()?[]:FUEL.filter(f=>(F.sys===''||TN[f[0]][1]==F.sys)&&(!F.ftype||f[1]===F.ftype));
+  const cols=[{k:'t',h:'Terminal / lieu',s:1,first:1},{k:'sy',h:'Système',s:1},{k:'ty',h:'Carburant',s:1},{k:'l',h:'Dernier',s:1,n:1},{k:'a',h:'Moyen',s:1,n:1},{k:'mi',h:'Min',s:1,n:1},{k:'ma',h:'Max',s:1,n:1},{k:'ag',h:'Ancienneté',s:1}];
+  const rw=rows.map(f=>{const a=A(f[6]);return {t:cell(TN[f[0]][0]),sy:cell(SY[TN[f[0]][1]]),ty:cell(f[1]),l:cell(nf(f[2]),f[2]),a:cell(nf(f[3]),f[3]),mi:cell(nf(f[4]),f[4]),ma:cell(nf(f[5]),f[5]),ag:cell(agePill(a),a)}});
+  const low=t=>{const x=rows.filter(f=>f[1]===t).sort((a,b)=>a[2]-b[2])[0];return x?`${t} : ${TN[x[0]][0]} (${x[2]} aUEC/SCU)`:null};
+  const l=[low('Hydrogène'),low('Quantique')].filter(Boolean);
+  $('#c-sum').textContent=E()?'Aucune donnée de carburant.':`${rows.length} ligne(s)${l.length?' · moins cher (dernier prix) : '+l.join(' ; '):''}.`;
+  R.innerHTML=tbl('fuel','Prix du carburant','aUEC par SCU',cols,rw,['l',1],E()?'Aucune donnée de carburant pour le moment.':'Aucun terminal ne correspond aux filtres.');
+ }};
+
+M.vaisseaux={
+ shell(){return `<div data-ready="vaisseaux">${hd('Vaisseaux','Capacités et caractéristiques, pour choisir un vaisseau ou le renseigner dans le carnet.')}
+ <div class="stack"><div class="pn"><div class="flt">${inp('vq','Rechercher un vaisseau','search')}${sel('vrole','Rôle',[['','Tous'],['Transport','Transport'],['Minage','Minage'],['Polyvalent','Polyvalent']])}${sel('vsize','Taille',[['','Toutes'],['Petit','Petit'],['Moyen','Moyen'],['Grand','Grand']])}${inp('vscu','SCU minimum','number','min="0" step="1"')}${inp('vcrew','Équipage maximum','number','min="1" step="1"')}${sel('vsort','Trier par',[['n','Nom'],['scu','SCU (décroissant)'],['crew','Équipage (décroissant)'],['mass','Masse (décroissante)']])}</div></div>
+ <p class="sum" id="v-sum" aria-live="polite"></p>
+ <div class="split v"><div><ul class="ships" id="v-list" aria-label="Vaisseaux"></ul><div id="v-none"></div></div><div class="pn fiche" id="v-fiche"></div></div></div></div>`},
+ upd(){
+  const L=$('#v-list');if(!L)return;
+  const q=F.vq.trim().toLowerCase(),k=F.vsort;
+  let ls=E()?[]:SH.filter(s=>(!q||s.n.toLowerCase().includes(q))&&(!F.vrole||s.role===F.vrole)&&(!F.vsize||s.size===F.vsize)&&s.scu>=(+F.vscu||0)&&(F.vcrew===''||s.crew<=+F.vcrew));
+  ls=ls.slice().sort((a,b)=>k==='n'?a.n.localeCompare(b.n,'fr'):b[k]-a[k]);
+  $('#v-sum').textContent=E()?'Aucune donnée de vaisseau.':`${ls.length} vaisseau(x) affiché(s).`;
+  L.innerHTML=ls.map(s=>`<li><button type="button" class="ship" data-ship="${s.id}" aria-pressed="${s.id===F.ship}"><b>${s.n} <span class="ex">exemple</span></b><span class="row"><span class="pill">${s.role}</span><span class="pill">${s.size}</span></span><span>${s.scu} SCU · équipage ${s.crew}</span></button></li>`).join('');
+  $('#v-none').innerHTML=ls.length?'':`<div class="pn em"><b>Aucun vaisseau</b><p>${E()?'Aucune donnée pour le moment.':'Aucun vaisseau ne correspond aux filtres.'}</p>${E()?'':'<button type="button" class="btn" data-reset>Réinitialiser les filtres</button>'}</div>`;
+  this.fiche();
+ },
+ fiche(){
+  const s=SH.find(x=>x.id===F.ship),X=$('#v-fiche');if(!X)return;
+  if(E()||!s){X.innerHTML='<div class="em"><b>Aucun vaisseau sélectionné</b><p>Choisissez un vaisseau dans la liste.</p></div>';return}
+  X.innerHTML=`<h3 tabindex="-1" id="v-h">${s.n} <span class="ex">exemple</span></h3><dl class="dl"><dt>Rôle</dt><dd>${s.role}</dd><dt>Taille</dt><dd>${s.size}</dd><dt>Capacité</dt><dd>${s.scu} SCU</dd><dt>Équipage</dt><dd>${s.crew} max.</dd><dt>Masse</dt><dd>${s.mass} t</dd><dt>Dimensions</dt><dd>${s.dim[0]} × ${s.dim[1]} × ${s.dim[2]} m</dd><dt>Carburant hydrogène</dt><dd>${s.h} unités</dd><dt>Carburant quantique</dt><dd>${s.q} unités</dd></dl>
+  <button type="button" class="btn pri" data-carnet="${s.id}">Utiliser dans le carnet</button><p class="hint" id="v-flash" role="status"></p>
+  <label class="fld carnet"><span>Aperçu du carnet : champ « Vaisseau »</span><input id="v-carnet" readonly value="${esc(F.carnet)}" placeholder="(vide)"></label>`;
+ }};
+
+/* ----- états, bandeau ----- */
+function banner(){
+ const up='<span class="up">Powered by UEX</span>';
+ if(st==='down')return `<div class="bn bad" role="alert"><span aria-hidden="true">⚠</span><span><b>Données UEX indisponibles</b>, dernière version connue du 25/10/2026 à 19:42.</span>${up}<span>Communautaires, peuvent être inexactes.</span></div>`;
+ if(st==='off')return `<div class="bn" role="status"><span><b>Données de marché désactivées</b> sur ce site.</span>${up}</div>`;
+ if(st==='stale')return `<div class="bn warn" role="status"><span aria-hidden="true">◐</span><span><b>Données anciennes</b> : dernière mise à jour il y a 3 jours.</span>${up}<span>Communautaires, peuvent être inexactes. Vérifiez en jeu.</span></div>`;
+ if(st==='loading')return `<div class="bn" role="status"><span>Mise à jour des données en cours…</span>${up}</div>`;
+ return `<div class="bn" role="status"><span>Données mises à jour il y a 12 min</span><span aria-hidden="true">—</span>${up}<span aria-hidden="true">—</span><span>communautaires, peuvent être inexactes</span></div>`;
+}
+function mount(n,el){
+ el.setAttribute('aria-busy',String(st==='loading'));
+ if(st==='off'){el.innerHTML=`<div class="pn em"><b>Les données de marché sont désactivées.</b><p>Le Simulateur reste utilisable avec une saisie manuelle des prix.</p></div>`;return}
+ if(st==='loading'){el.innerHTML=`<p class="sum" role="status">Chargement…</p><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>`;return}
+ el.innerHTML=M[n].shell();M[n].upd();
+}
+function updAll(){Object.keys(M).forEach(n=>{if($('[data-ready="'+n+'"]'))M[n].upd()})}
+
+/* ----- événements communs ----- */
+function onField(el){
+ const k=el.dataset.f;F[k]=el.dataset.n!==undefined?(el.value===''?'':+el.value):el.value;
+ $$('[data-f="'+k+'"]').forEach(x=>{if(x!==el)x.value=F[k]});updAll();
+}
+document.addEventListener('input',e=>{const el=e.target.closest('[data-f]');if(el)onField(el)});
+document.addEventListener('change',e=>{
+ const el=e.target.closest('[data-f]');if(el)onField(el);
+ const so=e.target.closest('[data-sortsel]');if(so){const p=so.value.split(':');S[so.dataset.sortsel]={k:p[0],d:+p[1]};updAll();const n=$('[data-sortsel="'+so.dataset.sortsel+'"]');if(n)n.focus()}
+});
+document.addEventListener('click',e=>{
+ const t=e.target;let b;
+ if(b=t.closest('[data-sort]')){const p=b.dataset.sort.split('|'),s=S[p[0]];if(s.k===p[1])s.d=-s.d;else{s.k=p[1];s.d=1}updAll();const n=$('[data-sort="'+b.dataset.sort+'"]');if(n)n.focus();return}
+ if(b=t.closest('[data-com]')){F.com=b.dataset.com;$$('[data-f="com"]').forEach(x=>x.value=F.com);updAll();return}
+ if(b=t.closest('[data-sim]')){openSim(+b.dataset.sim);return}
+ if(t.closest('[data-close]')){closeSim();return}
+ if(t.closest('[data-csv]')){csv();return}
+ if(b=t.closest('[data-ship]')){F.ship=b.dataset.ship;updAll();const f=$('#v-fiche');if(f&&matchMedia('(max-width:999px)').matches)f.scrollIntoView({block:'nearest'});return}
+ if(b=t.closest('[data-carnet]')){const s=SH.find(x=>x.id===b.dataset.carnet);F.carnet=s.n;$('#v-carnet').value=s.n;$('#v-flash').textContent='Champ « Vaisseau » du carnet renseigné : '+s.n+' (aperçu de la maquette).';return}
+ if(t.closest('[data-reset]')){Object.assign(F,F0);if(COMMON)F.com='';renderAll();return}
+});
+document.addEventListener('keydown',e=>{
+ const d=$('#dw');if(!d.classList.contains('open'))return;
+ if(e.key==='Escape'){closeSim();return}
+ if(e.key==='Tab'){const f=$$('button,[href],input,select',d.querySelector('aside')),a=f[0],z=f[f.length-1];if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}}
+});
+
+/* ===== Variante B : une page par module, fil d'Ariane, cartes = liens ===== */
+const COMMON=false;
+const MODS=[
+ ['prix','Prix','Où acheter et où vendre chaque marchandise, avec stock et ancienneté de la donnée.'],
+ ['routes','Routes','Les trades les plus rentables selon votre budget et vos SCU, calculés à partir des prix.'],
+ ['raffineries','Raffineries','Rendement par minerai et par raffinerie, et méthodes de raffinage.'],
+ ['carburant','Carburant','Prix de l’hydrogène et du carburant quantique par terminal.'],
+ ['vaisseaux','Vaisseaux','Capacités, équipage, masse et carburant ; renseigne le carnet.']];
+const NAMES={simulateur:'Simulateur'};MODS.forEach(m=>NAMES[m[0]]=m[1]);
+let view='home';
+const parse=()=>{const h=location.hash.replace(/^#/,'').split('/')[1];return NAMES[h]?h:'home'};
+function renderAll(focus){
+ const p=$('#page');
+ if(view==='home'){
+  const lab=st==='off'?['Désactivé','bad']:st==='stale'?['Données anciennes','warn']:st==='down'?['Indisponible','bad']:['Disponible','ok'];
+  p.innerHTML=`<h1 class="h1" tabindex="-1" id="ttl">Commerce</h1><p class="lead">Outils de commerce de la communauté. Choisissez un outil : chacun ouvre sa propre page.</p>${banner()}
+  <ul class="tools"><li><a class="tool on" href="#commerce/simulateur"><div class="top"><h2>Simulateur</h2><span class="pill ok">Actif</span></div><p>Calculez le résultat d’un trade avec vos propres prix.</p><span class="go">Ouvrir →</span></a></li>
+  ${MODS.map(m=>`<li><a class="tool on" href="#commerce/${m[0]}"><div class="top"><h2>${m[1]}</h2><span class="pill ${lab[1]}">${lab[0]}</span></div><p>${m[2]}</p><span class="go">Ouvrir →</span></a></li>`).join('')}</ul>
+  <p class="hint">Données de marché : Powered by UEX. Communautaires, peuvent être inexactes.</p>`;
+ }else{
+  p.innerHTML=`<nav class="crumb" aria-label="Fil d’Ariane"><ol><li><a href="#commerce">Commerce</a></li><li aria-current="page">${NAMES[view]}</li></ol><a class="btn" href="#commerce">← Retour aux cartes</a></nav><section class="pn main" aria-label="${NAMES[view]}"><div id="bn"></div><div id="mod"></div></section>`;
+  if(view==='simulateur'){$('#bn').innerHTML='';$('#mod').innerHTML='<header class="mh"><h2 tabindex="-1">Simulateur</h2></header><p class="lead">Le Simulateur existant, inchangé (hors périmètre de cette maquette).</p>'}
+  else{$('#bn').innerHTML=banner();mount(view,$('#mod'))}
+ }
+ if(focus){const h=$('#ttl')||$('#mod h2');if(h)h.focus({preventScroll:false})}
+ $('#mq-v').value=view;
+}
+$('#mq-v').innerHTML='<option value="home">Tableau de bord (cartes)</option>'+MODS.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join('');
+$('#mq-v').addEventListener('change',e=>{location.hash=e.target.value==='home'?'#commerce':'#commerce/'+e.target.value});
+$('#mq-s').addEventListener('change',e=>{st=e.target.value;renderAll(false)});
+window.addEventListener('hashchange',()=>{view=parse();renderAll(true);window.scrollTo(0,0)});
+view=parse();renderAll(false);
+</script>
+</body>
+</html>
