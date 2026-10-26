@@ -11,21 +11,9 @@
 | `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
 | `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log, journal, exports CSV/JSON) |
 | `trade.js`, `trade.css` | Journal de trades et simulateur : calculs (investissement, recettes, net, marge, ROI, bénéfice par heure), nettoyage de l’objet `trade`, tiroir « Calculer un trade » (volet latéral ≥ 700 px, volet bas en dessous), statistiques « Commerce » ; chargé avant `carnet.js` |
+| `commerce.js`, `commerce.css` | Onglet « Commerce » (`#commerce`) : cartes-outils (simulateur actif, cinq outils « bientôt »), résumé des 30 derniers jours et cinq derniers trades. Lit les entrées du carnet via `window.OrbLog` (exposé par `carnet.js` : `all()`, `addTrade()`, `sync()`, `showType()`, événement `lg:update`) et ouvre le tiroir de `trade.js` avec l’action finale « Ajouter au journal » (enregistrement direct d’une entrée « cargo »). Chargé après `carnet.js` |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
-| `util.js` | Utilitaires partagés (`OrbUtil` : `# Développement
-
-## Organisation de `public/`
-
-| Fichier | Contenu |
-|---|---|
-| `index.html` | Structure de la page (accueil, carnet, chronologie, carte) |
-| `style.css` | Tous les styles |
-| `data.js` | Données : époques et événements, systèmes de la carte, liaisons, positions |
-| `timeline.js` | Chronologie et fond étoilé |
-| `map.js` | Star Viewer (carte du temps), liens entre onglets, navigation |
-| `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
-| `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
-, `esc`, `escRe`, `norm`), chargé en premier |
+| `util.js` | Utilitaires partagés (`OrbUtil` : `$`, `$$`, `esc`, `escRe`, `norm`), chargé en premier |
 | `route.js`, `route.css` | Itinéraire entre deux systèmes du Star Viewer (plus court chemin en sauts à l’année affichée, tracé, lien `?de=&vers=`) |
 | `search.js`, `search.css` | Recherche globale (touche « / » ou loupe) : événements, systèmes, planètes, Comm-Links ; copie de lien |
 | `versions.js` | Historique des versions (une entrée par commit) |
@@ -47,7 +35,7 @@ npx playwright install chromium
 npm test
 ```
 
-`npm test` lance sept séries (plus `node tests/trade.js`, à lancer à part tant qu’il n’est pas dans `package.json`) : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne) `tests/perf-images.js` (images de la chronologie, Comm-Links) et `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne). `tests/trade.js` couvre le journal de trades : calculs exacts, tiroir (focus piégé, Échap, volet bas à 390 px), ajout au carnet, journal, statistiques Commerce, édition et retrait du lien, exports CSV/JSON, imports, stockage local, CSP. Les deux premières n’ouvrent pas de navigateur.
+`npm test` lance neuf séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne), `tests/perf-images.js` (images de la chronologie, Comm-Links), `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne) et `tests/trade.js` (journal de trades : calculs exacts, tiroir, ajout au carnet, journal, statistiques Commerce, exports, imports, stockage local, CSP). `tests/commerce.js` couvre l’onglet Commerce : navigation latérale et barre du bas à 5 entrées, cartes « bientôt » non interactives, état vide, ajout via le tiroir (« Ajouter au journal »), résumé 30 jours et cinq derniers trades, mise à jour depuis le carnet, volet bas à 390 px, absence de requêtes inutiles, CSP. Les deux premières n’ouvrent pas de navigateur.
 
 Le test lance le serveur, ouvre chaque onglet dans Chromium et vérifie la carte, les liens entre onglets, le carnet, l'API et l'authentification. Il échoue s'il y a une erreur dans la console. Avec un Chromium déjà installé : `CHROMIUM_PATH=/chemin/vers/chromium npm test`.
 

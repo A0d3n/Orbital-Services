@@ -360,7 +360,7 @@ function parseCsv(txt) {
       await page.tap('.tab[data-v="home"]');
       await page.waitForSelector("#v-home", { state: "visible" });
       const hs = await page.evaluate(() => [...document.querySelectorAll(".tabs > .tab, .tabs .lore-toggle")].filter(b => b.offsetParent !== null).map(b => ({ t: b.textContent.trim(), h: Math.round(b.getBoundingClientRect().height * 10) / 10, w: Math.round(b.getBoundingClientRect().width), bot: Math.round(b.getBoundingClientRect().bottom) })));
-      check("mobile : la barre du bas compte 4 boutons (Accueil, Carnet, Lore, Versions)", hs.length === 4, JSON.stringify(hs));
+      check("mobile : la barre du bas compte 5 boutons (Accueil, Carnet, Commerce, Lore, Versions)", hs.length === 5 && hs.map(b => b.t).join() === "Accueil,Carnet de bord,Commerce,Lore,Versions", JSON.stringify(hs));
       check("mobile : chaque bouton de la barre du bas fait au moins 44 px de haut", hs.length > 0 && hs.every(b => b.h >= 44), JSON.stringify(hs));
       check("mobile : chaque bouton de la barre du bas fait au moins 44 px de large", hs.every(b => b.w >= 44), JSON.stringify(hs));
       /* menu Lore */

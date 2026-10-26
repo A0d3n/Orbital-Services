@@ -577,9 +577,10 @@ applyFx();
 
 /* onglets */
 var tabs=[].slice.call(document.querySelectorAll(".tab[data-v]"));
-var VIEWS={home:"#home",log:"#carnet",time:"#chronologie",map:"#carte",cl:"#commlinks",ver:"#versions"};
+var VIEWS={home:"#home",log:"#carnet",commerce:"#commerce",time:"#chronologie",map:"#carte",cl:"#commlinks",ver:"#versions"};
 var SUBS={home:"Une carte qui change avec le temps, la chronologie de l’univers et votre carnet de bord.",
   log:"Journal personnel · aUEC · heures de vol",
+  commerce:"Vos outils de trade et le résumé de votre journal.",
   time:"",
   map:"Remontez les années et suivez les systèmes, leurs camps et leurs événements.",
   cl:"Les communications officielles de Roberts Space Industries.",
@@ -598,7 +599,7 @@ document.addEventListener("click",function(e){
 function show(v){
   if(!VIEWS[v])v="home";
   var map=v==="map";
-  ["home","log","time","map","cl","ver"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
+  ["home","log","commerce","time","map","cl","ver"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
   $("#bar").setAttribute("data-view",v);
   tabs.forEach(function(t){
     var on=t.dataset.v===v;
@@ -613,6 +614,7 @@ function show(v){
   window.scrollTo(0,0);
   if(v==="time")window.dispatchEvent(new Event("scroll"));
   if(v==="cl"&&window.__orbCL)window.__orbCL();
+  if(v==="commerce"&&window.__orbCommerce)window.__orbCommerce();
   if(map){fit();render();pinchHint()}
 }
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
@@ -669,7 +671,7 @@ document.addEventListener("click",function(e){
   n.hidden=false;
   n.querySelector("button").addEventListener("click",function(){toMap(last.s,last.y)});
 })();
-var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver","#commlinks":"cl"};readHash(HASH);show(R[HASH.split(/[\/?]/)[0]]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#commerce":"commerce","#chronologie":"time","#versions":"ver","#commlinks":"cl"};readHash(HASH);show(R[HASH.split(/[\/?]/)[0]]||"home");
 /* un lien collé dans l’onglet déjà ouvert : on le suit sans recharger la page */
 addEventListener("hashchange",function(){
   var k=R[location.hash.split(/[\/?]/)[0]];

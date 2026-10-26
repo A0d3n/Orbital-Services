@@ -134,6 +134,7 @@ function resHTML(c) {
     '<p class="tr-res-f">Net = recettes \u2212 investissement \u2212 frais · ROI = net ÷ (investissement + frais)</p>';
 }
 
+var curAdd = null, subBtn = null, SUB = "Ajouter au carnet";
 var ov = null, box = null, form = null, resEl = null, resBox = null, msg = null, inp = {}, err = {}, attempt = false, last = null, opener = null, inerts = [];
 var api = { onAdd: null };
 
@@ -176,11 +177,14 @@ function onKey(e) {
   else if (!e.shiftKey && (cur === z || !inside)) { e.preventDefault(); a.focus(); }
 }
 function isOpen() { return !!ov && !ov.hidden; }
-/* o.opener : élément qui reprend le focus ; o.values : valeurs à charger (sinon le brouillon est conservé) ; o.dur : durée du formulaire */
+/* o.opener : élément qui reprend le focus ; o.values : valeurs à charger (sinon le brouillon est conservé) ; o.dur : durée du formulaire ;
+   o.onAdd : action finale propre à cette ouverture (sinon api.onAdd) ; o.submit : libellé du bouton final (sinon « Ajouter au carnet ») */
 function open(o) {
   if (!ov || isOpen()) return;
   o = o || {};
   opener = o.opener || document.activeElement;
+  curAdd = typeof o.onAdd === "function" ? o.onAdd : null;
+  if (subBtn) subBtn.textContent = o.submit || SUB;
   if (o.values) set(o.values);
   if (o.dur != null && String(o.dur) !== "") inp.dur.value = String(o.dur);
   msg.textContent = ""; attempt = false; run();
@@ -216,6 +220,7 @@ function init() {
     if (!p.id) p.id = "trEr" + (++uid);
     if (i) i.setAttribute("aria-describedby", p.id);
   });
+  subBtn = $("trSubmit"); if (subBtn) SUB = subBtn.textContent;
   [].forEach.call(ov.querySelectorAll("[data-tr-close]"), function (b) { b.addEventListener("click", close); });
   form.addEventListener("submit", function (ev) {
     ev.preventDefault(); attempt = true;
@@ -227,8 +232,9 @@ function init() {
       return;
     }
     var v = vals(), t = clean({ cm: v.cm, scu: c.r.scu, buy: c.r.buy, sell: c.r.sell, fees: c.r.fees, from: v.from, to: v.to }, "cargo");
+    var fn = curAdd || api.onAdd;
     close();
-    if (api.onAdd) api.onAdd({ trade: t, dur: c.r.dur });
+    if (fn) fn({ trade: t, dur: c.r.dur });
   });
   run();
 }

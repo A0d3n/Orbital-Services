@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="search.css">
 <link rel="stylesheet" href="route.css">
 <link rel="stylesheet" href="trade.css">
+<link rel="stylesheet" href="commerce.css">
 <script src="search.js" defer></script>
 </head>
 <body>
@@ -29,6 +30,7 @@
       <div class="nav-h">Navigation</div>
       <button type="button" class="tab" data-v="home" aria-current="page"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 8l7-5 7 5v7H2z"/></svg><span>Accueil</span></button>
       <button type="button" class="tab" data-v="log"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="3" y="2" width="12" height="14" rx="2"/><path d="M6 6h6M6 9h6M6 12h3"/></svg><span>Carnet de bord</span></button>
+      <button type="button" class="tab" data-v="commerce"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 6h10M11 3l3 3-3 3M15 12H5M7 9l-3 3 3 3"/></svg><span>Commerce</span></button>
       <div class="lore">
         <button type="button" class="tab lore-toggle" id="loreBtn" aria-expanded="false" aria-controls="loreMenu"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 3h8a3 3 0 013 3v9H6a3 3 0 01-3-3zM3 12a3 3 0 013-3h8"/></svg><span>Lore</span><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 8l4-4 4 4"/></svg></button>
         <div class="lore-menu" id="loreMenu" role="group" aria-label="Lore" hidden>
@@ -92,6 +94,12 @@
           <span class="hm-d" id="hmLogD">Notez vos activités, chronométrez vos sessions, importez votre Game.log.</span>
           <span class="hm-go">Ouvrir le carnet →</span>
         </button>
+        <button type="button" class="hm-card" data-go="commerce">
+          <span class="hm-k">Commerce</span>
+          <b>Simulateur de trade</b>
+          <span class="hm-d">Calculez le bénéfice net et le ROI d’un trade, puis gardez-le dans votre journal.</span>
+          <span class="hm-go">Ouvrir le commerce →</span>
+        </button>
         <button type="button" class="hm-card" data-go="time">
           <span class="hm-k">Chronologie</span>
           <b id="hmEvN">64 événements</b>
@@ -109,6 +117,70 @@
       <div class="hm-last" id="hmLast" hidden>
         <h2 class="fl">Dernière activité</h2>
         <div id="hmLastT"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="v-commerce" hidden>
+    <section class="page-pad cm" aria-label="Commerce">
+      <div class="cm-intro">
+        <p class="lead">Un point d’entrée pour vos outils de commerce. Un seul est disponible pour l’instant : le simulateur de trade ; les autres s’ajouteront ici.</p>
+        <button type="button" class="btn play cm-main" id="cmOpen" aria-haspopup="dialog">Calculer un trade</button>
+      </div>
+      <p class="cm-flash" id="cmStatus" role="status"></p>
+
+      <h2 class="cm-h" id="cmToolsT">Outils</h2>
+      <ul class="cm-tools" aria-labelledby="cmToolsT">
+        <li class="cm-tool on">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg></span></div>
+          <h3>Simulateur de trade</h3>
+          <p>Calculez bénéfice net, ROI et marge d’un trade à partir de votre saisie, puis gardez-le dans le journal.</p>
+          <button type="button" class="btn cm-card-btn" id="cmCard" aria-haspopup="dialog">Ouvrir le simulateur</button>
+        </li>
+        <li class="cm-tool off">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6"/></svg></span><span class="pill s">bientôt</span></div>
+          <h3>Routes</h3>
+          <p>Comparer des itinéraires de trade entre deux lieux.</p>
+          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+        </li>
+        <li class="cm-tool off">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="pill s">bientôt</span></div>
+          <h3>Prix</h3>
+          <p>Consulter les prix par marchandise et par lieu.</p>
+          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+        </li>
+        <li class="cm-tool off">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span><span class="pill s">bientôt</span></div>
+          <h3>Raffineries</h3>
+          <p>Comparer les raffineries et leurs méthodes.</p>
+          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+        </li>
+        <li class="cm-tool off">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></svg></span><span class="pill s">bientôt</span></div>
+          <h3>Carburant</h3>
+          <p>Estimer le carburant nécessaire à un trajet.</p>
+          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+        </li>
+        <li class="cm-tool off">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l3 7 6 3-6 2-3 6-3-6-6-2 6-3z"/></svg></span><span class="pill s">bientôt</span></div>
+          <h3>Vaisseaux</h3>
+          <p>Consulter la capacité de soute des vaisseaux.</p>
+          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+        </li>
+      </ul>
+      <p class="cm-uex">Données de marché : bientôt, via l’API publique d’UEX Corp.</p>
+
+      <h2 class="cm-h" id="cmSumT">Résumé du journal</h2>
+      <div class="cm-two" role="group" aria-labelledby="cmSumT">
+        <section class="pn cm-p30" aria-labelledby="cm30T">
+          <h3 class="fl" id="cm30T" tabindex="-1">30 derniers jours</h3>
+          <div id="cm30" aria-live="polite" aria-atomic="true"></div>
+        </section>
+        <section class="pn cm-plast" aria-labelledby="cmLastT">
+          <h3 class="fl" id="cmLastT" tabindex="-1">Derniers trades</h3>
+          <div id="cmLast"></div>
+          <p class="cm-more"><button type="button" class="btn" id="cmAll" data-go="log">Voir tout le journal</button></p>
+        </section>
       </div>
     </section>
   </div>
@@ -388,7 +460,7 @@
       <div class="tr-foot">
         <p class="tr-msg" id="trMsg" role="status"></p>
         <div class="tr-btns">
-          <button type="submit" class="btn play">Ajouter au carnet</button>
+          <button type="submit" class="btn play" id="trSubmit">Ajouter au carnet</button>
           <button type="button" class="btn" data-tr-close>Annuler</button>
         </div>
       </div>
@@ -430,6 +502,7 @@
 
 <script src="trade.js"></script>
 <script src="carnet.js"></script>
+<script src="commerce.js"></script>
 
 <script src="versions.js"></script>
 <script src="home.js"></script>

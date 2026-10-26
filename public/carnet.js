@@ -39,7 +39,11 @@ function setApiStore(list){
   $("#lgStore").innerHTML="";$("#lgStore").appendChild(el("b",null,"Enregistré sur le serveur"));
   $("#lgStore").appendChild(document.createTextNode(" — le carnet est stocké sur votre NAS et partagé entre vos appareils."));
   refresh();
-  setInterval(function(){if(document.hidden)return;fetch("api/entries",{cache:"no-store"}).then(function(r){return r.json()}).then(function(l){entries={};l.forEach(function(e){entries[e.id]=e});refresh()}).catch(function(){})},20000);
+  setInterval(function(){if(!document.hidden)pull()},20000);
+}
+/* relecture des entrées du serveur (toutes les 20 s, et au retour sur l’onglet Commerce) */
+function pull(){
+  return fetch("api/entries",{cache:"no-store"}).then(function(r){return r.json()}).then(function(l){entries={};l.forEach(function(e){entries[e.id]=e});refresh()}).catch(function(){});
 }
 function tryApi(){
   fetch("api/entries",{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(l){if(!Array.isArray(l))throw 0;setApiStore(l)}).catch(setLocalStore);
@@ -332,6 +336,23 @@ $("#xCsv").addEventListener("click",function(){
   exp("carnet-star-citizen.csv","﻿"+rows.map(function(r){return r.map(csvCell).join(";")}).join("\r\n"));
 });
 $("#xJson").addEventListener("click",function(){exp("carnet-star-citizen.json",JSON.stringify(all().map(function(e){var o=Object.assign({},e);delete o.tr;return o}),null,1))});
+
+/* ── partage avec l’onglet Commerce (commerce.js) : même magasin, même nettoyage ──
+   OrbLog.all() : entrées triées (chacune avec .tr = trade nettoyé ou null) ; l’événement « lg:update » signale tout changement.
+   OrbLog.addTrade(trade, minutes) : enregistre directement une entrée « cargo » (promesse) ; OrbLog.sync() : relit le serveur si besoin ;
+   OrbLog.showType(type) : filtre le journal sur une activité. */
+window.OrbLog={
+  all:all,
+  addTrade:function(t,min){
+    if(!store.put)return Promise.reject({code:"stockage_indisponible"});
+    var d=clean({type:"cargo",ts:Date.now(),dur:min||0,trade:t,title:OT.title(t),place:OT.route(t).slice(0,80),src:"manual"});
+    if(!d.trade)return Promise.reject({code:"trade_invalide"});
+    var id=newId();
+    return store.put(id,d).then(function(){if(store.mode!=="db")refresh();return Object.assign({id:id},d)});
+  },
+  sync:function(){return store.mode==="api"?pull():Promise.resolve()},
+  showType:function(type){fil=type||"";[].forEach.call(chipsF.children,function(c){c.setAttribute("aria-pressed",String(c.dataset.t===fil))});render()}
+};
 
 /* ── démarrage ── */
 showTimer();loadLocal();render();

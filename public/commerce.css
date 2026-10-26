@@ -1,0 +1,70 @@
+/* Onglet « Commerce » : cartes-outils, résumé des 30 derniers jours et derniers trades.
+   Même charte que le reste du site (panneaux .pn, pastilles .pill, boutons .btn, cartes de l'accueil) ; le tiroir reste celui de trade.css. */
+.page-pad.cm{max-width:1180px;margin-left:0}
+.cm .lead{max-width:62ch;margin:0;font-size:13.5px}
+.cm-intro{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-bottom:12px}
+.cm-intro .lead{flex:1 1 22rem}
+.cm .btn{min-height:44px;height:auto;padding:0 18px}
+.cm-flash{margin:0 0 12px;padding:10px 14px;border-radius:9px;border:1px solid rgba(184,217,166,.45);background:rgba(184,217,166,.08);color:#e3f2da;font-size:13.5px}
+.cm-flash:empty{margin:0;padding:0;border:0;height:0;overflow:hidden}
+
+/* titres de blocs (h2) */
+.cm-h{margin:22px 0 10px;font:500 11px/1.5 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage)}
+.cm h3:focus{outline:2px solid var(--sage);outline-offset:3px}
+
+/* cartes-outils */
+.cm-tools{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(15.5rem,1fr));gap:12px}
+.cm-tool{display:grid;gap:8px;align-content:start;min-width:0;padding:18px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.cm-tool.on{border-color:rgba(184,217,166,.45)}
+.cm-tool.off{border-style:dashed;border-color:var(--line-2)}
+.cm-tool h3{margin:0;font:600 17px/1.25 var(--f-display);color:var(--ink)}
+.cm-tool p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink-2)}
+.cm-tool .cm-why{font:400 12px/1.5 var(--f-mono);color:var(--dim)}
+.cm-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cm-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--line-2);color:var(--ink-2)}
+.cm-tool.on .cm-ic{border-color:rgba(184,217,166,.5);background:rgba(184,217,166,.1);color:var(--sage)}
+.cm-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5}
+.cm-card-btn{justify-self:start;margin-top:4px}
+.cm-uex{margin:12px 0 0;font:400 12.5px/1.5 var(--f-mono);color:var(--ink-2)}
+
+/* résumé : 30 derniers jours (étroit) et derniers trades (large) */
+.cm-two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.9fr);gap:12px;align-items:start}
+.cm-two .pn{padding:18px}
+.cm-two h3.fl{margin:0 0 12px}
+.cm-stats{grid-template-columns:minmax(0,1fr)}
+.cm-empty{display:grid;gap:8px;justify-items:start}
+.cm-empty p,.cm-hint{margin:0;color:var(--ink-2);font-size:13.5px}
+.cm-empty p:first-child{color:var(--ink);font-weight:600}
+.cm-more{margin:12px 0 0}
+
+/* tableau */
+.cm-tbl-wrap{min-width:0;overflow-wrap:anywhere}
+.cm-tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.cm-tbl th{padding:0 10px 8px 0;text-align:left;font:500 11px/1.4 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line-2)}
+.cm-tbl td{padding:10px 10px 10px 0;vertical-align:top;border-bottom:1px solid var(--line);color:var(--ink)}
+.cm-tbl tr:last-child td{border-bottom:0}
+.cm-tbl th.h-net,.cm-tbl th.h-roi,.cm-tbl td.c-net,.cm-tbl td.c-roi{text-align:right;font-variant-numeric:tabular-nums}
+.cm-tbl th:last-child,.cm-tbl td:last-child{padding-right:0}
+.cm-tbl td.c-ts{color:var(--ink-2);white-space:nowrap}
+.cm-tbl td.c-route{color:var(--ink-2)}
+.cm-tbl td b{font-weight:600}
+.cm-tbl td.c-net span,.cm-tbl td.c-roi span{white-space:nowrap}
+
+@media (max-width:1100px){.cm-two{grid-template-columns:minmax(0,1fr)}.cm-stats{grid-template-columns:repeat(auto-fit,minmax(9rem,1fr))}}
+@media (max-width:860px){.page-pad.cm{margin:0 auto}}
+/* téléphone : chaque trade devient une carte (les rôles ARIA gardent la structure de tableau) */
+@media (max-width:700px){
+  .cm-tbl thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .cm-tbl,.cm-tbl tbody,.cm-tbl tr,.cm-tbl td{display:block}
+  .cm-tbl tr{margin:0 0 8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.015)}
+  .cm-tbl tr.loss{border-color:rgba(255,138,143,.35)}
+  .cm-tbl tr:last-child{margin-bottom:0}
+  .cm-tbl td,.cm-tbl td:last-child{padding:2px 0;border:0;display:flex;justify-content:space-between;gap:12px}
+  .cm-tbl td.c-ts,.cm-tbl td.c-trade{display:block}
+  .cm-tbl td.c-route{text-align:right}
+  .cm-tbl td::before{content:attr(data-l);flex:none;font:500 11px/1.6 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+  .cm-tbl td[data-l=""]::before{content:none}
+  .cm-tbl td.c-net,.cm-tbl td.c-roi{text-align:right}
+  .cm-tools{grid-template-columns:minmax(0,1fr)}
+  .cm-intro .cm-main{width:100%}
+}
