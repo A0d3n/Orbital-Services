@@ -1,6 +1,23 @@
+/* Carnet de bord : masqué par défaut (voir OrbUtil.carnet dans util.js et docs/developpement.md).
+   Désactivé, son moteur (carnet.js : stockage, sondage de /api/entries) n’est même pas chargé. */
 (function(){
 "use strict";
-var N=document.getElementById("hmLogN"),D=document.getElementById("hmLogD"),B=document.getElementById("hmLast"),T=document.getElementById("hmLastT");
+var ON=!!(window.OrbUtil&&OrbUtil.carnet);
+if(!ON){
+  /* #carnet saisi ou collé dans l'onglet déjà ouvert : retour à l'accueil (map.js a déjà réagi, ce gestionnaire passe après) */
+  addEventListener("hashchange",function(){
+    if(!/^#carnet(?:[\/?#]|$)/.test(location.hash))return;
+    var h=document.querySelector('.tab[data-v="home"]');if(h)h.click();
+  });
+  /* le sous-titre de l'accueil (map.js) parle du carnet : on le réécrit sans */
+  var sub=document.getElementById("topSub");
+  if(sub&&window.MutationObserver){
+    var fix=function(){if(/carnet/i.test(sub.textContent))sub.textContent="Une carte qui change avec le temps et la chronologie de l’univers."};
+    new MutationObserver(fix).observe(sub,{childList:true,characterData:true,subtree:true});fix();
+  }
+  return;
+}
+var N=document.getElementById("hmLogN"),B=document.getElementById("hmLast"),T=document.getElementById("hmLastT");
 var NAMES={session:"Session de jeu",mining:"Minage",cargo:"Commerce / cargo",combat:"Combat",explo:"Exploration",mission:"Mission",salvage:"Récupération",pax:"Transport",race:"Course",social:"Social / événement",other:"Autre"};
 function paint(){
   var g=window.__lg;if(!g)return;
@@ -13,6 +30,7 @@ function paint(){
   }else B.hidden=true;
 }
 window.addEventListener("lg:update",paint);paint();
+var s=document.createElement("script");s.src="carnet.js";s.async=false;document.body.appendChild(s);
 })();
 
 /* mode hors ligne */

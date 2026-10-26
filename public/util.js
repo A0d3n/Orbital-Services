@@ -7,7 +7,10 @@
        opt.keep = true : apostrophes typographiques ramenées à « ' » (chronologie) ;
        opt.sp   = RegExp des espaces à ramener à une espace simple ;
        opt.trim = true : retire les espaces aux extrémités.
-     Sans option : accents et casse seulement (Comm-Links). */
+     Sans option : accents et casse seulement (Comm-Links).
+   - Carnet de bord : MASQUÉ par défaut. Activé si localStorage["orbital-carnet"] === "1" ou si l'adresse contient ?carnet=1
+     (la valeur est alors mémorisée) ; ?carnet=0 le désactive et efface la valeur. Calculé ici, tout de suite (ce script est
+     chargé dans <head>, avant le premier rendu et avant le routage) : <html data-carnet="1"> si activé, et OrbUtil.carnet. */
 (function () {
 "use strict";
 var DIA = /[\u0300-\u036f]/g;
@@ -25,5 +28,13 @@ function norm(t, o) {
   s = s.toLowerCase();
   return o.trim ? s.trim() : s;
 }
-window.OrbUtil = { $: $, $$: $$, esc: esc, escRe: escRe, norm: norm };
+var KEY = "orbital-carnet", carnet = false, q = /[?&]carnet=([01])(?=&|#|$)/.exec(location.search);
+try {
+  if (q) { if (q[1] === "1") localStorage.setItem(KEY, "1"); else localStorage.removeItem(KEY); }
+} catch (e) {}
+try { carnet = q ? q[1] === "1" : localStorage.getItem(KEY) === "1"; } catch (e) { carnet = !!q && q[1] === "1"; }
+if (carnet) document.documentElement.setAttribute("data-carnet", "1");
+/* #carnet sans carnet : retour à l'accueil avant que map.js ne lise l'adresse (pas de boucle : le « # » disparaît) */
+else if (/^#carnet(?:[\/?#]|$)/.test(location.hash)) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+window.OrbUtil = { $: $, $$: $$, esc: esc, escRe: escRe, norm: norm, carnet: carnet };
 })();
