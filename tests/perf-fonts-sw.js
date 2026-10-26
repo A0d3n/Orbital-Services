@@ -46,7 +46,6 @@ const check = (name, ok, extra) => { results.push({ name, ok: !!ok, extra }); co
     /* navigateur : aucune requête externe, onglet par onglet */
     browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    await ctx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
     const page = await ctx.newPage();
     const ext = [], local = [];
     page.on("request", r => {

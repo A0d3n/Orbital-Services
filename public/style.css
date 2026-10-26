@@ -169,8 +169,6 @@ a{color:var(--holo)}
 .mnote{font-size:.85rem;color:var(--ink-2);max-width:78ch;margin:1rem 0 0}
 
 /* ── Carnet de bord ── */
-/* masqué par défaut ; <html data-carnet="1"> (util.js) le réactive. display:none : ni focus clavier ni lecteur d'écran. */
-html:not([data-carnet]) [data-feature="carnet"],html[data-carnet] [data-feature="no-carnet"]{display:none!important}
 .lg{padding-block:clamp(1.5rem,4vw,3rem) 3rem}
 .lg h2{font-size:clamp(2rem,5vw,3rem);margin:.2rem 0 .8rem;text-transform:uppercase;letter-spacing:.03em}
 .lg .lead{max-width:62ch;margin:0 0 .8rem}
@@ -470,8 +468,6 @@ footer ul{margin:.3rem 0 .9rem;padding-left:1.1rem}
 
 /* menu Lore */
 .lore{display:block}
-/* barre du bas : « Lore » prend la même largeur et la même hauteur que les autres boutons (3 ou 4 boutons selon le carnet) */
-@media (max-width:860px){.lore{display:flex}.tabs>.tab,.tabs>.lore{flex:1 1 20%}}
 .lore-toggle .chev{margin-left:auto;width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.6;transition:transform .15s;transform:rotate(180deg)}
 .lore-toggle[aria-expanded="true"] .chev{transform:none}
 .lore-toggle.on{color:#f2f5f3}

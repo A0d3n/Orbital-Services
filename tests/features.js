@@ -70,7 +70,6 @@ function parseCsv(txt) {
 
     async function newLog(opts) {
       const ctx = await browser.newContext(Object.assign({ viewport: { width: 1440, height: 900 }, acceptDownloads: true }, opts || {}));
-      await ctx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
       const page = await ctx.newPage(); watch(page, "");
       return { ctx, page };
     }
@@ -345,7 +344,6 @@ function parseCsv(txt) {
     /* ───────── 3. Mobile 390x844 ───────── */
     await section("mobile", async () => {
       const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-      await ctx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
       const page = await ctx.newPage(); watch(page, "mobile : ");
       await page.goto(base + "/");
       await page.waitForSelector(".hm-banner");
@@ -449,7 +447,6 @@ function parseCsv(txt) {
     /* ───────── 5. Service worker ───────── */
     await section("service worker", async () => {
       const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-      await ctx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
       const page = await ctx.newPage();
       await page.goto(base + "/");
       await page.waitForSelector(".hm-banner");

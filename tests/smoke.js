@@ -44,9 +44,7 @@ async function waitUp(port) {
 
     /* navigateur */
     browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
-    const mainCtx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    await mainCtx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
-    const page = await mainCtx.newPage();
+    const page = await (await browser.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
     const errors = [];
     page.on("pageerror", e => errors.push(e.message + (process.env.DBG ? " @ " + e.stack : "")));
     page.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push(m.text()); });
@@ -377,7 +375,6 @@ async function waitUp(port) {
       await route.fulfill({ response: resp, headers: Object.assign({}, resp.headers(), { "content-security-policy": CSP }) });
     });
     await cctx.addInitScript(() => { window.__csp = []; document.addEventListener("securitypolicyviolation", e => window.__csp.push(e.violatedDirective + " " + e.blockedURI + " " + (e.sourceFile || "") + ":" + (e.lineNumber || ""))); });
-    await cctx.addInitScript(() => { try { localStorage.setItem("orbital-carnet", "1"); } catch (e) {} }); /* carnet activé (masqué par défaut) */
     const cp = await cctx.newPage();
     const cspMsgs = [];
     cp.on("pageerror", e => cspMsgs.push("pageerror " + e.message));
@@ -585,118 +582,6 @@ async function waitUp(port) {
       check("itinéraire : aucune violation de la CSP stricte", (await rp.evaluate(() => window.__csp)).length === 0 && rmsg.length === 0, JSON.stringify(await rp.evaluate(() => window.__csp)) + rmsg.join("|"));
       await rctx.close();
     }
-    /* ───────── carnet masqué par défaut (réactivable par ?carnet=1 ou localStorage "orbital-carnet") ───────── */
-    {
-      const CSPC = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://robertsspaceindustries.com https://*.robertsspaceindustries.com; connect-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'";
-      // contexte neuf (aucun localStorage), CSP stricte, mesure des requêtes /api/entries, de carnet.js, des erreurs et des violations
-      const fresh = async (opts) => {
-        const c = await browser.newContext(Object.assign({ viewport: { width: 1440, height: 900 }, serviceWorkers: "block" }, opts || {}));
-        await c.route(base + "/**", async route => { const r = await route.fetch(); await route.fulfill({ response: r, headers: Object.assign({}, r.headers(), { "content-security-policy": CSPC }) }); });
-        await c.addInitScript(() => { window.__csp = []; document.addEventListener("securitypolicyviolation", e => window.__csp.push(e.violatedDirective + " " + e.blockedURI)); });
-        const p = await c.newPage(); const o = { c, p, api: [], js: [], err: [] };
-        p.on("request", r => { const u = new URL(r.url()); if (u.pathname.indexOf("/api/entries") === 0) o.api.push(u.pathname); if (u.pathname === "/carnet.js") o.js.push(u.pathname); });
-        p.on("pageerror", e => o.err.push("pageerror " + e.message));
-        p.on("console", m => { if (m.type() === "error" || /Content Security Policy|Refused to/i.test(m.text())) o.err.push(m.text()); });
-        return o;
-      };
-      const feat = (p) => p.evaluate(() => ({ attr: document.documentElement.getAttribute("data-carnet"), ls: localStorage.getItem("orbital-carnet"),
-        vis: [...document.querySelectorAll('[data-feature="carnet"]')].filter(e => e.offsetParent !== null || getComputedStyle(e).display !== "none").length,
-        n: document.querySelectorAll('[data-feature="carnet"]').length }));
-      const tabbed = async (p) => { // 40 appuis sur Tab : le focus ne doit jamais entrer dans un élément du carnet
-        await p.evaluate(() => document.activeElement && document.activeElement.blur()); const hit = [];
-        for (let i = 0; i < 40; i++) { await p.keyboard.press("Tab"); hit.push(await p.evaluate(() => { const a = document.activeElement; return a && a.closest && a.closest('[data-feature="carnet"]') ? (a.id || a.tagName) : ""; })); }
-        return hit.filter(Boolean);
-      };
-
-      /* 1. bureau, défaut */
-      const d = await fresh();
-      await d.p.goto(base + "/"); await d.p.waitForSelector(".hm-banner"); await d.p.waitForTimeout(1200);
-      const f0 = await feat(d.p);
-      check("carnet masqué : <html> sans data-carnet, rien en localStorage, éléments data-feature=\"carnet\" tous masqués (display:none)", f0.attr === null && f0.ls === null && f0.n >= 8 && f0.vis === 0, JSON.stringify(f0));
-      const nav0 = await d.p.evaluate(() => ({ tab: !!document.querySelector('.tab[data-v="log"]') && document.querySelector('.tab[data-v="log"]').offsetParent !== null,
-        side: document.querySelector(".side-card").offsetParent !== null, txt: document.querySelector(".sidebar").innerText }));
-      check("carnet masqué : ni « Carnet de bord » ni badge « Carnet local · N entrées » dans la barre latérale", !nav0.tab && !nav0.side && !/carnet/i.test(nav0.txt), nav0.txt.replace(/\s+/g, " "));
-      const home0 = await d.p.evaluate(() => ({ t: document.getElementById("v-home").innerText.replace(/\s+/g, " "), ctas: [...document.querySelectorAll(".hm-cta .cta")].filter(b => b.offsetParent !== null).map(b => b.textContent.trim()),
-        cards: [...document.querySelectorAll(".hm-card")].filter(b => b.offsetParent !== null).length, sub: document.getElementById("topSub").textContent, h2: [...document.querySelectorAll(".hm-copy h2")].filter(h => h.offsetParent !== null).map(h => h.textContent) }));
-      check("carnet masqué : l'accueil ne parle plus du carnet (ni bloc, ni « Dernière activité », ni « Démarrer une session », ni texte)", !/carnet|derni[eè]re activit|d[eé]marrer une session|consigner|game\.log/i.test(home0.t + " " + home0.sub), home0.t + " | " + home0.sub);
-      check("carnet masqué : accueil recomposé (2 cartes, 2 boutons d'action, un seul titre)", home0.cards === 2 && home0.ctas.length === 2 && home0.h2.length === 1, JSON.stringify(home0));
-      check("carnet masqué : aucune requête vers /api/entries ni chargement de carnet.js", d.api.length === 0 && d.js.length === 0, JSON.stringify([d.api, d.js]));
-      const hits = await tabbed(d.p);
-      check("carnet masqué : le clavier (Tab) n'atteint aucun élément du carnet", hits.length === 0, hits.join(","));
-      check("carnet masqué : le titre de la barre du haut reste « Accueil »", (await d.p.textContent("#topTitle")) === "Accueil");
-      /* recherche globale */
-      await d.p.keyboard.press("/"); await d.p.waitForSelector("#srchOv", { state: "visible" });
-      const sres = {};
-      for (const q of ["carnet", "session", "Game.log", "aUEC", "minage"]) {
-        await d.p.fill("#srchQ", q); await d.p.waitForTimeout(350);
-        sres[q] = await d.p.$$eval("#srchLb [role=option]", els => els.map(e => e.textContent.replace(/\s+/g, " ").trim()).filter(t => /carnet|journal de bord|chronom[eè]tre|game\.log/i.test(t)));
-      }
-      check("carnet masqué : la recherche globale ne propose rien du carnet", Object.values(sres).every(a => a.length === 0), JSON.stringify(sres));
-      await d.p.keyboard.press("Escape");
-      /* routage */
-      for (const h of ["#carnet", "#carnet/x", "#carnet?a=1"]) {
-        await d.p.goto(base + "/" + h); await d.p.waitForSelector(".hm-banner"); await d.p.waitForTimeout(300);
-        const r = await d.p.evaluate(() => ({ home: document.getElementById("v-home").offsetParent !== null, log: document.getElementById("v-log").offsetParent !== null, h: location.hash, t: document.getElementById("topTitle").textContent }));
-        check("carnet masqué : " + h + " au chargement renvoie à l'accueil (sans # carnet)", r.home && !r.log && !/carnet/.test(r.h) && r.t === "Accueil", JSON.stringify(r));
-      }
-      await d.p.goto(base + "/#carte"); await d.p.waitForSelector("#v-map", { state: "visible" });
-      await d.p.evaluate(() => { location.hash = "#carnet"; }); await d.p.waitForTimeout(500);
-      const rh = await d.p.evaluate(() => ({ home: document.getElementById("v-home").offsetParent !== null, log: document.getElementById("v-log").offsetParent !== null, h: location.hash, t: document.getElementById("topTitle").textContent, sub: document.getElementById("topSub").textContent }));
-      check("carnet masqué : #carnet saisi dans l'onglet ouvert renvoie à l'accueil, sans boucle", rh.home && !rh.log && !/carnet/.test(rh.h) && rh.t === "Accueil" && !/carnet/i.test(rh.sub), JSON.stringify(rh));
-      for (const [v, sel] of [["time", "#v-time"], ["map", "#v-map"], ["cl", "#v-cl"], ["ver", "#v-ver"], ["home", "#v-home"]]) {
-        if (["time", "map", "cl"].includes(v) && (await d.p.getAttribute("#loreBtn", "aria-expanded")) !== "true") await d.p.click("#loreBtn");
-        await d.p.click('.tab[data-v="' + v + '"]'); await d.p.waitForTimeout(150);
-        if (!(await d.p.isVisible(sel))) check("carnet masqué : onglet « " + v + " » affiché", false);
-      }
-      await d.p.waitForTimeout(600);
-      check("carnet masqué : toujours aucune requête /api/entries après navigation dans tous les onglets", d.api.length === 0, JSON.stringify(d.api));
-      check("carnet masqué : aucune erreur console ni violation CSP", d.err.length === 0 && (await d.p.evaluate(() => window.__csp)).length === 0, d.err.join(" | ") + JSON.stringify(await d.p.evaluate(() => window.__csp)));
-
-      /* 2. ?carnet=1 réactive, mémorise ; ?carnet=0 coupe */
-      await d.p.goto(base + "/?carnet=1"); await d.p.waitForSelector(".hm-banner"); await d.p.waitForTimeout(1000);
-      const f1 = await feat(d.p);
-      const on1 = await d.p.evaluate(() => ({ tab: document.querySelector('.tab[data-v="log"]').offsetParent !== null, side: document.querySelector(".side-card").offsetParent !== null, side2: document.getElementById("sideLogN").textContent,
-        card: document.querySelector('.hm-card[data-go="log"]').offsetParent !== null, cta: [...document.querySelectorAll(".hm-cta .cta")].filter(b => b.offsetParent !== null).map(b => b.textContent.trim()), h2: [...document.querySelectorAll(".hm-copy h2")].filter(h => h.offsetParent !== null).map(h => h.textContent) }));
-      check("?carnet=1 : réactive la navigation, le badge, la carte et le bouton d'accueil, et mémorise la valeur", f1.attr === "1" && f1.ls === "1" && on1.tab && on1.side && on1.card && on1.cta.length === 2 && /Démarrer une session/.test(on1.cta.join()) && /Consigner/.test(on1.h2.join()), JSON.stringify([f1, on1]));
-      check("?carnet=1 : le moteur du carnet se charge et interroge /api/entries", d.js.length >= 1 && d.api.length >= 1, JSON.stringify([d.api, d.js]));
-      await d.p.goto(base + "/"); await d.p.waitForSelector(".hm-banner");
-      check("?carnet=1 mémorisé : le carnet reste actif au rechargement sans paramètre", (await feat(d.p)).attr === "1");
-      await d.p.goto(base + "/#carnet"); await d.p.waitForSelector("#v-log", { state: "visible" });
-      check("carnet activé : #carnet ouvre le carnet", (await d.p.textContent("#topTitle")) === "Carnet de bord" && /carnet/.test(await d.p.evaluate(() => location.hash)));
-      await d.p.waitForFunction(() => /Enregistré sur le serveur/.test(document.getElementById("lgStore").textContent), null, { timeout: 5000 }).catch(() => {});
-      check("carnet activé : le moteur est démarré (stockage serveur détecté)", /Enregistré sur le serveur/.test(await d.p.textContent("#lgStore")));
-      const nApi = d.api.length;
-      await d.p.goto(base + "/?carnet=0"); await d.p.waitForSelector(".hm-banner"); await d.p.waitForTimeout(800);
-      const f2 = await feat(d.p);
-      check("?carnet=0 : coupe le carnet et efface la valeur mémorisée", f2.attr === null && f2.ls === null && f2.vis === 0, JSON.stringify(f2));
-      check("?carnet=0 : plus aucune requête /api/entries", d.api.length === nApi, JSON.stringify(d.api));
-      await d.p.goto(base + "/"); await d.p.waitForSelector(".hm-banner");
-      check("?carnet=0 mémorisé : le carnet reste masqué au rechargement sans paramètre", (await feat(d.p)).attr === null);
-      check("réactivation : aucune erreur console ni violation CSP", d.err.length === 0 && (await d.p.evaluate(() => window.__csp)).length === 0, d.err.join(" | "));
-      await d.c.close();
-
-      /* les données du carnet ne sont pas touchées par le masquage */
-      check("carnet masqué : l'API et les données sont conservées (les entrées de test sont toujours lisibles)", (await (await fetch(base + "/api/entries")).json()).length >= 1);
-
-      /* 3. mobile 390 x 844 : barre du bas à 3 boutons, par défaut puis activée */
-      const m = await fresh({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-      await m.p.goto(base + "/"); await m.p.waitForSelector(".hm-banner"); await m.p.waitForTimeout(500);
-      const bar = async (p) => p.evaluate(() => { const bs = [...document.querySelectorAll(".tabs > .tab, .tabs .lore-toggle")].filter(b => b.offsetParent !== null).map(b => { const r = b.getBoundingClientRect(); return { t: b.textContent.trim(), h: Math.round(r.height), w: Math.round(r.width), x: Math.round(r.left) }; });
-        return { bs, sw: document.documentElement.scrollWidth, side: getComputedStyle(document.querySelector(".sidebar")).position }; });
-      const b3 = await bar(m.p);
-      const ws = b3.bs.map(b => b.w);
-      check("mobile, carnet masqué : barre du bas à 3 boutons (Accueil, Lore, Versions)", b3.bs.length === 3 && b3.bs.map(b => b.t).join("|") === "Accueil|Lore|Versions", JSON.stringify(b3.bs));
-      check("mobile, carnet masqué : boutons >= 44 px, largeurs égales et barre qui occupe tout l'écran, sans défilement horizontal", b3.bs.every(b => b.h >= 44 && b.w >= 44) && Math.max(...ws) - Math.min(...ws) <= 2 && b3.bs[0].x <= 10 && b3.bs[2].x + b3.bs[2].w >= 380 && b3.sw <= 390, JSON.stringify(b3));
-      const mh = await m.p.evaluate(() => document.getElementById("v-home").innerText.replace(/\s+/g, " "));
-      check("mobile, carnet masqué : l'accueil ne parle pas du carnet", !/carnet|derni[eè]re activit|d[eé]marrer une session/i.test(mh), mh);
-      check("mobile, carnet masqué : le clavier n'atteint aucun élément du carnet", (await tabbed(m.p)).length === 0);
-      await m.p.goto(base + "/?carnet=1"); await m.p.waitForSelector(".hm-banner");
-      const b4 = await bar(m.p);
-      check("mobile, ?carnet=1 : barre du bas à 4 boutons", b4.bs.length === 4 && b4.bs.every(b => b.h >= 44), JSON.stringify(b4.bs));
-      check("mobile : aucune erreur console ni violation CSP", m.err.length === 0 && (await m.p.evaluate(() => window.__csp)).length === 0, m.err.join(" | "));
-      await m.c.close();
-    }
-
     await page.keyboard.press("Escape"); await page.mouse.click(700, 450).catch(() => {}); await page.waitForTimeout(300);
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
