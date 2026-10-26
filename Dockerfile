@@ -1,6 +1,6 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY server.js ./
+COPY server.js uex.js package.json ./
 COPY public ./public
 ENV PORT=8080 DATA_DIR=/data PUBLIC_DIR=/app/public
 USER 568:568

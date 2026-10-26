@@ -85,6 +85,10 @@ const send = (res, code, body, type, extra) => {
   res.end(body);
 };
 const json = (res, code, obj) => send(res, code, JSON.stringify(obj));
+/* données de marché UEX : facultatives, désactivées par défaut (UEX_ENABLED=1), cache sous DATA_DIR/uex-cache (voir uex.js) */
+let VERSION = "dev";
+try { VERSION = require("./package.json").version || VERSION; } catch (e) {}
+const uex = require("./uex.js")({ env: process.env, dataDir: DATA, version: VERSION, send });
 const ID = /^[A-Za-z0-9_-]{1,100}$/;
 const NUM = v => (typeof v === "number" && isFinite(v) ? v : 0);
 const STR = (v, n) => (typeof v === "string" ? v.slice(0, n) : "");
@@ -169,6 +173,8 @@ async function handle(req, res) {
   }
   if (!authorized(req)) return send(res, 401, "authentification requise", "text/plain; charset=utf-8", { "WWW-Authenticate": 'Basic realm="Orbital Services", charset="UTF-8"' });
 
+  if (p === "/api/uex" || p.startsWith("/api/uex/")) return uex.handle(req, res, p);
+
   if (p === "/api/entries" && req.method === "GET")
     return json(res, 200, Object.keys(entries).map(id => Object.assign({ id }, entries[id])));
   const m = /^\/api\/entries\/([^/]+)$/.exec(p);
@@ -225,6 +231,6 @@ const server = http.createServer(async (req, res) => {
 server.requestTimeout = 30000; server.headersTimeout = 15000; server.keepAliveTimeout = 5000;
 process.on("uncaughtException", e => console.error("exception non gérée :", (e && e.stack) || e));
 process.on("unhandledRejection", e => console.error("rejet non géré :", (e && e.stack) || e));
-const bye = () => { clearTimeout(timer); writeNow(); if (dirty) backupNow(); process.exit(0); };
+const bye = () => { uex.close(); clearTimeout(timer); writeNow(); if (dirty) backupNow(); process.exit(0); };
 process.on("SIGTERM", bye); process.on("SIGINT", bye);
-server.listen(PORT, () => console.log("Orbital Services en écoute sur :" + PORT + " — données : " + FILE + (AUTH_PASSWORD ? " — accès protégé" : "")));
+server.listen(PORT, () => console.log("Orbital Services en écoute sur :" + PORT + " — données : " + FILE + (AUTH_PASSWORD ? " — accès protégé" : "") + (uex.enabled ? " — données de marché UEX activées" : "")));

@@ -193,6 +193,11 @@ const JSONH = { "Content-Type": "application/json" };
     // bon mot de passe sur un serveur neuf
     const c = await startServer({ AUTH_PASSWORD: "secret" }); kids.push(c.child);
     check("bon mot de passe → 200", (await raw(c.port, "GET", "/", basic("secret"))).status === 200);
+    /* données de marché UEX : désactivées par défaut (le détail est dans tests/uex.js) */
+    const ux = await raw(c.port, "GET", "/api/uex/status", basic("secret")), ux2 = await raw(c.port, "GET", "/api/uex/commodities?x=1", basic("secret"));
+    check("UEX désactivé par défaut : /api/uex/status → enabled:false, autres routes /api/uex/* → 404 uex_disabled", ux.status === 200 && JSON.parse(ux.body).enabled === false && ux2.status === 404 && JSON.parse(ux2.body).error === "uex_disabled", ux.body + " " + ux2.status);
+    check("UEX désactivé : aucun dossier uex-cache créé dans les données", !fs.existsSync(path.join(c.data, "uex-cache")));
+    check("/api/uex/* est protégé par l'authentification de base (401 sans mot de passe, 200 avec)", (await raw(c.port, "GET", "/api/uex/status")).status === 401 && (await raw(c.port, "GET", "/api/uex/status", basic("secret"))).status === 200);
   } catch (e) {
     check("exécution des tests", false, e.stack);
   } finally {

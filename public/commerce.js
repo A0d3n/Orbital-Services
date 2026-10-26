@@ -1,7 +1,7 @@
 /* Onglet « Commerce » (#commerce) : outils de trade et résumé du journal.
    Lit les mêmes entrées que le carnet via window.OrbLog (carnet.js) et ouvre le même tiroir de simulation (window.OrbTrade.drawer),
    avec l'action finale « Ajouter au journal » qui enregistre directement une entrée « cargo ». Chargé après carnet.js.
-   Aucune requête de ce fichier : il ne fait que lire le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
+   Une seule requête : GET /api/uex/status (bloc « Données de marché »), à l'affichage de l'onglet ; le reste lit le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
 (function () {
 "use strict";
 var OT = window.OrbTrade, LG = window.OrbLog, view = document.getElementById("v-commerce");
@@ -81,6 +81,67 @@ function render(force) {
   $("cmAll").parentNode.hidden = !all.length;
 }
 
+/* ── données de marché (UEX, facultatif) : une seule requête GET /api/uex/status à chaque affichage de l'onglet (jamais de sondage),
+   aucune requête quand l'onglet n'est pas affiché ; le navigateur ne parle qu'à ce serveur (CSP inchangée). ── */
+var UEX_URL = "https://uexcorp.space", mkBusy = false;
+var UEX_LABELS = { commodities_prices_all: "Prix des marchandises", commodities: "Marchandises", terminals: "Terminaux", star_systems: "Systèmes stellaires", fuel_prices_all: "Prix du carburant",
+  refineries_yields: "Raffineries : rendements", refineries_methods: "Raffineries : méthodes", refineries_capacities: "Raffineries : capacités", vehicles: "Vaisseaux",
+  vehicles_purchases_prices_all: "Vaisseaux : prix d'achat", vehicles_rentals_prices_all: "Vaisseaux : prix de location", game_versions: "Version du jeu" };
+var UEX_ERR = { timeout: "délai dépassé", network: "réseau injoignable", denied: "accès refusé", rate_limited: "quota atteint", invalid_json: "réponse illisible", upstream_status: "réponse refusée",
+  too_big: "réponse trop volumineuse", invalid_data: "réponse illisible" };
+function ago(s) {
+  if (!(s >= 0)) return "";
+  if (s < 60) return "moins d'une minute";
+  if (s < 3600) return Math.floor(s / 60) + NB + "min";
+  if (s < 86400) return Math.floor(s / 3600) + NB + "h";
+  return Math.floor(s / 86400) + NB + "j";
+}
+function mkMsg(t) { $("cmMktMsg").textContent = t; }
+function mkShow(on, btn) { $("cmMktOn").hidden = !on; $("cmMktBtn").hidden = !btn; }
+function mkOff() {
+  mkMsg("Données de marché : désactivées. Pour les activer, voir la documentation (UEX_ENABLED=1)");
+  mkShow(false, false);
+}
+function mkErr() {
+  mkMsg("Données de marché : état indisponible pour le moment (le serveur ne répond pas). Les outils ci-dessus restent utilisables.");
+  mkShow(false, true);
+}
+function mkState(r) {
+  var c = "none", t = "pas encore récupérée";
+  if (r.state === "ok") { c = "ok"; t = r.age_s < 60 ? "à jour (à l'instant)" : "à jour il y a " + ago(r.age_s); }
+  else if (r.state === "stale") { c = "bad"; t = "ancienne (il y a " + ago(r.age_s) + ")"; }
+  else if (r.state === "error") { c = "bad"; t = "indisponible"; }
+  if (r.error && (r.state === "error" || r.state === "stale")) t += " : " + (UEX_ERR[r.error] || (/^http_(\d{3})$/.test(r.error) ? "erreur HTTP " + r.error.slice(5) : "erreur"));
+  return { c: c, t: t };
+}
+function mkOn(j) {
+  var head = $("cmMktHead"), ul = $("cmMktList");
+  mkMsg("Données de marché : activées. Elles ne sont récupérées qu'à la demande, puis gardées en cache sur le serveur.");
+  head.textContent = "";
+  var a = el("a", "cm-badge", "Powered by UEX"); a.href = UEX_URL; a.target = "_blank"; a.rel = "noopener noreferrer"; a.setAttribute("aria-label", "Powered by UEX Corp, site externe");
+  head.appendChild(a); head.appendChild(el("span", "cm-mkt-note", "Données communautaires, peuvent être inexactes"));
+  ul.textContent = "";
+  (j.resources || []).forEach(function (r) {
+    var li = el("li"), s = mkState(r);
+    li.appendChild(el("span", null, UEX_LABELS[r.resource] || String(r.resource)));
+    li.appendChild(el("span", "cm-st " + s.c, s.t));
+    ul.appendChild(li);
+  });
+  var g = j.game_version;
+  $("cmMktVer").textContent = g && g.live ? "Version du jeu connue d'UEX : " + g.live + (g.ptu ? " (PTU " + g.ptu + ")" : "") + "." : "";
+  mkShow(true, true);
+}
+function uexLoad() {
+  if (!shown() || mkBusy || typeof fetch !== "function") return;
+  mkBusy = true;
+  fetch("/api/uex/status", { headers: { Accept: "application/json" }, cache: "no-store" }).then(function (r) {
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error("http");
+    return r.json();
+  }).then(function (j) { if (j && j.enabled === true) mkOn(j); else mkOff(); })
+    .catch(mkErr).then(function () { mkBusy = false; });
+}
+
 /* tiroir : même tiroir que le carnet, action finale « Ajouter au journal » */
 function say(msg) {
   var p = $("cmStatus"); clearTimeout(flashT); p.textContent = "";
@@ -107,11 +168,12 @@ function onAdd(r, opener) {
 view.addEventListener("click", function (e) {
   var b = e.target.closest("#cmOpen,#cmCard,.cm-open");
   if (b) { openDrawer(b); return; }
+  if (e.target.closest("#cmMktBtn")) { uexLoad(); return; }
   if (e.target.closest("#cmAll")) LG.showType("cargo"); /* la navigation vers le carnet est faite par data-go (map.js) */
 });
 
 window.addEventListener("lg:update", function () { if (shown()) render(); });
 /* appelé par map.js à chaque affichage de l'onglet : résumé recalculé (la fenêtre de 30 jours avance) et stockage serveur relu */
-window.__orbCommerce = function () { render(true); LG.sync(); };
-if (shown()) render(true);
+window.__orbCommerce = function () { render(true); LG.sync(); uexLoad(); };
+if (shown()) { render(true); uexLoad(); }
 })();

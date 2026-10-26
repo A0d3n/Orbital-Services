@@ -68,3 +68,18 @@
   .cm-tools{grid-template-columns:minmax(0,1fr)}
   .cm-intro .cm-main{width:100%}
 }
+
+/* données de marché (UEX, facultatif) : bloc d'état et badge texte « Powered by UEX » */
+.cm-mkt .cm-h{margin-top:22px}
+.cm-mkt .cm-uex{margin:0 0 10px}
+.cm-mkt-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px}
+.cm-badge{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:7px;border:1px solid rgba(184,217,166,.5);background:rgba(184,217,166,.14);color:var(--sage);font:600 12px/1 var(--f-mono);letter-spacing:.06em;text-decoration:none}
+.cm-badge:hover{background:rgba(184,217,166,.26);color:#fff}
+.cm-mkt-note{font-size:12.5px;color:var(--ink-2)}
+.cm-mkt-list{list-style:none;margin:0 0 10px;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:8px}
+.cm-mkt-list li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:13px;color:var(--ink)}
+.cm-st{font:400 12px/1.4 var(--f-mono);color:var(--ink-2);text-align:right}
+.cm-st.ok{color:var(--sage)}
+.cm-st.bad{color:#ff8a8f}
+.cm-mkt-btn{margin-top:4px}
+@media (max-width:700px){.cm-mkt-list{grid-template-columns:minmax(0,1fr)}}

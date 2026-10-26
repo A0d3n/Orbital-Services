@@ -70,3 +70,55 @@ Toutes les réponses portent une `Content-Security-Policy` (scripts, styles, pol
 ## Cache hors ligne
 
 Le service worker nomme son cache `orbital-<version>` (la version de `package.json`, écrite dans `public/sw.js` par `npm run version`). À chaque nouvelle version, l'ancien cache est supprimé et le nouveau se remplit au premier chargement. Le cache d'exécution est plafonné à 150 entrées, et `commlinks.js` (1,3 Mo) n'est pas précaché : il est gardé après la première visite de l'onglet Comm-Links.
+
+## Données de marché UEX (optionnel)
+
+Fonction **désactivée par défaut**. Une fois activée, le serveur (jamais le navigateur) interroge l'API publique d'UEX Corp (https://uexcorp.space) pour récupérer des prix, terminaux, raffineries, carburant et vaisseaux. Elle sert de base aux futurs outils de l'onglet Commerce (Prix, Routes, Raffineries, Carburant, Vaisseaux). Pour l'instant, l'onglet Commerce n'affiche que l'état de ces données (bloc « Données de marché »), avec le badge « Powered by UEX ».
+
+### Activer
+
+1. Dans `docker-compose.yml`, décommentez `UEX_ENABLED: "1"` (les autres variables sont facultatives).
+2. Redémarrez l'application. Le journal indique « données de marché UEX activées ».
+3. Ouvrez l'onglet **Commerce** : le bloc « Données de marché » affiche le badge et l'état de chaque ressource. Au début, toutes sont « pas encore récupérée » : **rien n'est téléchargé tant qu'un outil ne demande pas la ressource** (pas de préchauffage). Pour essayer à la main : `http://IP-DU-NAS:9080/api/uex/status` puis `http://IP-DU-NAS:9080/api/uex/commodities`.
+
+Le conteneur doit pouvoir joindre `https://api.uexcorp.uk` (sortie HTTPS, DNS compris). Le mode `read_only: true` reste compatible : le cache est écrit dans le volume `/data` (`/data/uex-cache`).
+
+### Variables
+
+| Variable | Rôle | Défaut |
+|---|---|---|
+| `UEX_ENABLED` | `1` active la fonction ; toute autre valeur : aucune requête sortante, aucun dossier créé, `/api/uex/*` répond 404 | vide (désactivé) |
+| `UEX_KEY` | Clé d'API UEX (Bearer), facultative (créée dans « My Apps » sur uexcorp.space). Jamais renvoyée au navigateur, ni écrite dans les journaux | vide |
+| `UEX_BASE` | Adresse de l'API (change seulement pour des essais) | `https://api.uexcorp.uk/2.0` |
+| `UEX_CACHE_DIR` | Dossier du cache sur disque. À garder dans `/data` | `DATA_DIR/uex-cache` |
+| `UEX_MAX_PER_MINUTE` | Appels sortants par minute, tous types confondus (100 au maximum ; UEX en autorise 120) | `40` |
+| `UEX_TTL_SCALE` | Multiplicateur des durées de validité du cache (`2` : deux fois plus longues, donc deux fois moins d'appels) | `1` |
+| `UEX_TIMEOUT_MS` | Délai maximal d'un appel sortant | `20000` |
+
+### Ce que ça fait
+
+- **Appels sortants depuis le NAS** : un GET par ressource, sans paramètre, avec le `User-Agent` `OrbitalServices/<version> (+usage personnel)`. Liste fermée de 12 ressources (voir `docs/uex-api.md`).
+- **Durées de validité (TTL)** : prix et carburant 30 min, marchandises 1 h, terminaux et vaisseaux 12 h, systèmes, raffineries et version du jeu 1 jour. Quand une ressource est périmée, le serveur répond tout de suite avec l'ancienne version (marquée `stale`) et la renouvelle en arrière-plan.
+- **Quotas** : au plus `UEX_MAX_PER_MINUTE` appels par minute (file d'attente au-delà), un seul appel à la fois par ressource. En usage normal : quelques dizaines d'appels par jour au total.
+- **Pannes** : si UEX ne répond pas, répond mal ou si le quota est atteint, l'ancien cache est conservé, une ligne courte est écrite dans le journal et le serveur attend de plus en plus longtemps (30 s, 1 min, 2 min… jusqu'à 1 h) avant de réessayer cette ressource. Sans aucun cache, l'API répond 503 `uex_unavailable`.
+- **Authentification** : si `AUTH_PASSWORD` est défini, `/api/uex/*` est protégé comme le reste du site.
+
+### Conditions d'UEX à respecter
+
+- **Usage personnel et non commercial** uniquement. L'accès peut être restreint en cas d'abus : ne montez pas `UEX_MAX_PER_MINUTE` sans raison.
+- **Attribution** : le badge « Powered by UEX » (lien vers https://uexcorp.space) doit rester affiché ; c'est le cas dans l'onglet Commerce.
+- **Données communautaires** : saisies par des joueurs, elles peuvent être inexactes ou en retard. Aucune garantie.
+- **L'API peut changer ou disparaître** sans préavis.
+- **Ne pas redistribuer les données** : le cache n'est jamais dans git ni dans l'image Docker (`uex-cache` est dans le volume de données, hors des sauvegardes du carnet). Ne publiez pas le dossier `uex-cache`.
+
+### Vider le cache
+
+Arrêtez l'application, supprimez le contenu de `/mnt/POOL/apps/orbital-services/data/uex-cache/` (ou un seul fichier `<ressource>.json`), puis redémarrez. Les ressources supprimées seront récupérées de nouveau à la demande. Supprimer des fichiers pendant que l'application tourne n'a pas d'effet immédiat : le serveur garde aussi une copie en mémoire.
+
+### Dépannage
+
+- **Le bloc affiche « désactivées »** : `UEX_ENABLED` n'est pas à `"1"` (entre guillemets dans le YAML) ou l'application n'a pas été redémarrée.
+- **« indisponible » avec `network` ou `timeout`** (visible dans `/api/uex/status`) : le conteneur n'a pas d'accès à Internet (pare-feu, DNS, réseau du conteneur). Essayez depuis le NAS : `docker exec orbital-services wget -qO- https://api.uexcorp.uk/2.0/game_versions`. Un proxy n'est pas géré.
+- **`rate_limited` (HTTP 429) ou `denied`** : quota atteint ou accès restreint par UEX. Le serveur attend (jusqu'à 1 h) avant de réessayer ; baissez `UEX_MAX_PER_MINUTE` ou augmentez `UEX_TTL_SCALE`.
+- **UEX en panne** : l'application continue de fonctionner. Les données déjà en cache restent servies (marquées « ancienne »), les autres fonctions (carnet, carte, simulateur) ne sont pas touchées.
+- **Erreur d'écriture du cache** (`écriture du cache impossible`) : le dossier de données n'est pas inscriptible pour l'utilisateur 568 ; le cache reste alors seulement en mémoire.

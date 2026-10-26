@@ -77,7 +77,7 @@ const netOf = t => t.scu * t.sell - t.scu * t.buy - t.fees;
       check("aria-current=\"page\" sur « Commerce » et sur lui seul", (await page.getAttribute('.tab[data-v="commerce"]', "aria-current")) === "page" && (await page.locator('nav.tabs [aria-current="page"]').count()) === 1);
       check("barre du haut : titre « Commerce » (h1) et sous-titre", (await txt(page, "#topTitle")) === "Commerce" && (await page.evaluate(() => document.getElementById("topTitle").tagName)) === "H1" && (await txt(page, "#topSub")).length > 10);
       const h = await page.evaluate(() => ({ h1: document.querySelectorAll("h1").length, h2: [...document.querySelectorAll("#v-commerce h2")].map(x => x.textContent), h3: document.querySelectorAll("#v-commerce h3").length, h1in: !!document.querySelector("#v-commerce h1") }));
-      check("titres hiérarchisés : un seul h1 (page), h2 « Outils » et « Résumé du journal », h3 pour les cartes et panneaux", h.h1 === 1 && !h.h1in && h.h2.join() === "Outils,Résumé du journal" && h.h3 >= 8, JSON.stringify(h));
+      check("titres hiérarchisés : un seul h1 (page), h2 « Outils » et « Résumé du journal », h3 pour les cartes et panneaux", h.h1 === 1 && !h.h1in && h.h2.join() === "Outils,Données de marché,Résumé du journal" && h.h3 >= 8, JSON.stringify(h));
       await page.reload();
       await page.waitForSelector("#v-commerce", { state: "visible" });
       check("rechargement sur #commerce : l'onglet reste affiché et actif", (await page.getAttribute('.tab[data-v="commerce"]', "aria-current")) === "page");
@@ -107,8 +107,9 @@ const netOf = t => t.scu * t.sell - t.scu * t.buy - t.fees;
       const off = cards.filter(c => c.off);
       check("cinq cartes « bientôt » avec le texte « nécessitent les données de marché », sans aucun élément interactif", off.length === 5 && off.every(c => c.soon && c.why && c.inter === 0), JSON.stringify(off));
       check("la carte active (Simulateur) a un seul bouton et n'est pas marquée « bientôt »", cards[0].inter === 1 && !cards[0].soon && !cards[0].off);
-      check("aucun lien mort dans l'onglet (aucun a[href])", (await page.locator("#v-commerce a").count()) === 0);
-      check("mention « Données de marché : bientôt, via l'API publique d'UEX Corp » sans badge ni image", /Données de marché : bientôt, via l.API publique d.UEX Corp/.test(await txt(page, "#v-commerce .cm-uex")) && (await page.locator("#v-commerce img").count()) === 0);
+      check("aucun lien dans l'onglet quand les données de marché sont désactivées (aucun a[href])", (await page.locator("#v-commerce a").count()) === 0);
+      await page.waitForFunction(() => /désactivées/.test(document.getElementById("cmMktMsg").textContent));
+      check("données de marché désactivées : « Données de marché : désactivées. Pour les activer, voir la documentation (UEX_ENABLED=1) », sans badge ni image", (await txt(page, "#cmMktMsg")) === "Données de marché : désactivées. Pour les activer, voir la documentation (UEX_ENABLED=1)" && (await page.locator("#v-commerce img").count()) === 0 && (await page.isHidden("#cmMktOn")) && (await page.isHidden("#cmMktBtn")));
       const e = await txt(page, "#cm30");
       check("état vide : message et bouton « Calculer un trade »", /aucun trade/i.test(e) && (await page.locator("#cm30 button.cm-open").innerText()) === "Calculer un trade", e);
       check("état vide : « Voir tout le journal » masqué, liste des derniers trades vide", (await page.isHidden("#cmAll")) && (await page.locator("#cmLast table").count()) === 0);
@@ -284,13 +285,94 @@ const netOf = t => t.scu * t.sell - t.scu * t.buy - t.fees;
       const n0 = reqs.length; await page.waitForTimeout(1500);
       check("onglet Commerce non affiché (accueil) : aucune requête API supplémentaire en 1,5 s", reqs.length === n0, reqs.join(" ; "));
       await goTab(page, "commerce"); await page.waitForTimeout(600);
-      check("affichage de l'onglet : au plus une relecture du serveur (GET /api/entries)", reqs.length - n0 <= 1 && reqs.slice(n0).every(r => r === "GET /api/entries"), reqs.slice(n0).join(" ; "));
+      const shownReqs = reqs.slice(n0);
+      check("affichage de l'onglet : au plus une relecture du serveur (GET /api/entries) et une seule requête d'état GET /api/uex/status", shownReqs.filter(r => r === "GET /api/entries").length <= 1 && shownReqs.filter(r => r === "GET /api/uex/status").length === 1 && shownReqs.every(r => r === "GET /api/entries" || r === "GET /api/uex/status"), shownReqs.join(" ; "));
       const sw = fs.readFileSync(path.join(ROOT, "public", "sw.js"), "utf8");
       check("sw.js : commerce.js et commerce.css sont précachés", /CORE = \[[^\]]*"commerce\.js"/.test(sw) && /CORE = \[[^\]]*"commerce\.css"/.test(sw));
       const html = fs.readFileSync(path.join(ROOT, "public", "index.html"), "utf8");
       const seg = html.slice(html.indexOf('id="v-commerce"'), html.indexOf('id="v-time"'));
       check("index.html : aucun gestionnaire ni script en ligne dans l'onglet Commerce", seg.length > 500 && !/\son[a-z]+\s*=/.test(seg) && !/<script/.test(seg) && !/\sstyle\s*=/.test(seg));
       await ctx.close();
+    });
+
+    /* ───────── Données de marché (UEX, facultatif), avec un faux amont local ───────── */
+    await section("données de marché UEX", async () => {
+      const http = require("http");
+      const up = { hits: [], mode: "ok" };
+      up.server = http.createServer((rq, rs) => {
+        const m = /^\/2\.0\/([a-z_]+)$/.exec(rq.url); up.hits.push(rq.url);
+        if (up.mode !== "ok") { rs.writeHead(500, { "Content-Type": "application/json" }); return rs.end('{"status":"error","http_code":500}'); }
+        rs.writeHead(200, { "Content-Type": "application/json" });
+        rs.end(JSON.stringify({ status: "ok", http_code: 200, data: m && m[1] === "game_versions" ? { live: "9.9.9", ptu: "9.9.10" } : [{ id: 1, name: "Élément" }] }));
+      });
+      const upPort = await freePort(); await new Promise(r => up.server.listen(upPort, "127.0.0.1", r));
+      const upBase = "http://127.0.0.1:" + upPort + "/2.0";
+      const startSrv = async env => {
+        const p = await freePort(), d = fs.mkdtempSync(path.join(os.tmpdir(), "orbital-commerce-uex-"));
+        const c = spawn(process.execPath, [path.join(ROOT, "server.js")], { env: Object.assign({}, process.env, { PORT: String(p), DATA_DIR: d, UEX_ENABLED: "1", UEX_BASE: upBase }, env), stdio: "ignore" });
+        for (let i = 0; i < 60; i++) { try { if ((await fetch("http://127.0.0.1:" + p + "/healthz")).status) break; } catch (e) {} await new Promise(r => setTimeout(r, 100)); }
+        return { c, p, d, base: "http://127.0.0.1:" + p };
+      };
+      const srv = await startSrv({ UEX_TTL_SCALE: "0.0002", UEX_BACKOFF_BASE_MS: "100000" }); // prix 30 min × 0,0002 = 0,36 s
+      try {
+        // rien n'est préchauffé : on demande deux ressources, dont une sera périmée à l'affichage
+        await fetch(srv.base + "/api/uex/commodities_prices_all"); await fetch(srv.base + "/api/uex/game_versions");
+        up.hits.length = 0;
+        const { ctx, page } = await newPage();
+        const reqs = []; page.on("request", r => { const u = new URL(r.url()); if (u.pathname.startsWith("/api/uex")) reqs.push(r.method() + " " + u.pathname + u.search); });
+        await page.goto(srv.base + "/"); await page.waitForSelector(".hm-banner");
+        await page.waitForFunction(() => /serveur|local/.test(document.getElementById("lgStore").textContent));
+        await page.waitForTimeout(1200);
+        check("onglet Commerce non affiché : aucune requête /api/uex/*", reqs.length === 0, reqs.join(" ; "));
+        await goTab(page, "commerce"); await page.waitForSelector("#v-commerce", { state: "visible" });
+        await page.waitForFunction(() => !document.getElementById("cmMktOn").hidden);
+        check("affichage de l'onglet : une seule requête, GET /api/uex/status, sans paramètre", reqs.length === 1 && reqs[0] === "GET /api/uex/status", reqs.join(" ; "));
+        const badge = page.locator("#v-commerce a.cm-badge");
+        check("activé : badge texte « Powered by UEX » (un seul lien dans l'onglet), nom accessible « Powered by UEX Corp, site externe »", (await badge.count()) === 1 && (await badge.innerText()) === "Powered by UEX" && (await badge.getAttribute("aria-label")) === "Powered by UEX Corp, site externe" && (await page.locator("#v-commerce a").count()) === 1);
+        check("lien externe sûr : https://uexcorp.space, target=_blank, rel=\"noopener noreferrer\"", (await badge.getAttribute("href")) === "https://uexcorp.space" && (await badge.getAttribute("target")) === "_blank" && (await badge.getAttribute("rel")) === "noopener noreferrer");
+        check("mention « Données communautaires, peuvent être inexactes » et aucune image (pas de logo UEX)", /Données communautaires, peuvent être inexactes/.test(await txt(page, "#cmMktHead")) && (await page.locator("#v-commerce img").count()) === 0);
+        const rows = await page.evaluate(() => [...document.querySelectorAll("#cmMktList li")].map(li => li.textContent));
+        check("une ligne par ressource (12), état en texte : prix « ancienne » (TTL dépassé), autres « pas encore récupérée » sauf la version du jeu", rows.length === 12 && /Prix des marchandises.*ancienne \(il y a/.test(rows.join("|")) && rows.some(r => /Version du jeu/.test(r) && !/pas encore/.test(r)) && rows.filter(r => /pas encore récupérée/.test(r)).length === 10, rows.join(" | "));
+        check("version du jeu affichée d'après UEX", /Version du jeu connue d.UEX : 9\.9\.9 \(PTU 9\.9\.10\)/.test(await txt(page, "#cmMktVer")), await txt(page, "#cmMktVer"));
+        check("les six cartes restent inchangées (cinq « bientôt »)", (await page.locator("#v-commerce .cm-tool.off").count()) === 5 && (await page.locator("#v-commerce .cm-tool").count()) === 6);
+        check("bouton « Actualiser l'état » visible", (await page.locator("#cmMktBtn").innerText()) === "Actualiser l’état" && (await page.locator("#cmMktBtn").isVisible()));
+        await page.waitForTimeout(1000);
+        check("pas de sondage permanent : toujours une seule requête après 1 s", reqs.length === 1, reqs.join(" ; "));
+        const n1 = up.hits.length;
+        await page.click("#cmMktBtn"); await page.waitForTimeout(500);
+        check("« Actualiser l'état » : une nouvelle requête /api/uex/status, aucun appel amont déclenché", reqs.length === 2 && reqs[1] === "GET /api/uex/status" && up.hits.length === n1, reqs.join(" ; ") + " amont:" + (up.hits.length - n1));
+        await goTab(page, "log"); await page.waitForTimeout(400); const n2 = reqs.length;
+        await page.waitForTimeout(800);
+        check("onglet quitté : plus aucune requête /api/uex/*", reqs.length === n2);
+        await goTab(page, "commerce"); await page.waitForTimeout(500);
+        check("retour sur l'onglet : une requête d'état de plus", reqs.length === n2 + 1, reqs.join(" ; "));
+        // l'amont tombe : « ancienne … erreur » (cache gardé) et « indisponible » (sans cache)
+        up.mode = "fail"; await fetch(srv.base + "/api/uex/commodities_prices_all"); await new Promise(r => setTimeout(r, 400));
+        await fetch(srv.base + "/api/uex/vehicles");
+        await page.click("#cmMktBtn"); await page.waitForTimeout(500);
+        const rows2 = await page.evaluate(() => [...document.querySelectorAll("#cmMktList li")].map(li => li.textContent));
+        check("amont en panne : « ancienne … erreur HTTP 500 » (cache gardé) et « indisponible » (sans cache), jamais d'adresse ni de détail", rows2.some(r => /Prix des marchandises.*ancienne.*erreur HTTP 500/.test(r)) && rows2.some(r => /Vaisseaux.*indisponible/.test(r)) && !/127\.0\.0\.1|2\.0/.test(rows2.join()), rows2.join(" | "));
+        await page.setViewportSize({ width: 390, height: 844 }); await page.waitForTimeout(150);
+        check("mobile 390 px : pas de défilement horizontal, bouton visible", await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1) && (await page.locator("#cmMktBtn").isVisible()));
+        await ctx.close();
+
+        // serveur injoignable : message propre, le bouton permet de réessayer, pas d'erreur de console
+        const e0 = errors.length;
+        const { ctx: c2, page: p2 } = await newPage();
+        await p2.route("**/api/uex/status", r => r.abort("connectionrefused"));
+        await openCommerce(p2); await p2.waitForFunction(() => /indisponible/.test(document.getElementById("cmMktMsg").textContent));
+        check("serveur qui ne répond pas : message « état indisponible », bouton pour réessayer, pas de badge", /état indisponible/.test(await txt(p2, "#cmMktMsg")) && (await p2.locator("#cmMktBtn").isVisible()) && (await p2.locator("#v-commerce a").count()) === 0 && (await p2.isHidden("#cmMktOn")));
+        await p2.unroute("**/api/uex/status"); await p2.route("**/api/uex/status", r => r.fulfill({ status: 404, contentType: "application/json", body: '{"error":"uex_disabled"}' }));
+        await p2.click("#cmMktBtn"); await p2.waitForFunction(() => /désactivées/.test(document.getElementById("cmMktMsg").textContent));
+        check("réponse 404 (ancien serveur) : même message que « désactivées »", /désactivées.*UEX_ENABLED=1/.test(await txt(p2, "#cmMktMsg")) && (await p2.isHidden("#cmMktBtn")));
+        await p2.unroute("**/api/uex/status"); await p2.route("**/api/uex/status", r => r.fulfill({ status: 200, contentType: "application/json", body: "pas du json" }));
+        await p2.evaluate(() => { document.getElementById("cmMktBtn").hidden = false; }); await p2.click("#cmMktBtn");
+        await p2.waitForFunction(() => /indisponible/.test(document.getElementById("cmMktMsg").textContent));
+        check("réponse illisible : message d'état indisponible, sans exception", /état indisponible/.test(await txt(p2, "#cmMktMsg")));
+        await c2.close();
+        check("aucune erreur JavaScript ni violation CSP pendant ces essais (hors messages réseau du navigateur)", errors.length === e0, errors.slice(e0).join(" | "));
+        check("seul le serveur a parlé au faux amont, sans paramètre", up.hits.every(h => /^\/2\.0\/[a-z_]+$/.test(h)));
+      } finally { try { srv.c.kill(); } catch (e) {} up.server.close(); try { fs.rmSync(srv.d, { recursive: true, force: true }); } catch (e) {} }
     });
 
     check("aucune erreur de console, aucune violation de la politique de sécurité (CSP)", errors.length === 0, errors.join(" | "));

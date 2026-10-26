@@ -35,7 +35,7 @@ npx playwright install chromium
 npm test
 ```
 
-`npm test` lance neuf séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne), `tests/perf-images.js` (images de la chronologie, Comm-Links), `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne) et `tests/trade.js` (journal de trades : calculs exacts, tiroir, ajout au carnet, journal, statistiques Commerce, exports, imports, stockage local, CSP). `tests/commerce.js` couvre l’onglet Commerce : navigation latérale et barre du bas à 5 entrées, cartes « bientôt » non interactives, état vide, ajout via le tiroir (« Ajouter au journal »), résumé 30 jours et cinq derniers trades, mise à jour depuis le carnet, volet bas à 390 px, absence de requêtes inutiles, CSP. Les deux premières n’ouvrent pas de navigateur.
+`npm test` lance dix séries : `tests/data.js` (cohérence des données), `tests/server.js` (serveur et API), `tests/uex.js` (brique UEX avec faux serveur, sans navigateur ni Internet), `tests/smoke.js` (interface), `tests/search.js` (recherche globale), `tests/perf-fonts-sw.js` (polices locales, service worker hors ligne), `tests/perf-images.js` (images de la chronologie, Comm-Links), `tests/features.js` (carnet : édition, chronomètre, exports, imports ; mobile ; clavier ; hors ligne) et `tests/trade.js` (journal de trades : calculs exacts, tiroir, ajout au carnet, journal, statistiques Commerce, exports, imports, stockage local, CSP). `tests/commerce.js` couvre l’onglet Commerce : navigation latérale et barre du bas à 5 entrées, cartes « bientôt » non interactives, état vide, ajout via le tiroir (« Ajouter au journal »), résumé 30 jours et cinq derniers trades, mise à jour depuis le carnet, volet bas à 390 px, absence de requêtes inutiles, CSP. Les deux premières n’ouvrent pas de navigateur.
 
 Le test lance le serveur, ouvre chaque onglet dans Chromium et vérifie la carte, les liens entre onglets, le carnet, l'API et l'authentification. Il échoue s'il y a une erreur dans la console. Avec un Chromium déjà installé : `CHROMIUM_PATH=/chemin/vers/chromium npm test`.
 
@@ -50,3 +50,7 @@ npm run version -- sync                                                  # rense
 ```
 
 La commande met à jour `public/versions.js`, `package.json` et `package-lock.json` ; le test (`npm test`) vérifie que la dernière entrée correspond à la version de `package.json`. Le hash d'une entrée est ajouté par `sync` au commit suivant, puisqu'il n'existe pas avant le commit.
+
+## Données de marché UEX (optionnel)
+
+`uex.js` (racine, copié par le Dockerfile) est branché dans `server.js`. Désactivé par défaut (`UEX_ENABLED=1` pour l'activer) : le navigateur ne parle qu'à notre serveur, qui met en cache (mémoire + disque, dossier `DATA_DIR/uex-cache`, jamais dans git ni dans l'image) les ressources publiques d'UEX de sa liste blanche et les sert sous `/api/uex/<ressource>` ; `/api/uex/status` décrit l'état sans jamais appeler UEX. Détails, TTL et résultats du sondage : `docs/uex-api.md` ; activation, conditions d'usage et dépannage : `docs/deploiement.md`. Les tests (`tests/uex.js`) utilisent un faux serveur UEX local : aucun accès Internet.

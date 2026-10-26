@@ -168,7 +168,16 @@
           <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
         </li>
       </ul>
-      <p class="cm-uex">Données de marché : bientôt, via l’API publique d’UEX Corp.</p>
+      <section class="cm-mkt" id="cmMkt" aria-labelledby="cmMktT">
+        <h2 class="cm-h" id="cmMktT">Données de marché</h2>
+        <p class="cm-uex" id="cmMktMsg" role="status">Données de marché : vérification en cours…</p>
+        <div id="cmMktOn" hidden>
+          <p class="cm-mkt-head" id="cmMktHead"></p>
+          <ul class="cm-mkt-list" id="cmMktList" aria-label="État des données par ressource"></ul>
+          <p class="cm-hint" id="cmMktVer"></p>
+        </div>
+        <button type="button" class="btn cm-mkt-btn" id="cmMktBtn" hidden>Actualiser l’état</button>
+      </section>
 
       <h2 class="cm-h" id="cmSumT">Résumé du journal</h2>
       <div class="cm-two" role="group" aria-labelledby="cmSumT">

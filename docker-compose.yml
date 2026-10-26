@@ -21,6 +21,16 @@ services:
       # Pour protéger l'accès par mot de passe, décommentez ces deux lignes :
       # AUTH_USER: orbital
       # AUTH_PASSWORD: choisissez-un-mot-de-passe
+      #
+      # Données de marché UEX (facultatif, désactivé par défaut) : le serveur, pas le navigateur, interroge l'API publique
+      # d'UEX Corp (usage personnel non commercial) et garde le résultat dans /data/uex-cache (jamais dans l'image).
+      # Le conteneur doit pouvoir joindre https://api.uexcorp.uk. Voir docs/deploiement.md, section « Données de marché UEX ».
+      # UEX_ENABLED: "1"                       # active la fonction
+      # UEX_KEY: ""                            # clé API facultative (jamais renvoyée au navigateur ni écrite dans les journaux)
+      # UEX_CACHE_DIR: /data/uex-cache         # doit rester dans le volume /data (le reste est en lecture seule)
+      # UEX_MAX_PER_MINUTE: "40"               # appels sortants par minute (100 au maximum ; UEX en autorise 120)
+      # UEX_TIMEOUT_MS: "20000"                # délai d'un appel sortant
+      # UEX_TTL_SCALE: "1"                     # multiplicateur de la durée de validité du cache (2 = deux fois plus long)
     ports:
       - "9080:8080"                                 # accès : http://IP-DU-NAS:9080
     volumes:
