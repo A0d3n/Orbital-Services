@@ -57,10 +57,30 @@ SYS.forEach(function(s){
   s.g=g;s.h=h;s.c=c;s.t=t;s.dt=dt;
 });
 
+/* itinéraire (public/route.js) : calcul, section du panneau Filtres, tracé entre les liaisons et les systèmes */
+var RT=OrbRoute.init({
+  SYS:SYS,BY:BY,EDG:EDG,POS:POS,NS:NS,SP:SP,LINKED:LINKED,MIN:MIN,MAX:MAX,nodes:gN,root:$("#vwRail"),
+  norm:function(t){return norm(t)},
+  getYear:function(){return year},
+  getScale:function(){var r=svg.getBoundingClientRect();return r.width&&vb.w?r.width/vb.w:0},
+  isPlaying:function(){return playing},isMobile:function(){return isMobile()},
+  setYear:function(y){stop();setYear(y)},
+  render:function(){render()},
+  refresh:function(){syncHash();queueLabels()},
+  openRail:function(){setPanel("rail")},
+  goStep:function(id){
+    stop();sel=id;tabId=id;
+    if(isMobile())setPanel(null);
+    else if(matchMedia("(max-width:1099px)").matches)box.scrollIntoView({block:"nearest"});
+    render();centerOn(id);
+    if(isMobile())focusStop();
+  }
+});
+
 /* légende et dates clés */
 var OK=["hum","xian","banu","tev","van","out","con","none"];
 function icon(k){return '<svg viewBox="-8 -8 16 16" aria-hidden="true"><path class="ic'+(k==="con"?' ring':'')+'" style="--oc:var('+OW[k][1]+')" d="'+shapeD(SH[k],0,0,5.5)+'"/><circle class="icd" style="--oc:var('+OW[k][1]+')" r="1.7"/></svg>'}
-$("#mLegend").innerHTML='<h3>Légende</h3><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><div class="cols"><div><h4>Gouvernance</h4><ul>'+
+$("#mLegend").innerHTML='<h3>Légende</h3><p class="jp"><i></i>Point de saut</p><p class="jp"><i class="d"></i>Liaison déduite</p><p class="jp"><i class="rtl"></i>Itinéraire</p><div class="cols"><div><h4>Gouvernance</h4><ul>'+
   OK.map(function(k){return '<li>'+icon(k)+OW[k][0]+'</li>'}).join("")+'</ul></div></div><p class="jp" style="margin:.5rem 0 0"><span class="sw" style="--oc:var(--c-hum)"></span>Zone d’influence</p>';
 /* époques affichées en bandeau (années de début tirées des périodes de la chronologie) */
 var MERA=[[2100,"L’aube spatiale"],[2271,"L’expansion"],[2438,"Premiers contacts"],[2541,"Tevarin et Empire"],[2681,"L’ombre vanduul"],[2794,"Les temps modernes"],[2903,"Le présent"]];
@@ -97,7 +117,7 @@ function render(){
   $("#mKeys").querySelectorAll(".chip").forEach(function(c){c.setAttribute("aria-pressed",String(+c.dataset.y===year))});
   renderDetail();renderFeed();
   $("#vwSideN").textContent=sel&&BY[sel]?" · "+BY[sel].n:"";
-  queueLabels();announce();
+  RT.update();queueLabels();announce();
 }
 /* clavier : un seul arrêt de Tab sur la carte (tabindex itinérant), porté par le système sélectionné ou, à défaut, par le plus important */
 function syncStop(){
@@ -130,6 +150,7 @@ function renderDetail(){
   if(year<s.d){detail.innerHTML=h+'<p class="hint">Ce système n’est pas encore connu en '+year+'. Avancez jusqu’en '+s.d+'.</p>';return}
   var st=stateAt(s,year);
   h+='<span class="own" style="--oc:var('+OW[st[1]][1]+')"><i></i>'+OW[st[1]][0]+'</span><p class="note2">'+st[2]+'</p>';
+  h+='<div class="rt-act" role="group" aria-label="Itinéraire"><button type="button" class="btn" data-rt="de">Itinéraire depuis ici</button><button type="button" class="btn" data-rt="vers">Itinéraire jusqu’ici</button></div>';
   var now=[],later=[];
   s.p.forEach(function(p){
     var ev=p[1];
@@ -169,7 +190,7 @@ function renderFeed(){
 
 /* temps */
 function setYear(y){year=Math.max(MIN,Math.min(MAX,y));render()}
-function stop(){playing=false;$("#mPlayIcon").setAttribute("d","M4 2l10 6-10 6z");$("#mPlay").setAttribute("aria-label","Lecture")}
+function stop(){var was=playing;playing=false;if(was)RT.afterStop();$("#mPlayIcon").setAttribute("d","M4 2l10 6-10 6z");$("#mPlay").setAttribute("aria-label","Lecture")}
 var last=0,acc=0;
 function tick(t){
   if(!playing)return;
@@ -202,7 +223,7 @@ function pick(id,y){
 feed.addEventListener("click",function(ev){var b=ev.target.closest("button");if(b)pick(b.dataset.s,+b.dataset.y)});
 detail.addEventListener("click",function(ev){
   var b=ev.target.closest("button");if(!b)return;
-  if(b.dataset.clr){sel=null;setPanel(null);render();focusStop()}else if(b.dataset.s){sel=b.dataset.s;render();centerOn(sel)}else if(b.dataset.ty)toTimeline(+b.dataset.ty)
+  if(b.dataset.clr){sel=null;setPanel(null);render();focusStop()}else if(b.dataset.s){sel=b.dataset.s;render();centerOn(sel)}else if(b.dataset.ty)toTimeline(+b.dataset.ty);else if(b.dataset.rt)RT.fromFiche(b.dataset.rt,sel)
 });
 
 /* vue : zoom et déplacement */
@@ -231,7 +252,7 @@ function applyScale(){
     var rr=(s.mj?rs*1.3:rs)/sc;
     s.r=+rr.toFixed(2);drawShape(s);s.h.setAttribute("r",s.r);s.dt.setAttribute("r",(rr*.34).toFixed(2));
   });
-  labels();
+  RT.rescale(sc);labels();
 }
 /* étiquettes : on place les noms par ordre de priorité (sélection, survol, grands systèmes, nombre de liaisons). Chaque nom essaie dessous, dessus, à droite, à gauche ; il est masqué s’il recouvrirait un autre nom, le symbole d’un autre système ou une commande (zoom, panneaux). La sélection et le survol gardent toujours le leur (au meilleur emplacement). */
 var DEG={};EDG.forEach(function(e){DEG[e.a]=(DEG[e.a]||0)+1;DEG[e.b]=(DEG[e.b]||0)+1});
@@ -251,16 +272,16 @@ function labels(){
   lblRaf=0;
   var r=svg.getBoundingClientRect();if(!r.width||!vb.w)return;
   var sc=r.width/vb.w,fs=parseFloat(svg.style.getPropertyValue("--fs"))*sc||11,all=svg.classList.contains("all");
-  var obs=obstacles(r),syms=[],pos={},placed=[];
+  var obs=obstacles(r).concat(RT.boxes(sc,vb)),syms=[],pos={},placed=[];
   SYS.forEach(function(s){
     if(s.d>year)return;
     var q=(s.r||6)*sc*1.25+2,x=(POS[s.i][0]-vb.x)*sc,y=(POS[s.i][1]-vb.y)*sc;
     pos[s.i]=[x,y];syms.push([x-q,y-q,x+q,y+q,s.i]);
   });
   var order=BYPRIO.slice();
-  [hov,sel].forEach(function(id){if(id&&BY[id]){order=order.filter(function(s){return s.i!==id});order.unshift(BY[id])}});
+  RT.ids().concat([hov,sel]).forEach(function(id){if(id&&BY[id]){order=order.filter(function(s){return s.i!==id});order.unshift(BY[id])}}); /* l’itinéraire passe devant, puis le survol, puis la sélection */
   order.forEach(function(s){
-    var must=s.i===sel||s.i===hov,show=false;
+    var must=s.i===sel||s.i===hov||RT.has(s.i),show=false;
     if(s.d<=year&&(must||s.mj||all)){
       var P=pos[s.i],x=P[0],y=P[1],rr=(s.r||6)*sc,w=s.n.length*fs*.76+8,best=null,bc=1e12;
       for(var i=0;i<4;i++){
@@ -428,23 +449,25 @@ document.addEventListener("keydown",function(e){
   if(sel&&t&&t.closest&&t.closest("#mapsvg,.vw-side")){sel=null;render();focusStop()}
 });
 
-/* lien partageable : #carte/année/système, mis à jour en différé */
+/* lien partageable : #carte/année/système, avec en plus l’itinéraire s’il y en a un : #carte/2956/stanton?de=sol&vers=stanton (mis à jour en différé) */
 var hashTimer=0;
+function hashNow(){return "#carte/"+year+(sel?"/"+sel:"")+RT.query()}
 function syncHash(){
   if(!box.offsetParent)return;
   clearTimeout(hashTimer);
-  hashTimer=setTimeout(function(){if(!box.offsetParent)return;/* onglet quitté entre-temps : ne pas réécrire l'URL */try{history.replaceState(null,"","#carte/"+year+(sel?"/"+sel:""))}catch(e){}},250);
+  hashTimer=setTimeout(function(){if(!box.offsetParent)return;/* onglet quitté entre-temps : ne pas réécrire l'URL */try{history.replaceState(null,"",hashNow())}catch(e){}},250);
 }
 function readHash(h){
-  var a=h.split("/");
+  var q=h.indexOf("?"),a=(q<0?h:h.slice(0,q)).split("/");
   if(a[0]!=="#carte")return;
+  if(q>=0)RT.fromQuery(h.slice(q+1));
   var y=parseInt(a[1],10);
   if(y>=MIN&&y<=MAX)year=y;
   if(a[2]&&BY[a[2]])sel=a[2];
 }
 function say(msg){var el=$("#mLink");var old=el.textContent;el.textContent=msg;setTimeout(function(){el.textContent=old},1800)}
 $("#mLink").addEventListener("click",function(){
-  var url=location.href.split("#")[0]+"#carte/"+year+(sel?"/"+sel:"");
+  var url=location.href.split("#")[0]+hashNow();
   function fallback(){var t=document.createElement("textarea");t.value=url;t.setAttribute("readonly","");t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}t.remove();say(ok?"Lien copié":"Copie impossible")}
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(function(){say("Lien copié")},fallback);else fallback();
 });
@@ -518,7 +541,7 @@ svg.addEventListener("pointerleave",function(){hideTip();box.classList.remove("h
 
 /* aide clavier (texte masqué pour les lecteurs d’écran + « ? Aide clavier » dans les filtres) */
 (function(){
-  var K=[["Tab","entrer sur la carte (un seul arrêt)"],["Flèches","système voisin le plus proche, il est sélectionné"],["Entrée ou Espace","ouvrir la fiche"],["+ − (ou =)","zoom"],["0","vue d’ensemble"],["Maj + flèches","déplacer la carte"],["Échap","fermer la fiche"],["[ ] ou PageUp PageDown","changement précédent ou suivant dans le temps"],["Curseur Année","flèches, Début, Fin"]];
+  var K=[["Tab","entrer sur la carte (un seul arrêt)"],["Flèches","système voisin le plus proche, il est sélectionné"],["Entrée ou Espace","ouvrir la fiche"],["+ − (ou =)","zoom"],["0","vue d’ensemble"],["Maj + flèches","déplacer la carte"],["Échap","fermer la fiche"],["[ ] ou PageUp PageDown","changement précédent ou suivant dans le temps"],["Curseur Année","flèches, Début, Fin"],["Champs Itinéraire","↑ ↓ choisir un système, Entrée valider, Échap fermer la liste"]];
   var sr=document.createElement("p");sr.className="sr";sr.id="mapKeys";
   sr.textContent="Carte au clavier : Tab pour entrer sur la carte, flèches pour passer au système voisin, Entrée ou Espace pour ouvrir la fiche, plus et moins pour zoomer, zéro pour la vue d’ensemble, Maj et flèches pour déplacer la carte, Échap pour fermer la fiche. Les touches crochet ouvrant et crochet fermant, ou Page précédente et Page suivante, changent l’année. Hors de la carte, flèches gauche et droite aussi.";
   $("#mAnnounce").insertAdjacentElement("afterend",sr);
@@ -586,7 +609,7 @@ function show(v){
   $("#loreBtn").classList.toggle("on",lore);
   setLore(lore&&!matchMedia("(max-width:860px)").matches);
   if(!map)stop();
-  try{history.replaceState(null,"",map?"#carte/"+year+(sel?"/"+sel:""):VIEWS[v])}catch(e){}
+  try{history.replaceState(null,"",map?hashNow():VIEWS[v])}catch(e){}
   window.scrollTo(0,0);
   if(v==="time")window.dispatchEvent(new Event("scroll"));
   if(v==="cl"&&window.__orbCL)window.__orbCL();
@@ -646,10 +669,10 @@ document.addEventListener("click",function(e){
   n.hidden=false;
   n.querySelector("button").addEventListener("click",function(){toMap(last.s,last.y)});
 })();
-var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver","#commlinks":"cl"};readHash(HASH);show(R[HASH.split("/")[0]]||"home");
+var HASH=location.hash,R={"#carte":"map","#carnet":"log","#chronologie":"time","#versions":"ver","#commlinks":"cl"};readHash(HASH);show(R[HASH.split(/[\/?]/)[0]]||"home");
 /* un lien collé dans l’onglet déjà ouvert : on le suit sans recharger la page */
 addEventListener("hashchange",function(){
-  var k=R[location.hash.split("/")[0]];
+  var k=R[location.hash.split(/[\/?]/)[0]];
   if(!k)return;
   readHash(location.hash);show(k);if(k==="map"&&sel)centerOn(sel);
 });

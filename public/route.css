@@ -1,0 +1,77 @@
+/* Itinéraire du Star Viewer : section du panneau Filtres et tracé sur la carte (maquette docs/itineraire/A-panneau.html). */
+
+/* tracé : sauge épais avec halo, au-dessus des liaisons et sous les systèmes ; les largeurs restent fixes à l'écran */
+.rt-layer{pointer-events:none}
+.rt-h,.rt-l{fill:none;stroke:#b8d9a6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.rt-h{stroke-width:10px;opacity:.14}
+.rt-l{stroke-width:4px}
+.rt-l.ded{stroke-dasharray:9 6;stroke-linecap:butt}
+.rt-b circle{fill:#0b0d0c;stroke:#b8d9a6;stroke-width:1.6px}
+.rt-b text{font:500 10px var(--f-mono);fill:#b8d9a6;text-anchor:middle;dominant-baseline:central}
+.rt-t rect{fill:#b8d9a6}
+.rt-t text{font:500 9.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;fill:#0b0d0c;text-anchor:middle;dominant-baseline:central}
+.vw-stage .nd.onroute .c{stroke:#b8d9a6;stroke-width:2px}
+.vw-stage .nd.onroute.sel .c{stroke:#fff}
+.vw-stage .nd.onroute text{fill:#e7ebe8}
+.m-key .jp i.rtl{border-top:4px solid #b8d9a6;border-radius:2px}
+
+/* section Itinéraire */
+.rt-sec{margin-top:14px;padding-top:14px;border-top:1px solid #2a332d}
+.vw-rail .rt-sec h2{margin-top:0}
+.rt-f{position:relative;min-width:0}
+.rt-f+.rt-swap+.rt-f{margin-top:0}
+.rt-f label{display:block;margin:0 0 4px;font:400 10.5px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.vw-rail .rt-f input{height:40px;padding:0 10px;background:rgba(0,0,0,.35);border:1px solid var(--line-2);border-radius:9px;font:400 14px var(--f-body);color:var(--ink)}
+.vw-rail .rt-f input::placeholder{color:var(--dim)}
+.vw-rail .rt-f input:focus{outline:2px solid var(--sage);outline-offset:1px;border-color:var(--sage)}
+.vw-rail .rt-f input[aria-invalid="true"]{border-color:#e8895a}
+.rt-lb{list-style:none;margin:4px 0 0;padding:0;max-height:11rem;overflow:auto;border:1px solid var(--line-2);border-radius:9px;background:#0b0d0c;overscroll-behavior:contain}
+.rt-lb[hidden]{display:none}
+.rt-lb li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:0 8px;min-height:36px;padding:7px 10px;border-left:2px solid transparent;cursor:pointer;font-size:13.5px;line-height:1.3}
+.rt-lb li em{font:400 10.5px var(--f-mono);font-style:normal;color:var(--dim)}
+.rt-lb li[aria-selected="true"]{background:rgba(184,217,166,.11);border-left-color:var(--sage)}
+.rt-lb li:hover{background:rgba(255,255,255,.04)}
+.rt-lb li.none{color:var(--ink-2);cursor:default}
+.vw-rail .rt-sec .rt-swap{display:flex;margin:6px 0 6px auto;width:auto;min-width:0;height:34px;padding:0 10px;gap:6px;font-size:12px;color:var(--ink-2)}
+.rt-swap svg{width:14px;height:14px;fill:none;flex:none}
+.rt-stat{margin-top:12px;min-height:0}
+.rt-stat:focus{outline:none}
+.rt-sum{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.rt-sum .big{font:500 22px/1.15 var(--f-mono);color:var(--sage)}
+.rt-sum span{color:var(--ink-2);font-size:13px;overflow-wrap:anywhere}
+.rt-hint{margin:0;font-size:12.5px;color:var(--ink-2)}
+.rt-err{border:1px solid var(--line-2);border-left:3px solid #e8895a;border-radius:6px;padding:10px 12px;background:rgba(232,137,90,.06)}
+.rt-err b{display:block;font-size:14px;line-height:1.35;margin-bottom:2px;color:var(--ink);overflow-wrap:anywhere}
+.rt-err p{margin:0;color:var(--ink-2);font-size:12.5px;overflow-wrap:anywhere}
+.vw-rail .rt-sec .rt-cta{margin-top:10px;background:var(--sage);color:#0b0d0c;border-color:var(--sage)}
+.vw-rail .rt-sec .rt-cta:hover{color:#0b0d0c;filter:brightness(1.1)}
+.rt-steps{list-style:none;margin:10px 0 0;padding:0;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.rt-steps[hidden],.rt-note[hidden],.rt-clear[hidden]{display:none}
+.rt-steps li+li{border-top:1px solid var(--line)}
+.rt-stp{display:flex;align-items:center;gap:10px;width:100%;min-height:40px;padding:6px 10px;background:none;border:0;border-left:2px solid transparent;text-align:left;cursor:pointer;color:var(--ink);font:400 13.5px var(--f-body)}
+.rt-stp:hover{background:rgba(184,217,166,.07);border-left-color:var(--sage)}
+.rt-stp:focus-visible{outline:2px solid var(--sage);outline-offset:-2px}
+.rt-stp b{flex:none;width:22px;height:22px;border:1px solid var(--sage);border-radius:50%;display:grid;place-items:center;font:500 11px var(--f-mono);color:var(--sage)}
+.rt-stp .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}
+.rt-stp .sub{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center}
+.rt-ded{font:400 10px var(--f-mono);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border:1px dashed var(--line-2);padding:1px 5px;border-radius:3px;white-space:nowrap}
+.rt-stp small{font:400 10.5px var(--f-mono);color:var(--dim)}
+.rt-note{margin:8px 0 0;font-size:11.5px;color:var(--dim)}
+.vw-rail .rt-sec .rt-clear{margin-top:10px;height:36px;font-size:12.5px;color:var(--ink-2)}
+
+/* boutons de la fiche : « Itinéraire depuis ici » / « jusqu'ici » */
+.rt-act{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.vw-side .rt-act .btn{flex:1 1 auto;height:34px;min-width:0;padding:0 10px;font-size:12px;white-space:nowrap}
+
+@media (min-width:1100px){
+  .vw-rail{max-height:calc(100% - 32px);display:flex;flex-direction:column}
+  .vw-rail>.in{min-height:0;flex:1;overflow-y:auto;scrollbar-width:thin}
+}
+@media (max-width:700px){
+  .vw-rail .rt-f input{height:44px;font-size:16px}
+  .vw-rail .rt-sec .rt-swap,.vw-rail .rt-sec .rt-clear{height:44px}
+  .rt-stp{min-height:44px}
+  .vw-side .rt-act .btn{height:44px;font-size:13px}
+  .rt-lb li{min-height:44px;font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){.rt-layer *,.rt-stp,.rt-lb{transition:none;animation:none}}

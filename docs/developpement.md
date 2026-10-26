@@ -25,6 +25,7 @@
 | `carnet.js` | Carnet de bord (chronomètre, saisie, bilan, import Game.log) |
 | `home.js` | Accueil (dernière activité), page des versions et enregistrement du service worker |
 , `esc`, `escRe`, `norm`), chargé en premier |
+| `route.js`, `route.css` | Itinéraire entre deux systèmes du Star Viewer (plus court chemin en sauts à l’année affichée, tracé, lien `?de=&vers=`) |
 | `search.js`, `search.css` | Recherche globale (touche « / » ou loupe) : événements, systèmes, planètes, Comm-Links ; copie de lien |
 | `versions.js` | Historique des versions (une entrée par commit) |
 | `sw.js` | Mode hors ligne |

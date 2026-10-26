@@ -10,3 +10,4 @@ Maquettes autonomes (aucune dépendance). Mini-carte schématique : seules les a
   Avantages : réutilise la fiche et le volet bas existants, lecture des étapes la plus claire, peu de code carte. Risques : départ imposé par la fiche (inverser demande de changer de fiche), fonction cachée derrière la fiche.
 - **Recommandation** : A comme base (champs + liste, le plus simple et accessible), avec le geste de B en raccourci (« Itinéraire depuis ici » dans la fiche) ; la frise de C peut remplacer la liste d’étapes de A si les années d’ouverture sont fiables.
 - Taille des points de saut : donnée non disponible, simple ligne discrète dans A et C ; aucune distance ni durée.
+- **Implémenté le 26 octobre 2026** : option A (section dans le panneau Filtres) avec le raccourci « Itinéraire depuis ici / jusqu’ici » dans la fiche ; voir « Itinéraire entre deux systèmes » dans `docs/carte.md`.

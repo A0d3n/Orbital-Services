@@ -410,6 +410,178 @@ async function waitUp(port) {
     check("carte : « Découverte du système Tamsa » n'apparaît que pour Tamsa", /Tamsa/.test(await page.textContent("#mFeed")));
     await page.goto(base + "/#carte/2956/sol"); await page.waitForTimeout(600);
     check("carte : le fil de Sol n’affiche pas la découverte de Tamsa", !/Tamsa/.test(await page.textContent("#mFeed")));
+    /* itinéraire entre deux systèmes (panneau Filtres, tracé, lien, fiche, mobile) */
+    {
+      const D = await page.evaluate(() => ({ SYS: SYS.map(s => ({ i: s.i, n: s.n, d: s.d })), EL, SP, MIN, MAX }));
+      const dBy = {}; D.SYS.forEach(s => { dBy[s.i] = s; });
+      const dEdges = D.EL.map(p => { const sp = D.SP[p[0] + "-" + p[1]] || {}; return { a: p[0], b: p[1], y: sp.y || Math.max(dBy[p[0]].d, dBy[p[1]].d), u: sp.u || 0 }; });
+      /* calcul indépendant : distance par couches (nombre de liaisons actives), -1 si aucune route */
+      const refDist = (a, b, y) => {
+        const act = dEdges.filter(e => y >= e.y && (!e.u || y < e.u)), seen = new Set([a]); let front = [a];
+        for (let d = 0; front.length; d++) {
+          if (front.includes(b)) return d;
+          const nx = [];
+          act.forEach(e => { [[e.a, e.b], [e.b, e.a]].forEach(([p, q]) => { if (front.includes(p) && !seen.has(q)) { seen.add(q); nx.push(q); } }); });
+          front = nx;
+        }
+        return -1;
+      };
+      const refMin = (a, b) => { for (let y = D.MIN; y <= D.MAX; y++) if (refDist(a, b, y) > 0) return y; return 0; };
+      const stat = async (pg) => (await (pg || page).textContent("#rtStat")).replace(/\s+/g, " ").trim();
+      const setRt = async (de, vers, pg) => { pg = pg || page; for (const [id, v] of [["#rtDe", de], ["#rtVers", vers]]) { await pg.fill(id, v); await pg.press(id, "Enter"); } await pg.waitForTimeout(80); };
+      const nBadge = (pg) => (pg || page).locator(".rt-b").count();
+      const stepsTxt = (pg) => (pg || page).$$eval("#rtSteps .rt-stp .t > span:first-child", l => l.map(x => x.textContent));
+      const setYearUi = async (y) => { await page.fill("#mRange", String(y)); await page.waitForTimeout(80); };
+      const names = (sel) => page.$$eval(sel, l => l.map(x => x.textContent));
+
+      await page.goto(base + "/#carte/2956/stanton"); await page.waitForSelector(".nd.sel");
+      if (await page.isVisible("#rtClear")) await page.click("#rtClear");
+      check("itinéraire : section dans le panneau Filtres, ARIA des champs (combobox, autocomplete, expanded, listbox, status)", await page.evaluate(() => { const r = document.querySelector("#vwRail #rtSec"); return !!r && ["#rtDe", "#rtVers"].every(s => { const i = document.querySelector(s); return i.getAttribute("role") === "combobox" && i.getAttribute("aria-autocomplete") === "list" && i.getAttribute("aria-expanded") === "false" && document.getElementById(i.getAttribute("aria-controls")).getAttribute("role") === "listbox"; }) && document.querySelector("#rtStat").getAttribute("role") === "status" && document.querySelector("#rtStat").getAttribute("aria-live") === "polite"; }));
+      /* saisie clavier complète : « sol », ↓, Entrée puis « stan », ↓, Entrée */
+      await page.click("#rtDe"); await page.keyboard.type("sol");
+      check("itinéraire : la liste s'ouvre à la saisie (aria-expanded=true, options role=option)", (await page.getAttribute("#rtDe", "aria-expanded")) === "true" && (await page.locator("#rtDeL [role=option]").count()) >= 1);
+      await page.keyboard.press("ArrowDown");
+      const ad = await page.evaluate(() => { const i = document.querySelector("#rtDe"), o = document.getElementById(i.getAttribute("aria-activedescendant")); return o ? o.textContent + "|" + o.getAttribute("aria-selected") : ""; });
+      check("itinéraire : ↓ désigne une option (aria-activedescendant, aria-selected)", /^Sol/.test(ad) && /\|true$/.test(ad), ad);
+      await page.keyboard.press("Enter");
+      check("itinéraire : Entrée choisit l'option et ferme la liste", (await page.inputValue("#rtDe")) === "Sol" && (await page.getAttribute("#rtDe", "aria-expanded")) === "false");
+      await page.click("#rtVers"); await page.keyboard.type("stan"); await page.keyboard.press("ArrowDown"); await page.keyboard.press("Enter");
+      check("itinéraire : saisie « stan », ↓, Entrée → Stanton", (await page.inputValue("#rtVers")) === "Stanton");
+      check("itinéraire : Sol → Stanton en 2956 = 4 sauts (résumé dans la zone status)", (await stat()) === "4 sauts · Sol → Stanton · en 2956", await stat());
+      check("itinéraire : étapes Sol → Davien → Cano → Pyro → Stanton", JSON.stringify(await stepsTxt()) === JSON.stringify(["Sol → Davien", "Davien → Cano", "Cano → Pyro", "Pyro → Stanton"]), JSON.stringify(await stepsTxt()));
+      check("itinéraire : les étapes forment une liste ordonnée de boutons", await page.evaluate(() => !!document.querySelector("ol#rtSteps") && document.querySelectorAll("#rtSteps li > button").length === 4));
+      check("itinéraire : tracé dans le SVG (4 badges numérotés, repères « Départ » et « Arrivée » en texte)", (await nBadge()) === 4 && JSON.stringify(await names(".rt-b text")) === '["1","2","3","4"]' && JSON.stringify((await names(".rt-t text")).sort()) === '["Arrivée","Départ"]');
+      check("itinéraire : le trait est au-dessus des liaisons et sous les systèmes, badges et repères au-dessus (ordre des calques du SVG)", await page.evaluate(() => { const c = [...document.querySelector("#mapsvg").children], at = q => c.findIndex(x => x.matches(q) || x.querySelector(q) && !x.classList.contains("rt-layer")), e = c.findIndex(x => x.querySelector(".edge")), l = c.findIndex(x => x.matches(".rt-layer:not(.rt-top)")), n = c.findIndex(x => x.querySelector(".nd")), t = c.findIndex(x => x.matches(".rt-top")); return e >= 0 && e < l && l < n && n < t && t === c.length - 1 && at(".nd") === n; }));
+      check("itinéraire : les 5 systèmes de l'itinéraire gardent leur nom visible", (await page.locator(".nd.onroute.lbl").count()) === 5, String(await page.locator(".nd.onroute.lbl").count()));
+      check("itinéraire : calcul indépendant du test = 4 sauts", refDist("sol", "stanton", 2956) === 4);
+      await setRt("Sol", "Pyro");
+      check("itinéraire : Sol → Pyro en 2956 = 3 sauts", (await stat()) === "3 sauts · Sol → Pyro · en 2956" && refDist("sol", "pyro", 2956) === 3, await stat());
+      await setRt("Sol", "Hadur");
+      check("itinéraire : Sol → Hadur en 2956 = 7 sauts via Davien, Cano, Pyro, Hadrian, Kiel, Baker", /^7 sauts · Sol → Hadur/.test(await stat()) && JSON.stringify((await stepsTxt()).map(x => x.split(" → ")[1])) === JSON.stringify(["Davien", "Cano", "Pyro", "Hadrian", "Kiel", "Baker", "Hadur"]) && refDist("sol", "hadur", 2956) === 7 && (await nBadge()) === 7, await stat());
+      check("itinéraire : les noms des 8 systèmes de la route restent visibles", (await page.locator(".nd.onroute.lbl").count()) === 8);
+      await setRt("Croshaw", "Stanton");
+      check("itinéraire : Croshaw → Stanton en 2956 = 5 sauts (via Sol)", /^5 sauts · Croshaw → Stanton/.test(await stat()) && (await stepsTxt())[0] === "Croshaw → Sol" && refDist("croshaw", "stanton", 2956) === 5, await stat());
+      await setRt("Sol", "Stanton");
+      await page.click("#rtSwap");
+      check("itinéraire : ⇄ inverse départ et arrivée (Stanton → Sol, 4 sauts)", (await page.inputValue("#rtDe")) === "Stanton" && (await page.inputValue("#rtVers")) === "Sol" && (await stat()) === "4 sauts · Stanton → Sol · en 2956", await stat());
+      await page.click("#rtSwap");
+      await setRt("Sol", "Hadur");
+      check("itinéraire : les liaisons déduites ont le badge « liaison déduite » et un trait en pointillés (autant l'un que l'autre)", (await page.$$eval("#rtSteps .rt-ded", l => l.length)) === (await page.$$eval(".rt-l.ded", l => l.length)));
+      /* année : 2956 → 2900 → message → « Voir en » */
+      await setRt("Sol", "Stanton");
+      await setYearUi(2900);
+      const s2900 = await stat();
+      check("itinéraire : en 2900, Sol → Stanton = « Aucune route en 2900 » avec la raison (découvert en 2903)", /^Aucune route en 2900/.test(s2900) && /Stanton n’est découvert qu’en 2903/.test(s2900), s2900);
+      check("itinéraire : en 2900, le tracé disparaît (0 badge, 0 trait, 0 étape)", (await nBadge()) === 0 && (await page.locator(".rt-l").count()) === 0 && (await page.locator("#rtSteps li").count()) === 0);
+      const mY = refMin("sol", "stanton");
+      check("itinéraire : la plus petite année avec route (calcul indépendant) est 2903", mY === 2903, String(mY));
+      check("itinéraire : bouton « Voir en 2903 »", (await page.textContent("#rtCta button")).trim() === "Voir en " + mY);
+      await page.click("#rtCta button"); await page.waitForTimeout(150);
+      check("itinéraire : « Voir en 2903 » change l'année et trace la route", (await page.textContent("#mYear")) === String(mY) && /^\d+ sauts? · Sol → Stanton · en 2903$/.test(await stat()) && (await nBadge()) >= 1, await stat());
+      check("itinéraire : en 2903 le nombre de sauts = calcul indépendant", (await stat()).startsWith(refDist("sol", "stanton", 2903) + " saut"), await stat());
+      await page.focus("body"); await page.keyboard.press("]"); await page.waitForTimeout(200);
+      const yy = +(await page.textContent("#mYear"));
+      check("itinéraire : changer l'année au clavier (]) recalcule et met le résumé à jour", yy > 2903 && (await stat()).endsWith("en " + yy) && (await stat()).startsWith(refDist("sol", "stanton", yy) + " saut"), yy + " | " + (await stat()));
+      await setYearUi(2900);
+      await page.click("#rtVers"); await page.waitForTimeout(80);
+      const opts = await names("#rtVersL [role=option]");
+      check("itinéraire : les 90 systèmes sont proposés, ceux découverts plus tard portent « pas encore découvert en 2900 »", opts.length === D.SYS.length && opts.some(o => /^Stanton.*pas encore découvert en 2900/.test(o)) && !opts.some(o => /^Sol.*pas encore/.test(o)), opts.length + " " + opts.slice(0, 3).join("|"));
+      await page.keyboard.press("Escape");
+      check("itinéraire : Échap ferme la liste et rend la valeur précédente", (await page.getAttribute("#rtVers", "aria-expanded")) === "false" && (await page.inputValue("#rtVers")) === "Stanton");
+      await setYearUi(2956); await page.waitForTimeout(100);
+      /* accents et apostrophes */
+      await page.click("#rtVers"); await page.fill("#rtVers", "ELSIN");
+      const o1 = await names("#rtVersL [role=option] span");
+      await page.fill("#rtVers", "el'sin"); const o2 = await names("#rtVersL [role=option] span");
+      await page.fill("#rtVers", "k.apari"); const o3 = await names("#rtVersL [role=option] span");
+      check("itinéraire : recherche insensible à la casse et aux apostrophes (« ELSIN » et « el'sin » → El’sin ; « k.apari » → K.ap’a’ri)", o1[0] === "El’sin" && o2[0] === "El’sin" && o3[0] === "K.ap’a’ri", JSON.stringify([o1, o2, o3]));
+      await page.fill("#rtVers", "t.al"); const o5 = await names("#rtVersL [role=option] span");
+      check("itinéraire : « tal » trouve aussi les noms accentués (T.āl)", o5.includes("T.āl") || o5.some(x => /^T\./.test(x)), JSON.stringify(o5));
+      await page.press("#rtVers", "Escape");
+      /* erreurs */
+      await setRt("Sol", "Sol");
+      check("itinéraire : départ = arrivée → « Départ et arrivée sont identiques »", /Départ et arrivée sont identiques/.test(await stat()) && (await nBadge()) === 0, await stat());
+      await setRt("Sol", "Zorglub");
+      check("itinéraire : nom inconnu → message clair, champ marqué invalide, pas de tracé", /Système inconnu : « Zorglub »/.test(await stat()) && (await page.getAttribute("#rtVers", "aria-invalid")) === "true" && (await nBadge()) === 0, await stat());
+      await setRt("", "Stanton");
+      check("itinéraire : départ vide → « Choisissez un système de départ »", /Choisissez un système de départ/.test(await stat()), await stat());
+      await setRt("Sol", "Virgo");
+      check("itinéraire : Sol → Virgo = « Aucun point de saut publié pour Virgo »", /Aucun point de saut publié pour Virgo/.test(await stat()) && (await nBadge()) === 0, await stat());
+      /* effacement */
+      await setRt("Sol", "Stanton");
+      check("itinéraire : « Effacer l'itinéraire » visible quand un itinéraire existe", await page.isVisible("#rtClear"));
+      await page.click("#rtClear");
+      check("itinéraire : effacer vide les champs, la liste et le tracé", (await page.inputValue("#rtDe")) === "" && (await page.inputValue("#rtVers")) === "" && (await nBadge()) === 0 && (await page.locator(".rt-l").count()) === 0 && (await page.locator(".nd.onroute").count()) === 0 && !(await page.isVisible("#rtSteps")));
+      await setRt("Sol", "Pyro");
+      check("itinéraire : ligne discrète « Taille des points de saut : donnée non disponible »", (await page.textContent("#rtNote")).includes("Taille des points de saut : donnée non disponible") && (await page.isVisible("#rtNote")));
+      /* étape cliquée : sélectionne l'arrivée de l'étape */
+      await page.click("#rtSteps li:nth-child(2) button"); await page.waitForTimeout(150);
+      check("itinéraire : une étape cliquée sélectionne le système d'arrivée de l'étape (Cano) et garde le tracé", (await page.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === "cano" && (await nBadge()) === 3);
+      /* lien partageable */
+      await setRt("Sol", "Stanton"); await page.waitForTimeout(450);
+      const hsh = await page.evaluate(() => location.hash);
+      check("lien : le hash contient l'itinéraire (#carte/année/système?de=…&vers=…)", /^#carte\/2956\/cano\?de=sol&vers=stanton$/.test(hsh), hsh);
+      await page.evaluate(() => { window.__cp = ""; navigator.clipboard.writeText = t => { window.__cp = t; return Promise.resolve(); }; });
+      await page.click("#mLink"); await page.waitForTimeout(150);
+      check("lien : « Copier le lien » inclut l'itinéraire", /#carte\/2956\/cano\?de=sol&vers=stanton$/.test(await page.evaluate(() => window.__cp)), await page.evaluate(() => window.__cp));
+      const fp = await page.context().newPage();
+      fp.on("pageerror", e => errors.push("(lien) " + e.message));
+      fp.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push("(lien) " + m.text()); });
+      await fp.goto(base + "/#carte/2956/stanton?de=sol&vers=hadur"); await fp.waitForSelector(".nd.sel"); await fp.waitForTimeout(500);
+      check("lien : l'ouverture directe remplit les champs et trace la route (Sol → Hadur, 7 sauts)", (await fp.inputValue("#rtDe")) === "Sol" && (await fp.inputValue("#rtVers")) === "Hadur" && (await nBadge(fp)) === 7 && /^7 sauts/.test(await stat(fp)) && (await fp.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === "stanton", await stat(fp));
+      await fp.goto(base + "/#carte/2900?de=sol&vers=stanton"); await fp.waitForTimeout(400);
+      check("lien : un lien sans système (#carte/2900?de=…) fonctionne et affiche « Aucune route en 2900 »", (await fp.textContent("#mYear")) === "2900" && /Aucune route en 2900/.test(await stat(fp)));
+      const fp2 = await page.context().newPage();
+      fp2.on("pageerror", e => errors.push("(ancien lien) " + e.message));
+      await fp2.goto(base + "/#carte/2956/terra"); await fp2.waitForSelector(".nd.sel"); await fp2.waitForTimeout(500);
+      check("lien : un ancien lien #carte/2956/terra marche toujours (sans itinéraire)", (await fp2.evaluate(() => document.querySelector(".nd.sel").dataset.i)) === "terra" && (await fp2.textContent("#mYear")) === "2956" && (await nBadge(fp2)) === 0 && (await fp2.inputValue("#rtDe")) === "");
+      check("lien : l'adresse d'un lien sans itinéraire reste #carte/année/système", (await fp2.evaluate(() => location.hash)) === "#carte/2956/terra");
+      await fp2.goto(base + "/#carte/2956/terra?de=zzz&vers=sol"); await fp2.waitForTimeout(400);
+      check("lien : un identifiant inconnu dans le lien donne un message, sans erreur", /Système inconnu : « zzz »/.test(await stat(fp2)));
+      await fp.close(); await fp2.close();
+      /* boutons de la fiche */
+      await page.click("#rtClear"); await page.goto(base + "/#carte/2956/stanton"); await page.waitForTimeout(300);
+      await page.click('#mDetail [data-rt="de"]'); await page.waitForTimeout(150);
+      check("fiche : « Itinéraire depuis ici » remplit le départ et place le focus sur l'arrivée", (await page.inputValue("#rtDe")) === "Stanton" && (await page.evaluate(() => document.activeElement.id)) === "rtVers");
+      await page.keyboard.press("Escape");
+      await page.goto(base + "/#carte/2956/hadur"); await page.waitForTimeout(300);
+      await page.click('#mDetail [data-rt="vers"]'); await page.waitForTimeout(150);
+      check("fiche : « Itinéraire jusqu'ici » remplit l'arrivée et trace la route (Stanton → Hadur)", (await page.inputValue("#rtVers")) === "Hadur" && /^\d+ sauts? · Stanton → Hadur/.test(await stat()) && (await nBadge()) >= 1, await stat());
+      check("fiche : les deux boutons ont un nom accessible", await page.evaluate(() => ["de", "vers"].every(k => document.querySelector('#mDetail [data-rt="' + k + '"]').textContent.trim().length > 10)));
+      await page.click("#rtClear");
+
+      /* mobile : 390 x 844, tactile */
+      const mctx = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+      const mp = await mctx.newPage();
+      mp.on("pageerror", e => errors.push("(mobile) " + e.message));
+      mp.on("console", m => { if (m.type() === "error" && !/googleapis|gstatic|ERR_|net::|evt-/.test(m.text() + (m.location().url || ""))) errors.push("(mobile) " + m.text()); });
+      await mp.goto(base + "/#carte/2956/stanton"); await mp.waitForSelector(".nd.sel"); await mp.waitForTimeout(500);
+      await mp.tap("#vwTabRail"); await mp.waitForTimeout(300);
+      const sec = await mp.evaluate(() => { const i = document.querySelector("#vwRail .in"), s = document.querySelector("#rtSec"); i.scrollTop = s.offsetTop - 8; const r = s.getBoundingClientRect(); return { vis: r.height > 0 && r.top < innerHeight, sw: document.documentElement.scrollWidth, iw: innerWidth }; });
+      check("mobile : la section Itinéraire est atteignable dans le panneau Filtres, sans défilement horizontal", sec.vis && sec.sw <= sec.iw, JSON.stringify(sec));
+      await setRt("Sol", "Hadur", mp);
+      const mrt = await mp.evaluate(() => ({ n: document.querySelectorAll("#rtSteps li").length, small: [...document.querySelectorAll("#vwRail input,#vwRail .btn,#rtSteps button")].filter(e => e.offsetParent && e.getBoundingClientRect().height < 40).length, sw: document.documentElement.scrollWidth <= innerWidth }));
+      check("mobile : 7 étapes, cibles tactiles d'au moins 40 px, pas de défilement horizontal", mrt.n === 7 && mrt.small === 0 && mrt.sw, JSON.stringify(mrt));
+      await mp.evaluate(() => document.querySelector("#rtSteps li:nth-child(3)").scrollIntoView({ block: "center" }));
+      await mp.tap("#rtSteps li:nth-child(3) button"); await mp.waitForTimeout(500);
+      const mst = await mp.evaluate(() => { const g = document.querySelector(".nd.sel"), c = g.querySelector(".c").getBoundingClientRect(), s = document.getElementById("mapsvg").getBoundingClientRect(), v = document.getElementById("vwRail").getBoundingClientRect(); return { sel: g.dataset.i, railShown: v.height > 0, cx: (c.x + c.width / 2 - s.left) / s.width, cy: (c.y + c.height / 2 - s.top) / s.height, sw: document.documentElement.scrollWidth <= innerWidth }; });
+      check("mobile : une étape tapée ferme le panneau, sélectionne le système (Pyro) et le centre", mst.sel === "pyro" && !mst.railShown && mst.cx > 0.3 && mst.cx < 0.7 && mst.cy > 0.2 && mst.cy < 0.7 && mst.sw, JSON.stringify(mst));
+      await mp.tap("#vwTabSide"); await mp.waitForTimeout(300);
+      await mp.tap('#mDetail [data-rt="vers"]'); await mp.waitForTimeout(400);
+      check("mobile : « Itinéraire jusqu'ici » dans la fiche ouvre la section Itinéraire du panneau Filtres", (await mp.isVisible("#vwRail")) && (await mp.inputValue("#rtVers")) === "Pyro" && (await mp.isVisible("#rtH")), await mp.inputValue("#rtVers"));
+      await mctx.close();
+
+      /* CSP stricte : parcours d'un itinéraire sans violation */
+      const rctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+      await rctx.route(base + "/**", async route => { const resp = await route.fetch(); await route.fulfill({ response: resp, headers: Object.assign({}, resp.headers(), { "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://robertsspaceindustries.com https://*.robertsspaceindustries.com; connect-src 'self'; font-src 'self'; worker-src 'self'; object-src 'none'" }) }); });
+      await rctx.addInitScript(() => { window.__csp = []; document.addEventListener("securitypolicyviolation", e => window.__csp.push(e.violatedDirective + " " + e.blockedURI)); });
+      const rp = await rctx.newPage(); const rmsg = [];
+      rp.on("pageerror", e => rmsg.push(e.message)); rp.on("console", m => { if (/Content Security Policy|Refused to/i.test(m.text())) rmsg.push(m.text()); });
+      await rp.goto(base + "/#carte/2956/stanton?de=sol&vers=stanton"); await rp.waitForSelector(".nd.sel");
+      await rp.fill("#mRange", "2900"); await rp.click("#rtCta button"); await rp.click("#rtSwap"); await rp.click("#rtClear"); await rp.waitForTimeout(300);
+      check("itinéraire : aucune violation de la CSP stricte", (await rp.evaluate(() => window.__csp)).length === 0 && rmsg.length === 0, JSON.stringify(await rp.evaluate(() => window.__csp)) + rmsg.join("|"));
+      await rctx.close();
+    }
     await page.keyboard.press("Escape"); await page.mouse.click(700, 450).catch(() => {}); await page.waitForTimeout(300);
     check("aucune erreur dans la console", errors.length === 0, errors.join(" | "));
   } catch (e) {
