@@ -55,12 +55,14 @@ function ageLabel(s) {
   return "il y a " + Math.floor(s / 86400) + NB + "j";
 }
 /* fraîcheur d'une donnée : Frais ≤ 1 h, À vérifier ≤ 24 h, Périmé > 24 h ; date absente : « Date inconnue » (rangée avec les périmées) */
-function fresh(ageS) {
+/* lim : seuils en secondes [Frais, À vérifier] (défaut [3600, 86400] ; le module Raffineries, dont les données sont mensuelles, passe [7 j, 30 j]) */
+function fresh(ageS, lim) {
+  lim = lim || [3600, 86400];
   if (ageS == null || !(ageS >= 0)) return { c: "bad", l: "Date inconnue", s: "○" };
-  return ageS <= 3600 ? { c: "ok", l: "Frais", s: "●" } : ageS <= 86400 ? { c: "warn", l: "À vérifier", s: "◐" } : { c: "bad", l: "Périmé", s: "○" };
+  return ageS <= lim[0] ? { c: "ok", l: "Frais", s: "●" } : ageS <= lim[1] ? { c: "warn", l: "À vérifier", s: "◐" } : { c: "bad", l: "Périmé", s: "○" };
 }
-function pill(ageS) {
-  var f = fresh(ageS), p = el("span", "mk-f " + f.c);
+function pill(ageS, lim) {
+  var f = fresh(ageS, lim), p = el("span", "mk-f " + f.c);
   p.appendChild(at(el("span", null, f.s), { "aria-hidden": "true" })); p.appendChild(document.createTextNode(f.l));
   return p;
 }

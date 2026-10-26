@@ -2,8 +2,8 @@
    Même charte que le reste du site (variables de style.css, panneaux .pn, boutons .btn, badge .cm-badge de commerce.css) ; maquette docs/marche/A-sous-onglets.html. */
 .mk-h2{margin:0 0 4px;font:600 20px/1.25 var(--f-display);color:var(--ink)}
 .mk-h2:focus{outline:2px solid var(--sage);outline-offset:3px}
-#cmPanel-prix .lead,#cmPanel-routes .lead{margin:0 0 12px}
-#cmPanel-prix [hidden],#cmPanel-routes [hidden]{display:none!important}
+#cmPanel-prix .lead,#cmPanel-routes .lead,#cmPanel-raffineries .lead{margin:0 0 12px}
+#cmPanel-prix [hidden],#cmPanel-routes [hidden],#cmPanel-raffineries [hidden]{display:none!important}
 
 /* bandeau de fraîcheur */
 .mk-bn{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:10px 14px;margin:0 0 12px;border-radius:10px;border:1px solid rgba(184,217,166,.45);background:rgba(184,217,166,.08);color:#e3f2da;font-size:13.5px}
@@ -18,14 +18,14 @@
 .mk-fld select,.mk-fld input{width:100%;min-height:44px;background:var(--bg);color:var(--ink);border:1px solid var(--line-2);border-radius:10px;padding:0 12px;font:16px var(--f-body);color-scheme:dark}
 .mk-fld select:focus,.mk-fld input:focus{outline:2px solid var(--sage);outline-offset:1px}
 @media(min-width:700px){.mk-fld select,.mk-fld input{font-size:14px}}
-#cmPanel-prix .btn,#cmPanel-routes .btn{min-height:44px;height:auto;padding:0 18px}
+#cmPanel-prix .btn,#cmPanel-routes .btn,#cmPanel-raffineries .btn{min-height:44px;height:auto;padding:0 18px}
 
 /* disposition */
 .mk-stack{display:grid;gap:12px;min-width:0}
 .mk-split{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
 @media(min-width:1000px){.mk-split{grid-template-columns:17rem minmax(0,1fr)}}
 .mk-flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,10.5rem),1fr));gap:12px;align-items:end}
-#cmPanel-prix .pn,#cmPanel-routes .pn{padding:16px;border-radius:14px}
+#cmPanel-prix .pn,#cmPanel-routes .pn,#cmPanel-raffineries .pn{padding:16px;border-radius:14px}
 .mk-sum{margin:0;min-height:1.5em;color:var(--ink-2);font-size:13.5px}
 .mk-msg{margin:0;color:var(--sage);font-size:13px}
 .mk-msg:empty{display:none}
@@ -138,3 +138,80 @@
   #cmPanel-routes .mk-t td[data-l=""]{display:block;text-align:left}
   .rc-fm summary{width:100%}
 }
+
+/* ───────── module Raffineries (#commerce/raffineries) : matrice minerai × raffinerie, classement, méthodes, charge ───────── */
+.rf-warn{margin:0 0 12px;padding:10px 14px;border-radius:10px;border:1px solid rgba(232,196,106,.45);background:rgba(232,196,106,.06);color:#f3e2b3;font-size:13.5px}
+.rf-flt{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,11.5rem),1fr));gap:12px;align-items:start}
+.rf-chks,.rf-acts,.rf-flt>.rf-hint{grid-column:1/-1}
+.rf-acts{display:flex;flex-wrap:wrap;gap:8px 12px}
+.rf-hint{margin:6px 0 0;font-size:12.5px;color:var(--dim)}
+.rf-chk{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 4px;color:var(--ink);font-size:14px;cursor:pointer}
+.rf-chk input{width:22px;height:22px;min-height:0;flex:none;margin:0;accent-color:var(--sage)}
+.rf-chk:focus-within{outline:2px solid var(--sage);outline-offset:1px;border-radius:8px}
+#cmPanel-raffineries .pn h3,.rf-h3{margin:0 0 8px;font:600 16px/1.3 var(--f-body);color:var(--ink)}
+#cmPanel-raffineries .mk-tbh h3{margin:0}
+.rf-mat{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+.rf-mat>*,.rf-split>*{min-width:0}
+.rf-mat .mk-tbh{margin:0}
+.rf-split{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
+@media(min-width:1000px){.rf-split{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.rf-fm{margin:12px 0 0;color:var(--ink-2);font-size:13px}
+.rf-fm summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--ink)}
+.rf-fm summary:focus-visible{outline:2px solid var(--sage);outline-offset:2px;border-radius:6px}
+.rf-fm ul{margin:0 0 8px;padding-left:18px;display:grid;gap:6px}
+/* légende */
+.rf-lg{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12.5px;color:var(--ink-2)}
+.rf-lg li{display:flex;align-items:center;gap:6px}
+.rf-lg .rf-lgn{flex:1 1 100%;color:var(--dim)}
+.rf-sw{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid var(--line-2)}
+.rf-l3{background:rgba(184,217,166,.2)}.rf-l2{background:rgba(232,196,106,.14)}.rf-l1{background:rgba(255,138,143,.13)}
+/* matrice : défile DANS son cadre (jamais la page), en-têtes de colonnes et de lignes collants */
+.rf-sc{position:relative;max-width:100%;max-height:min(78vh,44rem);overflow:auto;overscroll-behavior:contain;border:1px solid var(--line);border-radius:10px}
+.rf-sc:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+.rf-t{border-collapse:separate;border-spacing:0;font-size:13.5px;width:max-content;min-width:100%}
+.rf-t th,.rf-t td{padding:6px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:left;vertical-align:top}
+.rf-t thead th{position:sticky;top:0;z-index:2;background:var(--panel);font:500 11px/1.4 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim);vertical-align:bottom;min-width:7.75rem}
+.rf-t thead th.rf-corner{left:0;z-index:4;min-width:9.5rem}
+.rf-t tbody th{position:sticky;left:0;z-index:1;background:var(--panel);font:600 14px var(--f-body);color:var(--ink);text-transform:none;letter-spacing:0;min-width:9.5rem}
+.rf-t th[aria-sort="ascending"],.rf-t th[aria-sort="descending"]{color:var(--sage)}
+.rf-t .mk-sb{white-space:normal;align-items:flex-start;padding:0;min-height:44px;text-align:left}
+.rf-hn{display:grid;gap:0;font-family:var(--f-body);text-transform:none;letter-spacing:0}
+.rf-hn b{font:600 13px/1.35 var(--f-body);color:var(--ink)}
+.rf-t .mk-sm{font:400 11.5px/1.4 var(--f-body);text-transform:none;letter-spacing:0}
+.rf-c{min-width:7.75rem;min-height:44px}
+.rf-c.rf-e{color:var(--dim);text-align:center;vertical-align:middle}
+.rf-c>*{display:block}
+.rf-v{font:600 15px/1.35 var(--f-body);font-variant-numeric:tabular-nums;color:var(--ink)}
+.rf-lv{font-size:12.5px;color:var(--ink)}
+.rf-bst{font:500 11.5px/1.5 var(--f-mono);color:var(--sage)}
+.rf-ex{font-weight:400;color:var(--ink-2)}
+.rf-pl{margin-top:2px;padding:0 7px;font-size:10.5px;width:max-content}
+/* cartes mobiles (sous 700 px elles remplacent la matrice) */
+.rf-cards{display:none;list-style:none;margin:0;padding:0;gap:8px}
+.rf-card{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.015)}
+#cmPanel-raffineries .rf-card .rf-ch{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:2px 10px;margin:0 0 8px;padding:0;font:600 15px/1.35 var(--f-body);letter-spacing:0;text-transform:none;color:var(--ink)}
+.rf-cl{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rf-ci,.rf-rl{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:4px 12px;padding:8px 10px;border-radius:8px;min-height:44px}
+.rf-cn{display:grid;gap:0;min-width:0}
+.rf-cv{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:2px 10px;text-align:right}
+.rf-cv .mk-ag{flex:1 1 100%;text-align:right}
+.rf-cv .rf-v{font-size:16px}
+.rf-rk{list-style:none;counter-reset:rk;margin:10px 0 0;padding:0;display:grid;gap:6px}
+.rf-rl{border:1px solid var(--line-2);display:grid;grid-template-columns:2rem minmax(8rem,1fr) minmax(0,1.6fr);align-items:start;gap:4px 8px;counter-increment:rk}
+.rf-rl::before{content:counter(rk);font:600 13px/1.6 var(--f-mono);color:var(--dim)}
+.rf-bsel{max-width:26rem}
+.rf-bars{display:inline-flex;gap:2px;vertical-align:middle;margin-right:6px}
+.rf-bars i{width:8px;height:10px;border-radius:2px;background:var(--line-2)}
+.rf-bars i.on{background:var(--sage)}
+.rf-lvl{display:inline-flex;align-items:center;white-space:nowrap}
+@media(max-width:699px){
+  .rf-sc{display:none}
+  .rf-cards{display:grid}
+  .rf-ci{flex-direction:column;align-items:stretch}
+  .rf-ci .rf-cv{justify-content:flex-start;text-align:left}
+  .rf-ci .rf-cv .mk-ag{text-align:left}
+  .rf-rl{grid-template-columns:2rem minmax(0,1fr)}
+  .rf-rl .rf-cv{grid-column:2;justify-content:flex-start;text-align:left}
+  .rf-rl .rf-cv .mk-ag{text-align:left}
+}
+@media(prefers-reduced-motion:reduce){.rf-sc{scroll-behavior:auto}}

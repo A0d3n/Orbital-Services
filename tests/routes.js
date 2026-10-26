@@ -192,7 +192,7 @@ async function startServer(env) {
       await open(page, on.base, "#commerce", false);
       await page.waitForFunction(() => /désactivées|activées|indisponible/.test(document.getElementById("cmMktMsg").textContent), null, { timeout: 5000 }).catch(() => {});
       const tabs = await page.evaluate(() => [...document.querySelectorAll("#cmTabs [role=tab]")].map(b => ({ t: b.textContent.replace(/\s+/g, " ").trim(), dis: b.getAttribute("aria-disabled"), ctl: b.getAttribute("aria-controls"), ti: b.tabIndex })));
-      check("onglet « Routes » actif (plus de « bientôt », pas aria-disabled, relié à son panneau) ; Raffineries, Carburant, Vaisseaux restent « bientôt » et désactivés", tabs[2].t === "Routes" && tabs[2].dis === null && tabs[2].ctl === "cmPanel-routes" && tabs.slice(3).every(t => t.dis === "true" && /bientôt/.test(t.t) && t.ctl === null), JSON.stringify(tabs));
+      check("onglet « Routes » actif (plus de « bientôt », pas aria-disabled, relié à son panneau) ; Raffineries est actif ; Carburant et Vaisseaux restent « bientôt » et désactivés", tabs[2].t === "Routes" && tabs[2].dis === null && tabs[2].ctl === "cmPanel-routes" && tabs[3].dis === null && tabs[3].ctl === "cmPanel-raffineries" && tabs.slice(4).every(t => t.dis === "true" && /bientôt/.test(t.t) && t.ctl === null), JSON.stringify(tabs));
       check("page par défaut : aucune requête sur les données de prix tant que Routes n'est pas ouvert", reqs.every(r => r === "status"), reqs.join());
       const card = await page.evaluate(() => { const li = [...document.querySelectorAll("#cmPanel-sim .cm-tool")].find(x => x.querySelector("h3").textContent === "Routes"); return { off: li.classList.contains("off"), soon: /bientôt/.test(li.textContent), href: li.querySelector("a") && li.querySelector("a").getAttribute("href") }; });
       check("carte « Routes » du tableau de bord : active, lien #commerce/routes, plus « bientôt »", !card.off && !card.soon && card.href === "#commerce/routes", JSON.stringify(card));
@@ -208,9 +208,11 @@ async function startServer(env) {
       check("bloc « Formules utilisées » repliable (details fermé) avec toutes les formules et la règle de stock", f.d === "DETAILS" && !f.open && f.sum === "Formules utilisées" && /Bénéfice par SCU = prix de vente − prix d’achat/.test(f.t) && /Bénéfice total = revenu − investissement/.test(f.t) && /ROI = \(prix de vente − prix d’achat\) ÷ prix d’achat/.test(f.t) && /Investissement = prix d’achat × SCU utilisés/.test(f.t) && /Revenu = prix de vente × SCU utilisés/.test(f.t) && /arrondi à l’entier inférieur/.test(f.t) && /règle prudente/.test(f.t), f.t.slice(0, 80));
       await page.click("#rcFm summary"); check("le clic sur « Formules utilisées » déplie le bloc", await page.evaluate(() => document.getElementById("rcFm").open));
       await page.keyboard.press("Tab");
-      // navigation clavier : flèche droite depuis Routes saute les onglets « bientôt »
+      // navigation clavier : flèche droite depuis Routes mène à Raffineries (actif) puis, en sautant les onglets « bientôt », revient à « Simulateur & journal »
       await page.focus("#cmTab-routes"); await page.keyboard.press("ArrowRight"); await page.waitForTimeout(150);
-      check("flèche droite depuis Routes : les onglets « bientôt » sont sautés (retour à « Simulateur & journal »)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-sim" && (await hashOf(page)) === "#commerce");
+      check("flèche droite depuis Routes : Raffineries (onglet actif)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-raffineries");
+      await page.keyboard.press("ArrowRight"); await page.waitForTimeout(150);
+      check("flèche droite depuis Raffineries : les onglets « bientôt » sont sautés (retour à « Simulateur & journal »)", (await page.evaluate(() => document.activeElement.id)) === "cmTab-sim" && (await hashOf(page)) === "#commerce");
       await page.goBack().catch(() => {}); await ctx.close();
     });
 

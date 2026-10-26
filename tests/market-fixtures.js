@@ -113,4 +113,40 @@ function bigRoutesData() {
   rows.forEach((p, i) => { p.id = i + 1; p.commodity_name = cn[p.id_commodity]; p.terminal_name = tn[p.id_terminal]; });
   return { commodities_prices_all: rows, commodities: coms, terminals: terms, star_systems: RSYS, game_versions: { live: "9.9.9", ptu: "9.9.10" } };
 }
-module.exports = { T0, DATA, systems, terminals, commodities, prices, ROUTES_DATA, bigRoutesData };
+/* ───────── Raffineries (tests/refineries.js) : jeu FABRIQUÉ, formes de refineries_yields / methods / capacities observées (docs/uex-api.md, « Raffineries : sens des données »), valeurs inventées.
+   Raffineries : Alpha, Bravo, Formule (Système X), Charlie, Delta (Système Y), Écho (Système Z, AUCUNE donnée), Fantôme (terminal absent de « terminals », nom pris dans les lignes de rendement).
+   Le drapeau is_refinery est volontairement incohérent (Bravo à 0, boutique à 1) : seule le type « refinery » compte.
+   value = dernier, value_week = 7 jours, value_month = 30 jours (bonus de rendement relatif en %, signé). Âges relatifs à T0 (Frais ≤ 7 j, À vérifier ≤ 30 j, Périmé au-delà). */
+const days = d => d * 86400;
+const FSYS = [{ id: 1, name: "Système X", code: "SX", is_available_live: 1 }, { id: 2, name: "Système Y", code: "SY", is_available_live: 1 }, { id: 3, name: "Système Z", code: "SZ", is_available_live: 1 }];
+const FT = (id, name, nick, sys, type, flag) => ({ id, name, fullname: name, displayname: nick, nickname: nick, type, star_system_name: sys, planet_name: null, space_station_name: null, city_name: null, is_refinery: flag, max_container_size: 32, screenshot: "https://exemple.invalid/x.jpg" });
+const FTERMS = [FT(501, "Refinement Center - Alpha", "Alpha", "Système X", "refinery", 1), FT(502, "Refinement Center - Bravo", "Bravo", "Système X", "refinery", 0),
+  FT(503, "Refinement Processing - Charlie", "Charlie", "Système Y", "refinery", 1), FT(504, "Refinement Processing - Delta", "Delta", "Système Y", "refinery", 1),
+  FT(505, "Refinement Processing - Écho", "Écho", "Système Z", "refinery", 1), FT(506, "Refinement Processing - =Formule", "=Formule", "Système X", "refinery", 1),
+  FT(507, "Boutique - Zéro", "Zéro", "Système X", "commodity", 1)];
+const FC = (id, name, code, slug, refinable) => ({ id, name, code, slug, kind: "Métal", weight_scu: 1, price_buy: 0, price_sell: 0, is_illegal: 0, is_raw: 1, is_refined: 0, is_refinable: refinable, is_extractable: 1 });
+const FCOMS = [FC(1, "Alphite (Minerai)", "ALPH", "alphite", 1), FC(2, "Bêtarite (Minerai)", "BETA", "betarite", 1), FC(3, "Gammanium", "GAMM", "gammanium", 1), FC(4, "Deltium", "DELT", "deltium", 1),
+  FC(5, "Epsilium", "EPSI", "epsilium", 1), FC(6, "Zêtanite", "ZETA", "zetanite", 1), FC(7, "=Formule (Minerai)", "FORM", "formule", 1), FC(8, "Hexite", "HEXI", "hexite", 1),
+  FC(9, "Glace (Brut)", "GLAC", "glace", 0), FC(10, "Carburant X", "CARX", "carburant-x", 0)];
+const FY = (com, term, v, w, m, age, extra) => Object.assign({ id: 0, id_commodity: com, id_terminal: term, id_report: 1, value: v, value_week: w, value_month: m, date_added: 1700000000, date_modified: ago(days(age)),
+  commodity_name: "", star_system_name: "", terminal_name: "" }, extra || {});
+const FYIELDS = [
+  FY(1, 501, 10, 8, 6, 1), FY(1, 502, -3, -3, -4, 3), FY(1, 503, 10, 7, 6, 20), FY(1, 504, 2, 2, 2, 50), FY(1, 506, 4, 4, 4, 1),
+  FY(2, 501, -9, -9, -9, 1), FY(2, 502, 0, 0, 0, 2), FY(2, 503, 5, 5, 5, 2), FY(2, 504, -1, -1, -1, 10),
+  FY(3, 501, 3, 3, 3, 1), FY(3, 504, 3, 3, 3, 5), FY(3, 502, null, null, null, 1), FY(3, 999, 1, 1, 1, 2, { terminal_name: "Refinement Processing - Fantôme", star_system_name: "Système Y" }),
+  FY(5, 503, 7, 7, 7, 1),
+  FY(6, 501, 4, 4, 4, 2), FY(6, 502, 4, 4, 4, 2), FY(6, 503, 4, 4, 4, 2), FY(6, 504, 4, 4, 4, 2), FY(6, 506, 4, 4, 4, 2),
+  FY(7, 501, 12, 12, 12, 1), FY(7, 502, -8, -8, -8, 1), FY(7, 506, 12, 12, 12, 4),
+  FY(8, 501, 5, 5, null, 1), FY(8, 502, 2, 2, 2, 1, { date_modified: 0 }), // date inconnue
+  FY(9, 504, 9, 9, 9, 1), FY(9, 506, 1, 1, 1, 1),
+  FY(99, 501, 1, 1, 1, 1, { commodity_name: "Orphelin (Minerai)" })
+];
+const tnm = {}; FTERMS.forEach(t => { tnm[t.id] = t.name; }); const cnm = {}; FCOMS.forEach(c => { cnm[c.id] = c.name; });
+FYIELDS.forEach((y, i) => { y.id = i + 1; if (!y.terminal_name) y.terminal_name = tnm[y.id_terminal]; if (!y.commodity_name) y.commodity_name = cnm[y.id_commodity]; if (!y.star_system_name) { const t = FTERMS.find(x => x.id === y.id_terminal); y.star_system_name = t ? t.star_system_name : ""; } });
+const FCAP = (term, v, w, m, age) => ({ id: 0, id_terminal: term, id_report: 1, value: v, value_week: w, value_month: m, date_added: 1700000000, date_modified: ago(days(age)), terminal_name: tnm[term], star_system_name: "" });
+const FCAPS = [FCAP(501, 95, 95, 95, 1), FCAP(502, 8, 9, 10, 3), FCAP(503, 1075, 1075, 1075, 20), FCAP(504, 420, 420, 420, 50), FCAP(506, 20, 20, 20, 1)];
+FCAPS.forEach((c, i) => { c.id = i + 1; });
+const FMETH = [{ id: 1, name: "Cormack", code: "COR", rating_yield: 1, rating_cost: 2, rating_speed: 3, date_added: 1700000000 }, { id: 2, name: "Électro-synthèse", code: "EST", rating_yield: 3, rating_cost: 1, rating_speed: 1, date_added: 1700000000 },
+  { id: 3, name: "Gaskin", code: "GAS", rating_yield: 2, rating_cost: 3, rating_speed: 3, date_added: 1700000000 }, { id: 4, name: "Méthode invalide", code: "BAD", rating_yield: 0, rating_cost: 5, rating_speed: 2, date_added: 1700000000 }];
+const REFINERIES_DATA = { refineries_yields: FYIELDS, refineries_methods: FMETH, refineries_capacities: FCAPS, commodities: FCOMS, terminals: FTERMS, star_systems: FSYS, game_versions: { live: "9.9.9", ptu: "9.9.10" } };
+module.exports = { T0, DATA, systems, terminals, commodities, prices, ROUTES_DATA, bigRoutesData, REFINERIES_DATA };

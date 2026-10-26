@@ -129,14 +129,14 @@
           <button type="button" role="tab" class="cm-tab" id="cmTab-sim" data-mod="sim" aria-selected="true" aria-controls="cmPanel-sim">Simulateur &amp; journal</button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-prix" data-mod="prix" aria-selected="false" aria-controls="cmPanel-prix" tabindex="-1">Prix</button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-routes" data-mod="routes" aria-selected="false" aria-controls="cmPanel-routes" tabindex="-1">Routes</button>
-          <button type="button" role="tab" class="cm-tab" id="cmTab-raffineries" data-mod="raffineries" aria-selected="false" aria-disabled="true" tabindex="-1">Raffineries <small class="cm-soon">bientôt</small></button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-raffineries" data-mod="raffineries" aria-selected="false" aria-controls="cmPanel-raffineries" tabindex="-1">Raffineries</button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-carburant" data-mod="carburant" aria-selected="false" aria-disabled="true" tabindex="-1">Carburant <small class="cm-soon">bientôt</small></button>
           <button type="button" role="tab" class="cm-tab" id="cmTab-vaisseaux" data-mod="vaisseaux" aria-selected="false" aria-disabled="true" tabindex="-1">Vaisseaux <small class="cm-soon">bientôt</small></button>
         </div>
       </div>
       <div id="cmPanel-sim" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-sim" tabindex="-1">
       <div class="cm-intro">
-        <p class="lead">Vos outils de commerce, regroupés en modules : choisissez un onglet ci-dessus. Le simulateur de trade, les prix des marchandises et les routes commerciales sont disponibles ; les autres modules s’ajouteront ici.</p>
+        <p class="lead">Vos outils de commerce, regroupés en modules : choisissez un onglet ci-dessus. Le simulateur de trade, les prix des marchandises, les routes commerciales et les raffineries sont disponibles ; les autres modules s’ajouteront ici.</p>
         <button type="button" class="btn play cm-main" id="cmOpen" aria-haspopup="dialog">Calculer un trade</button>
       </div>
       <p class="cm-flash" id="cmStatus" role="status"></p>
@@ -161,11 +161,11 @@
           <p>Trouver les routes de trade les plus rentables, calculées à partir des prix communautaires UEX.</p>
           <a class="btn cm-card-btn" href="#commerce/routes">Ouvrir les routes</a>
         </li>
-        <li class="cm-tool off">
-          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span><span class="pill s">bientôt</span></div>
+        <li class="cm-tool on">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></span></div>
           <h3>Raffineries</h3>
-          <p>Comparer les raffineries et leurs méthodes.</p>
-          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
+          <p>Comparer le rendement des raffineries par minerai, trouver la meilleure et consulter les méthodes (données communautaires UEX).</p>
+          <a class="btn cm-card-btn" href="#commerce/raffineries">Ouvrir les raffineries</a>
         </li>
         <li class="cm-tool off">
           <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 01-12 0c0-4.5 6-11 6-11z"/></svg></span><span class="pill s">bientôt</span></div>
@@ -220,6 +220,15 @@
         <div id="rcWrap" aria-busy="false">
           <div id="rcState" hidden></div>
           <div id="rcMain" class="mk-stack" hidden></div>
+        </div>
+      </div>
+      <div id="cmPanel-raffineries" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-raffineries" tabindex="-1" hidden>
+        <h2 class="mk-h2" id="rfTitle" tabindex="-1">Raffineries</h2>
+        <p class="lead">Bonus de rendement du raffinage par minerai et par raffinerie, meilleure raffinerie pour un minerai, méthodes de raffinage et charge des raffineries. Données communautaires fournies par UEX.</p>
+        <div id="rfBanner"></div>
+        <div id="rfWrap" aria-busy="false">
+          <div id="rfState" hidden></div>
+          <div id="rfMain" class="mk-stack" hidden></div>
         </div>
       </div>
     </section>
@@ -544,6 +553,7 @@
 <script src="carnet.js"></script>
 <script src="market.js"></script>
 <script src="routes.js"></script>
+<script src="refineries.js"></script>
 <script src="commerce.js"></script>
 
 <script src="versions.js"></script>

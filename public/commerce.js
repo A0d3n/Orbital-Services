@@ -1,7 +1,7 @@
 /* Onglet « Commerce » (#commerce) : outils de trade et résumé du journal.
    Lit les mêmes entrées que le carnet via window.OrbLog (carnet.js) et ouvre le même tiroir de simulation (window.OrbTrade.drawer),
    avec l'action finale « Ajouter au journal » qui enregistre directement une entrée « cargo ». Chargé après carnet.js.
-   Sous-onglets (Simulateur & journal, Prix, Routes ; les autres « bientôt ») : voir la fin du fichier. Le module Prix est dans market.js (window.OrbMarket.prix), le module Routes dans routes.js (window.OrbMarket.routes).
+   Sous-onglets (Simulateur & journal, Prix, Routes, Raffineries ; Carburant et Vaisseaux « bientôt ») : voir la fin du fichier. Le module Prix est dans market.js (window.OrbMarket.prix), le module Routes dans routes.js (window.OrbMarket.routes), le module Raffineries dans refineries.js (window.OrbMarket.refineries).
    Page par défaut (Simulateur & journal) : une seule requête, GET /api/uex/status (bloc « Données de marché »), à l'affichage du sous-onglet ; aucune requête quand il n'est pas affiché ; le reste lit le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
 (function () {
 "use strict";
@@ -177,13 +177,14 @@ view.addEventListener("click", function (e) {
 
 window.addEventListener("lg:update", function () { if (shown() && cur === "sim") render(); });
 
-/* ── sous-onglets : #commerce (Simulateur & journal, par défaut), #commerce/prix[?m=<marchandise>], #commerce/routes[?b=&s=&m=&de=&vers=&roi=&f=&l=&x=] ; Raffineries, Carburant et Vaisseaux sont « bientôt » (aria-disabled, aucun lien).
+/* ── sous-onglets : #commerce (Simulateur & journal, par défaut), #commerce/prix[?m=<marchandise>], #commerce/routes[?b=&s=&m=&de=&vers=&roi=&f=&l=&x=], #commerce/raffineries[?v=&s=&q=&tous=&m=&lt=&ct=] ; Carburant et Vaisseaux sont « bientôt » (aria-disabled, aucun lien).
    Un hash inconnu ou non livré ramène au défaut sans erreur. Les panneaux restent dans la page (état conservé en revenant). ── */
-var READY = { sim: 1, prix: 1, routes: 1 }, SUB = { sim: "Vos outils de trade et le résumé de votre journal.", prix: "Prix par marchandise : où acheter, où vendre (données communautaires UEX).", routes: "Routes commerciales calculées localement à partir des prix UEX (estimations)." };
+var READY = { sim: 1, prix: 1, routes: 1, raffineries: 1 }, SUB = { sim: "Vos outils de trade et le résumé de votre journal.", prix: "Prix par marchandise : où acheter, où vendre (données communautaires UEX).", routes: "Routes commerciales calculées localement à partir des prix UEX (estimations).", raffineries: "Rendement du raffinage par minerai et par raffinerie, méthodes de raffinage (données communautaires UEX)." };
 var tabBtns = [].slice.call(view.querySelectorAll("#cmTabs [role=tab]")), cur = null, last = "sim", pendTab = false, pendT = 0;
 function MK() { return window.OrbMarket && window.OrbMarket.prix; }
 function RK() { return window.OrbMarket && window.OrbMarket.routes; }
-function MOD(id) { return id === "prix" ? MK() : id === "routes" ? RK() : null; } /* modules de marché : open(q), set(q), close(), query(), title() */
+function RF() { return window.OrbMarket && window.OrbMarket.refineries; }
+function MOD(id) { return id === "prix" ? MK() : id === "routes" ? RK() : id === "raffineries" ? RF() : null; } /* modules de marché : open(q), set(q), close(), query(), title() */
 function dec(s) { try { return decodeURIComponent(s); } catch (e) { return s; } }
 function parse(h) {
   h = String(h || "");
