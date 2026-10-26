@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="route.css">
 <link rel="stylesheet" href="trade.css">
 <link rel="stylesheet" href="commerce.css">
+<link rel="stylesheet" href="market.css">
 <script src="search.js" defer></script>
 </head>
 <body>
@@ -123,8 +124,19 @@
 
   <div id="v-commerce" hidden>
     <section class="page-pad cm" aria-label="Commerce">
+      <div class="cm-tabs-w">
+        <div class="cm-tabs" role="tablist" aria-label="Modules du Commerce" id="cmTabs">
+          <button type="button" role="tab" class="cm-tab" id="cmTab-sim" data-mod="sim" aria-selected="true" aria-controls="cmPanel-sim">Simulateur &amp; journal</button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-prix" data-mod="prix" aria-selected="false" aria-controls="cmPanel-prix" tabindex="-1">Prix</button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-routes" data-mod="routes" aria-selected="false" aria-disabled="true" tabindex="-1">Routes <small class="cm-soon">bientôt</small></button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-raffineries" data-mod="raffineries" aria-selected="false" aria-disabled="true" tabindex="-1">Raffineries <small class="cm-soon">bientôt</small></button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-carburant" data-mod="carburant" aria-selected="false" aria-disabled="true" tabindex="-1">Carburant <small class="cm-soon">bientôt</small></button>
+          <button type="button" role="tab" class="cm-tab" id="cmTab-vaisseaux" data-mod="vaisseaux" aria-selected="false" aria-disabled="true" tabindex="-1">Vaisseaux <small class="cm-soon">bientôt</small></button>
+        </div>
+      </div>
+      <div id="cmPanel-sim" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-sim" tabindex="-1">
       <div class="cm-intro">
-        <p class="lead">Un point d’entrée pour vos outils de commerce. Un seul est disponible pour l’instant : le simulateur de trade ; les autres s’ajouteront ici.</p>
+        <p class="lead">Vos outils de commerce, regroupés en modules : choisissez un onglet ci-dessus. Le simulateur de trade et les prix des marchandises sont disponibles ; les autres modules s’ajouteront ici.</p>
         <button type="button" class="btn play cm-main" id="cmOpen" aria-haspopup="dialog">Calculer un trade</button>
       </div>
       <p class="cm-flash" id="cmStatus" role="status"></p>
@@ -137,16 +149,16 @@
           <p>Calculez bénéfice net, ROI et marge d’un trade à partir de votre saisie, puis gardez-le dans le journal.</p>
           <button type="button" class="btn cm-card-btn" id="cmCard" aria-haspopup="dialog">Ouvrir le simulateur</button>
         </li>
+        <li class="cm-tool on">
+          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span></div>
+          <h3>Prix</h3>
+          <p>Consulter les prix par marchandise : où l’acheter, où la vendre (données communautaires UEX).</p>
+          <a class="btn cm-card-btn" href="#commerce/prix">Ouvrir les prix</a>
+        </li>
         <li class="cm-tool off">
           <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 000-6h-4a3 3 0 010-6h6"/></svg></span><span class="pill s">bientôt</span></div>
           <h3>Routes</h3>
           <p>Comparer des itinéraires de trade entre deux lieux.</p>
-          <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
-        </li>
-        <li class="cm-tool off">
-          <div class="cm-top"><span class="cm-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="pill s">bientôt</span></div>
-          <h3>Prix</h3>
-          <p>Consulter les prix par marchandise et par lieu.</p>
           <p class="cm-why">Nécessite les données de marché, étape ultérieure.</p>
         </li>
         <li class="cm-tool off">
@@ -190,6 +202,16 @@
           <div id="cmLast"></div>
           <p class="cm-more"><button type="button" class="btn" id="cmAll" data-go="log">Voir tout le journal</button></p>
         </section>
+      </div>
+      </div>
+      <div id="cmPanel-prix" class="cm-panel" role="tabpanel" aria-labelledby="cmTab-prix" tabindex="-1" hidden>
+        <h2 class="mk-h2" id="mkTitle" tabindex="-1">Prix des marchandises</h2>
+        <p class="lead">Choisissez une marchandise pour voir où l’acheter et où la vendre. Prix en aUEC par SCU, saisis par des joueurs et fournis par UEX.</p>
+        <div id="mkBanner"></div>
+        <div id="mkWrap" aria-busy="false">
+          <div id="mkState" hidden></div>
+          <div id="mkMain" hidden></div>
+        </div>
       </div>
     </section>
   </div>
@@ -511,6 +533,7 @@
 
 <script src="trade.js"></script>
 <script src="carnet.js"></script>
+<script src="market.js"></script>
 <script src="commerce.js"></script>
 
 <script src="versions.js"></script>

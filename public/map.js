@@ -610,11 +610,11 @@ function show(v){
   $("#loreBtn").classList.toggle("on",lore);
   setLore(lore&&!matchMedia("(max-width:860px)").matches);
   if(!map)stop();
-  try{history.replaceState(null,"",map?hashNow():VIEWS[v])}catch(e){}
+  try{history.replaceState(null,"",map?hashNow():v==="commerce"&&/^#commerce(?=$|[/?])/.test(location.hash)?location.hash:VIEWS[v])}catch(e){}/* #commerce/<module> : le sous-onglet est gardé (commerce.js) */
   window.scrollTo(0,0);
   if(v==="time")window.dispatchEvent(new Event("scroll"));
   if(v==="cl"&&window.__orbCL)window.__orbCL();
-  if(v==="commerce"&&window.__orbCommerce)window.__orbCommerce();
+  if(v==="commerce"&&window.__orbCommerce)window.__orbCommerce(location.hash,false);
   if(map){fit();render();pinchHint()}
 }
 tabs.forEach(function(t){t.addEventListener("click",function(){show(t.dataset.v)})});
@@ -676,6 +676,7 @@ var HASH=location.hash,R={"#carte":"map","#carnet":"log","#commerce":"commerce",
 addEventListener("hashchange",function(){
   var k=R[location.hash.split(/[\/?]/)[0]];
   if(!k)return;
+  if(k==="commerce"&&!document.getElementById("v-commerce").hidden&&window.__orbCommerce){window.__orbCommerce(location.hash,true);return}/* déjà sur Commerce : changement de sous-onglet, sans recharger la vue */
   readHash(location.hash);show(k);if(k==="map"&&sel)centerOn(sel);
 });
 })();

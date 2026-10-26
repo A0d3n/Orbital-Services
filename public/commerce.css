@@ -8,6 +8,20 @@
 .cm-flash{margin:0 0 12px;padding:10px 14px;border-radius:9px;border:1px solid rgba(184,217,166,.45);background:rgba(184,217,166,.08);color:#e3f2da;font-size:13.5px}
 .cm-flash:empty{margin:0;padding:0;border:0;height:0;overflow:hidden}
 
+/* sous-onglets du Commerce (role=tablist) : la barre défile horizontalement dans son conteneur, la page ne déborde jamais */
+.cm-tabs-w{min-width:0;max-width:100%;margin:0 0 14px;border-bottom:1px solid var(--line)}
+.cm-tabs{display:flex;gap:4px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;max-width:100%}
+.cm-tab{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;margin:0;background:none;border:0;border-bottom:2px solid transparent;border-radius:0;color:var(--ink-2);font:500 14px/1 var(--f-body);white-space:nowrap;cursor:pointer}
+.cm-tab:hover{color:var(--ink)}
+.cm-tab[aria-selected="true"]{color:var(--sage);border-bottom-color:var(--sage)}
+.cm-tab[aria-disabled="true"]{color:var(--dim);cursor:not-allowed}
+.cm-tab[aria-disabled="true"]:hover{color:var(--dim)}
+.cm-tab:focus-visible{outline:2px solid var(--sage);outline-offset:-3px;border-radius:6px}
+.cm-soon{padding:1px 7px;border:1px solid var(--line-2);border-radius:99px;font:500 10.5px/1.5 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.cm-panel{min-width:0}
+.cm-panel:focus{outline:none}
+.cm-panel[hidden]{display:none}
+
 /* titres de blocs (h2) */
 .cm-h{margin:22px 0 10px;font:500 11px/1.5 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sage)}
 .cm h3:focus{outline:2px solid var(--sage);outline-offset:3px}
@@ -25,6 +39,8 @@
 .cm-tool.on .cm-ic{border-color:rgba(184,217,166,.5);background:rgba(184,217,166,.1);color:var(--sage)}
 .cm-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5}
 .cm-card-btn{justify-self:start;margin-top:4px}
+a.cm-card-btn{text-decoration:none;color:var(--ink)}
+a.cm-card-btn:hover{color:#fff}
 .cm-uex{margin:12px 0 0;font:400 12.5px/1.5 var(--f-mono);color:var(--ink-2)}
 
 /* résumé : 30 derniers jours (étroit) et derniers trades (large) */

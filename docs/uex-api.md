@@ -57,6 +57,32 @@ Remarques :
 | `vehicles_rentals_prices_all` | `id_vehicle`, `id_terminal`, `vehicle_name`, `terminal_name`, `price_rent`, `date_modified` |
 | `game_versions` | `live`, `ptu` |
 
+## Prix : achat et vente (sémantique des champs de commodities_prices_all)
+
+Établie le 26 octobre 2026 en croisant la documentation et les données publiques (ligne par terminal et par marchandise). **Point de vue du joueur** :
+
+| Champ | Sens retenu |
+|---|---|
+| `price_buy` > 0 | le terminal **vend** la marchandise : le **joueur l'achète** ici, au prix `price_buy` aUEC par SCU (« Où acheter ») |
+| `price_sell` > 0 | le terminal **achète** la marchandise : le **joueur la vend** ici, au prix `price_sell` (« Où vendre ») |
+| `scu_buy` | stock disponible à l'achat (côté « Où acheter ») |
+| `scu_sell` | demande (quantité que le terminal est prêt à acheter) (côté « Où vendre ») |
+| `scu_sell_stock` | stock détenu par le terminal ; **non utilisé** (souvent non nul sur les terminaux qui achètent, parfois absurde) |
+| `*_avg` | moyenne historique du champ correspondant (« average reported » pour `scu_sell_stock_avg`) ; 0 = absente |
+| `status_buy` / `status_sell` | niveau d'inventaire 1 à 7 (`commodities_status`) ; non affichés pour l'instant |
+| `date_modified` | horodatage en **secondes** (0 = inconnue) de la dernière saisie communautaire du terminal |
+
+Un terminal peut avoir les deux prix, un seul, ou aucun (ligne ignorée). Sur l'ensemble mesuré (2 581 lignes) : 700 lignes avec `price_buy` seul, 1 881 avec `price_sell` seul, aucune avec les deux, aucune sans prix ; 81 marchandises sur 205 n'ont aucune ligne de prix. Le **code** d'une marchandise n'est pas unique (ex. « Agricium » et « Agricium (Ore) » portent `AGRI`) : les liens `#commerce/prix?m=` utilisent le **slug** (`agricium`), le code n'étant accepté qu'en secours (premier résultat qui a des prix).
+
+Sources :
+- Documentation des champs : https://uexcorp.space/api/documentation/id/get_commodities_prices_all/ (ne décrit que « last » pour `price_buy`, `price_sell`, `scu_buy`, `scu_sell_stock`, et « average reported » pour `scu_sell_stock_avg` ; elle ne dit pas qui achète à qui).
+- Fiche publique https://uexcorp.space/commodities/info/name/agricium (vue d'ensemble) : « Offer (6) » et « Demand (27) » ; « Buy — Best » = 6 840 UEC à Endgame et 500 SCU à Shubin SMCa-6 ; « Sell — Best » = 11 000 UEC à Rod's Fuel 'N Supplies et 1 394 SCU à ARC-L3 ; l'onglet **Buy** pointe vers `locations_selling` et l'onglet **Sell** vers `locations_buying`. Recoupé avec l'API : les 6 terminaux avec `price_buy` > 0 sont exactement les 6 de « Offer », Endgame a `price_buy` 6 840, Shubin SMCa-6 `scu_buy` 500, Rod's Fuel `price_sell` 11 000, ARC-L3 `scu_sell` 1 394. Le meilleur prix d'achat est donc le plus bas `price_buy`, le meilleur prix de vente le plus haut `price_sell`.
+- Les tests (`tests/market.js`, données fabriquées dans `tests/market-fixtures.js`) couvrent : terminal qui vend seulement, qui achète seulement, les deux, aucun.
+
+Côté client (`public/market.js`) : un jeu de données = un index en mémoire construit une fois (marchandise → lignes « acheter » / « vendre »), rendu limité à 200 lignes par tableau avec « Voir plus » ; fraîcheur d'une ligne = âge de `date_modified` (Frais ≤ 1 h, À vérifier ≤ 24 h, Périmé au-delà, « Date inconnue » si 0, classée avec les périmés) ; valeurs à 0 ou absentes affichées « — ».
+
+À noter pour `/api/uex/<ressource>` (brique serveur, non modifiée) : l'ETag ne dépend que du contenu et un **304 ne porte ni `age_s` ni `stale`** ; le client calcule l'âge de son côté et, pour une ressource qu'il sait périmée, redemande **une fois, sans ETag**, 10 s plus tard.
+
 ## Liste blanche finale (code : `RESOURCES` dans `uex.js`)
 
 Ressource | TTL | Module prévu

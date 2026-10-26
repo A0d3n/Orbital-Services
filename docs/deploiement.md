@@ -73,7 +73,7 @@ Le service worker nomme son cache `orbital-<version>` (la version de `package.js
 
 ## Données de marché UEX (optionnel)
 
-Fonction **désactivée par défaut**. Une fois activée, le serveur (jamais le navigateur) interroge l'API publique d'UEX Corp (https://uexcorp.space) pour récupérer des prix, terminaux, raffineries, carburant et vaisseaux. Elle sert de base aux futurs outils de l'onglet Commerce (Prix, Routes, Raffineries, Carburant, Vaisseaux). Pour l'instant, l'onglet Commerce n'affiche que l'état de ces données (bloc « Données de marché »), avec le badge « Powered by UEX ».
+Dans l’onglet Commerce, le sous-onglet **Prix** utilise déjà ces données (marchandises, où acheter / où vendre, fraîcheur, export CSV) ; Routes, Raffineries, Carburant et Vaisseaux suivront. Le bloc « Données de marché » de l’onglet Simulateur & journal affiche l’état de chaque ressource.
 
 ### Activer
 

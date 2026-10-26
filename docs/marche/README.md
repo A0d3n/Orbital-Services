@@ -1,5 +1,7 @@
 # Commerce : modules de marché (données UEX), 3 navigations
 
+**Option A retenue ; lot 1 : cadre + Prix livrés le 26 octobre 2026.** Sous-onglets #commerce / #commerce/prix ; Routes, Raffineries, Carburant et Vaisseaux sont « bientôt » (désactivés) et viendront dans des lots suivants. Les maquettes B et C sont conservées pour mémoire.
+
 Maquettes autonomes (aucune dépendance), valeurs FICTIVES étiquetées « exemple ». Une barre « hors maquette » en haut change d'écran (5 modules) et d'état (OK, anciennes, indisponible, désactivé, chargement, vide). À tester à 390 et 1440 px.
 
 - **A-sous-onglets.html** : barre Prix · Routes · Raffineries · Carburant · Vaisseaux au-dessus d'un panneau unique, état dans l'URL (#commerce/prix). Mobile : barre défilante, un seul écran à la fois. Découvrabilité : bonne (tout visible d'un coup d'œil). Effort : faible, il suffit de remplacer le contenu du panneau.

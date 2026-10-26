@@ -1,7 +1,8 @@
 /* Onglet « Commerce » (#commerce) : outils de trade et résumé du journal.
    Lit les mêmes entrées que le carnet via window.OrbLog (carnet.js) et ouvre le même tiroir de simulation (window.OrbTrade.drawer),
    avec l'action finale « Ajouter au journal » qui enregistre directement une entrée « cargo ». Chargé après carnet.js.
-   Une seule requête : GET /api/uex/status (bloc « Données de marché »), à l'affichage de l'onglet ; le reste lit le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
+   Sous-onglets (Simulateur & journal, Prix ; les autres « bientôt ») : voir la fin du fichier. Le module Prix est dans market.js (window.OrbMarket.prix).
+   Page par défaut (Simulateur & journal) : une seule requête, GET /api/uex/status (bloc « Données de marché »), à l'affichage du sous-onglet ; aucune requête quand il n'est pas affiché ; le reste lit le magasin du carnet (relu au retour sur l'onglet si le stockage est le serveur). */
 (function () {
 "use strict";
 var OT = window.OrbTrade, LG = window.OrbLog, view = document.getElementById("v-commerce");
@@ -132,7 +133,7 @@ function mkOn(j) {
   mkShow(true, true);
 }
 function uexLoad() {
-  if (!shown() || mkBusy || typeof fetch !== "function") return;
+  if (!shown() || cur !== "sim" || mkBusy || typeof fetch !== "function") return;
   mkBusy = true;
   fetch("/api/uex/status", { headers: { Accept: "application/json" }, cache: "no-store" }).then(function (r) {
     if (r.status === 404) return null;
@@ -172,8 +173,69 @@ view.addEventListener("click", function (e) {
   if (e.target.closest("#cmAll")) LG.showType("cargo"); /* la navigation vers le carnet est faite par data-go (map.js) */
 });
 
-window.addEventListener("lg:update", function () { if (shown()) render(); });
-/* appelé par map.js à chaque affichage de l'onglet : résumé recalculé (la fenêtre de 30 jours avance) et stockage serveur relu */
-window.__orbCommerce = function () { render(true); LG.sync(); uexLoad(); };
-if (shown()) { render(true); uexLoad(); }
+window.addEventListener("lg:update", function () { if (shown() && cur === "sim") render(); });
+
+/* ── sous-onglets : #commerce (Simulateur & journal, par défaut), #commerce/prix[?m=<marchandise>] ; Routes, Raffineries, Carburant et Vaisseaux sont « bientôt » (aria-disabled, aucun lien).
+   Un hash inconnu ou non livré ramène au défaut sans erreur. Les panneaux restent dans la page (état conservé en revenant). ── */
+var READY = { sim: 1, prix: 1 }, SUB = { sim: "Vos outils de trade et le résumé de votre journal.", prix: "Prix par marchandise : où acheter, où vendre (données communautaires UEX)." };
+var tabBtns = [].slice.call(view.querySelectorAll("#cmTabs [role=tab]")), cur = null, last = "sim", pendTab = false, pendT = 0;
+function MK() { return window.OrbMarket && window.OrbMarket.prix; }
+function dec(s) { try { return decodeURIComponent(s); } catch (e) { return s; } }
+function parse(h) {
+  h = String(h || "");
+  if (!/^#commerce(?=$|[\/?])/.test(h)) return null;
+  var m = /^#commerce(?:\/([^\/?#]*))?(?:\?([^#]*))?$/.exec(h), id = m && m[1] ? m[1] : "sim", q = {};
+  if (m && m[2]) m[2].split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) q[dec(kv.slice(0, i))] = dec(kv.slice(i + 1).replace(/\+/g, " ")); });
+  var ok = !!m && READY[id] === 1;
+  return { mod: ok ? id : "sim", q: ok ? q : {}, bare: !!m && !m[1] && !m[2] };
+}
+function hashOf(mod) { return mod === "prix" ? "#commerce/prix" + (MK() ? MK().query() : "") : "#commerce"; }
+function setHash(h) { if (location.hash !== h) { try { history.replaceState(null, "", h); } catch (e) {} } }
+function apply(mod, q, ev) {
+  var changed = mod !== cur, from = cur;
+  if (changed) {
+    if (from === "prix" && MK()) MK().close();
+    cur = mod; last = mod;
+    tabBtns.forEach(function (b) {
+      var on = b.getAttribute("data-mod") === mod;
+      b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
+      var p = $("cmPanel-" + b.getAttribute("data-mod")); if (p) p.hidden = !on;
+    });
+    var t = $("cmTab-" + mod); if (t && t.scrollIntoView) t.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }
+  var sub = $("topSub"); if (sub) sub.textContent = SUB[mod] || "";
+  if (mod === "prix") {
+    var k = MK(); if (k) { if (!ev || changed) k.open(q); else k.set(q); }
+  } else if (changed || !ev) { render(true); LG.sync(); uexLoad(); }
+  setHash(hashOf(mod));
+  if (ev && changed && !pendTab) { var tg = mod === "prix" && MK() ? MK().title() : $("cmPanel-" + mod); if (tg) tg.focus({ preventScroll: true }); }
+  pendTab = false;
+}
+/* appelé par map.js : à chaque affichage de l'onglet (ev faux : #commerce seul = dernier module consulté) et à chaque changement d'adresse (ev vrai : adresse prise à la lettre) */
+function route(h, ev) {
+  var p = parse(h);
+  if (!p || (!ev && p.bare)) apply(last, {}, ev);
+  else apply(p.mod, p.q, ev);
+}
+window.__orbCommerce = route;
+function go(mod) {
+  var h = hashOf(mod);
+  if (mod === cur && location.hash === h) return;
+  pendTab = true; clearTimeout(pendT); pendT = setTimeout(function () { pendTab = false; }, 400);
+  if (location.hash === h) route(h, true); else location.hash = h; /* hashchange → map.js → route */
+}
+function enabled() { return tabBtns.filter(function (b) { return b.getAttribute("aria-disabled") !== "true"; }); }
+$("cmTabs").addEventListener("click", function (e) {
+  var b = e.target.closest("[role=tab]");
+  if (!b || b.getAttribute("aria-disabled") === "true") return;
+  go(b.getAttribute("data-mod"));
+});
+$("cmTabs").addEventListener("keydown", function (e) {
+  var l = enabled(), i = l.indexOf(document.activeElement), n = -1;
+  if (i < 0) return;
+  if (e.key === "ArrowRight") n = (i + 1) % l.length; else if (e.key === "ArrowLeft") n = (i - 1 + l.length) % l.length;
+  else if (e.key === "Home") n = 0; else if (e.key === "End") n = l.length - 1; else return;
+  e.preventDefault(); l[n].focus(); go(l[n].getAttribute("data-mod"));
+});
+if (shown()) route(location.hash, false);
 })();
